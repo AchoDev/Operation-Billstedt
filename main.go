@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var gameObjects []GameObject = []GameObject{}
@@ -28,6 +30,10 @@ func (g *Game) Update() error {
 func (g *Game) Draw (screen *ebiten.Image) {
     screen.Fill(color.White)
 
+    rect := ebiten.NewImage(200, 100)
+    rect.Fill(color.RGBA{0, 0, 0, 255})
+    ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
+    screen.DrawImage(rect, nil)
 
     for _, gameObject := range gameObjects {
         gameObject.Draw(screen)
@@ -40,7 +46,8 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 
 func main() {
 
-    gameObjects = append(gameObjects, CreatePlayer())
+    player := CreatePlayer()
+    gameObjects = append(gameObjects, &player)
 
     ebiten.SetWindowSize(2000, 1700)
     ebiten.SetWindowTitle("Operation Billstedt")

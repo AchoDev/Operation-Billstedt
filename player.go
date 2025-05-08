@@ -33,22 +33,14 @@ func CreatePlayer() Player {
 			height: 30,
 		},
 		velocity: Vector2{0, 0},
+        shooting: false,
 	}
 }
 
 type Player struct {
 	transform Transform
 	velocity  Vector2
-}
-
-// Draw implements GameObject.
-func (player Player) Draw(screen *ebiten.Image) {
-	panic("unimplemented")
-}
-
-// Update implements GameObject.
-func (player Player) Update() {
-	panic("unimplemented")
+    shooting bool
 }
 
 func (player *Player) Update() {
@@ -63,8 +55,26 @@ func (player *Player) Update() {
 
 	player.transform.rotation = angle
 
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !player.shooting {
+        player.shooting = true
+        bullet := Bullet{
+            transform: Transform{
+                x: player.transform.x,
+                y: player.transform.y,
+                width: 10,
+                height: 10,
+                rotation: player.transform.rotation,
+            },
+            angle: player.transform.rotation,
+            speed: 20,
+        }
+
+        gameObjects = append(gameObjects, &bullet)
 	}
+
+    if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+        player.shooting = false
+    }
 }
 
 func move(player *Player) {
