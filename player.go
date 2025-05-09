@@ -34,6 +34,7 @@ func CreatePlayer() Player {
 		},
 		velocity: Vector2{0, 0},
         shooting: false,
+		currentGun: &Pistol{},
 	}
 }
 
@@ -41,6 +42,7 @@ type Player struct {
 	transform Transform
 	velocity  Vector2
     shooting bool
+	currentGun Gun
 }
 
 func (player *Player) Update() {
@@ -56,25 +58,23 @@ func (player *Player) Update() {
 	player.transform.rotation = angle
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !player.shooting {
-        player.shooting = true
-        bullet := Bullet{
-            transform: Transform{
-                x: player.transform.x,
-                y: player.transform.y,
-                width: 10,
-                height: 10,
-                rotation: player.transform.rotation,
-            },
-            angle: player.transform.rotation,
-            speed: 20,
-        }
-
-        gameObjects = append(gameObjects, &bullet)
+		player.shooting = true
+        player.currentGun.Shoot(&player.transform)
 	}
 
     if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
         player.shooting = false
     }
+
+
+	if ebiten.IsKeyPressed(ebiten.Key1) {
+		player.currentGun = &Pistol{}
+	} else if ebiten.IsKeyPressed(ebiten.Key2) {
+		player.currentGun = &Shotgun{}
+	} else if ebiten.IsKeyPressed(ebiten.Key3) {
+		player.currentGun = &Rifle{}
+	}
+
 }
 
 func move(player *Player) {
@@ -122,4 +122,8 @@ func (player *Player) Draw(screen *ebiten.Image) {
 		player.transform.rotation,
 		color.Color(color.RGBA{255, 0, 0, 255}),
 	)
+}
+
+func (player *Player) GetTransform() Transform {
+	return player.transform
 }

@@ -9,6 +9,7 @@ import (
 type GameObject interface {
     Update()
     Draw(screen *ebiten.Image)
+    GetTransform() Transform
 }
 
 func drawRotatedRect(screen *ebiten.Image, x, y, width, height, angle float64, color color.Color) {
