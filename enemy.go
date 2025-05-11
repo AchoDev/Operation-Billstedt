@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func createEnemy(x, y int) *Enemy {
@@ -15,7 +17,7 @@ func createEnemy(x, y int) *Enemy {
             width:  50,
             height: 50,
         },
-        gun: &Pistol{},
+        gun: createGun(&Pistol{}, true),
     }
 }
 
@@ -44,7 +46,7 @@ func (enemy *Enemy) Update() {
         math.Pow(enemy.transform.y-player.transform.y, 2),
     )
 
-    if distance < 100 {
+    if distance < 500 {
         enemy.gun.Shoot(&enemy.transform)
     }
 
@@ -59,6 +61,12 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
         enemy.transform.rotation,
         color.RGBA{0, 255, 0, 255},
     )
+
+    textX := enemy.transform.x - enemy.transform.width/2
+    textY := enemy.transform.y - enemy.transform.height
+
+
+    ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
 }
 
 func (enemy *Enemy) GetTransform() Transform {

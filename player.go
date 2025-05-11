@@ -68,11 +68,15 @@ func (player *Player) Update() {
 
 
 	if ebiten.IsKeyPressed(ebiten.Key1) {
-		player.currentGun = &Pistol{}
+		player.currentGun = createGun(&Pistol{}, false)
 	} else if ebiten.IsKeyPressed(ebiten.Key2) {
-		player.currentGun = &Shotgun{}
+		player.currentGun = createGun(&Shotgun{}, false)
 	} else if ebiten.IsKeyPressed(ebiten.Key3) {
-		player.currentGun = &Rifle{}
+		player.currentGun = createGun(&Rifle{}, false)
+	}
+
+	if isKeyJustPressed(ebiten.Key7) {
+		gameObjects = append(gameObjects, createEnemy(100, 100))
 	}
 
 }
@@ -125,5 +129,8 @@ func (player *Player) Draw(screen *ebiten.Image) {
 }
 
 func (player *Player) GetTransform() Transform {
+	if player == nil {
+		return Transform{}
+	}
 	return player.transform
 }

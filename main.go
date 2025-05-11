@@ -34,6 +34,7 @@ func (g *Game) Draw (screen *ebiten.Image) {
     rect.Fill(color.RGBA{0, 0, 0, 255})
     ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
     ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
+    ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
     screen.DrawImage(rect, nil)
 
     for _, gameObject := range gameObjects {

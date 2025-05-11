@@ -11,6 +11,7 @@ type Bullet struct {
     transform Transform
     angle float64
     speed float64
+    fromEnemy bool
 }
 
 func (bullet *Bullet) Update() {
@@ -19,14 +20,23 @@ func (bullet *Bullet) Update() {
 
     for i := 0; i < len(gameObjects); i++ {
         gameObject := gameObjects[i]
+        var target GameObject
 
-        enemy, ok := gameObject.(*Enemy)
-        
-        if !ok {
-            continue
+        if bullet.fromEnemy {
+            if player, ok := gameObject.(*Player); !ok {
+                target = player
+            } else {
+                continue
+            }
+        } else {
+            if enemy, ok := gameObject.(*Enemy); ok {
+                target = enemy
+            } else {
+                continue
+            }
         }
 
-        tr := enemy.GetTransform()
+        tr := target.GetTransform()
         if RotatedRectsColliding(
             Rect{
                 Center: Vector2{bullet.transform.x, bullet.transform.y},
