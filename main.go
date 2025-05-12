@@ -25,6 +25,7 @@ func (g *Game) Update() error {
     }
 
     updateKeyState()
+    updateMouseState()
 
     return nil
 }
@@ -52,9 +53,9 @@ func main() {
     gameObjects = append(gameObjects, &player)
 
     gameObjects = append(gameObjects, createEnemy(100, 100))
-    gameObjects = append(gameObjects, createEnemy(200, 200))
-    gameObjects = append(gameObjects, createEnemy(300, 300))
-    gameObjects = append(gameObjects, createEnemy(400, 400))
+    // gameObjects = append(gameObjects, createEnemy(200, 200))
+    // gameObjects = append(gameObjects, createEnemy(300, 300))
+    // gameObjects = append(gameObjects, createEnemy(400, 400))
 
     ebiten.SetWindowSize(2000, 1700)
     ebiten.SetWindowTitle("Operation Billstedt")
