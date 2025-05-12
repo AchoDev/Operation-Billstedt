@@ -24,6 +24,8 @@ func (g *Game) Update() error {
         gameObject.Update()
     }
 
+    updateKeyState()
+
     return nil
 }
 

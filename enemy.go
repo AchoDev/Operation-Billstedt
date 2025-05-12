@@ -31,15 +31,15 @@ func (enemy *Enemy) Update() {
     enemy.transform.rotation = math.Atan2(
         enemy.transform.y - player.transform.y,
         enemy.transform.x - player.transform.x,
-    )
+    ) + math.Pi
 
     direction := Vector2{
         x: math.Cos(enemy.transform.rotation),
         y: math.Sin(enemy.transform.rotation),
     }
 
-    enemy.transform.x -= direction.x * 2
-    enemy.transform.y -= direction.y * 2
+    enemy.transform.x += direction.x * 2
+    enemy.transform.y += direction.y * 2
 
     distance := math.Sqrt(
         math.Pow(enemy.transform.x-player.transform.x, 2) +
@@ -67,6 +67,7 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
 
     ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
+    ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY - 20))
 }
 
 func (enemy *Enemy) GetTransform() Transform {
