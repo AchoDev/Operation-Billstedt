@@ -1,7 +1,10 @@
 package main
 
 import (
+	"image/color"
 	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 
@@ -86,4 +89,65 @@ func overlapOnAxis(rect1, rect2 Rect, axis Vector2) bool {
 
 func dot(v1, v2 Vector2) float64 {
     return v1.x*v2.x + v1.y*v2.y
+}
+
+type Circle struct {
+    Center Vector2
+    Radius float64
+}
+
+// Check collision between a circle and a rotated rectangle
+func CircleRotatedRectColliding(circle Circle, rect Rect) bool {
+    corners := getCorners(rect)
+    closestPoint := closestPointOnRect(circle.Center, corners)
+
+    dx := closestPoint.x - circle.Center.x
+    dy := closestPoint.y - circle.Center.y
+    distanceSquared := dx*dx + dy*dy
+
+    return distanceSquared <= circle.Radius*circle.Radius
+}
+
+func closestPointOnRect(point Vector2, corners []Vector2) Vector2 {
+    closest := corners[0]
+    minDistanceSquared := distanceSquared(point, closest)
+
+    for _, corner := range corners[1:] {
+        distSquared := distanceSquared(point, corner)
+        if distSquared < minDistanceSquared {
+            closest = corner
+            minDistanceSquared = distSquared
+        }
+    }
+
+    return closest
+}
+
+func distanceSquared(v1, v2 Vector2) float64 {
+    dx := v1.x - v2.x
+    dy := v1.y - v2.y
+    return dx*dx + dy*dy
+}
+
+
+
+
+type Collider struct {
+    transform Transform
+}
+
+func (collider *Collider) Update() {
+
+}
+
+func (collider *Collider) Draw(screen *ebiten.Image) {
+    rect := ebiten.NewImage(int(collider.transform.width), int(collider.transform.height))
+    rect.Fill(color.RGBA{0, 100, 0, 255})
+    opts := &ebiten.DrawImageOptions{}
+    opts.GeoM.Translate(collider.transform.x, collider.transform.y)
+    screen.DrawImage(rect, opts)
+}
+
+func (collider *Collider) GetTransform() Transform {
+    return collider.transform
 }
