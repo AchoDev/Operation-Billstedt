@@ -36,7 +36,7 @@ func (g *Game) Update() error {
         }
     }
 
-    checkPlayerCollision(playerX, playerY)
+    checkCollisions(playerX, playerY)
 
 
     updateKeyState()
@@ -64,7 +64,7 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
     return 1920, 1080
 }
 
-func checkPlayerCollision(playerX, playerY float64) {
+func checkCollisions(playerX, playerY float64) {
     xCenterCircle := Circle{
         Center: Vector2{player.transform.x, playerY},
         Radius: player.transform.width / 2,
@@ -73,6 +73,14 @@ func checkPlayerCollision(playerX, playerY float64) {
     yCenterCircle := Circle{
         Center: Vector2{playerX, player.transform.y},
         Radius: player.transform.width / 2,
+    }
+
+    var bullets []*Bullet
+
+    for _, gameObj := range gameObjects {
+        if bullet, ok := gameObj.(*Bullet); ok {
+            bullets = append(bullets, bullet)
+        }
     }
 
     for _, gameObj := range gameObjects {
@@ -86,9 +94,6 @@ func checkPlayerCollision(playerX, playerY float64) {
                 Height: collider.transform.height,
             }
 
-            fmt.Println(rect)
-            fmt.Println(yCenterCircle)
-
             if CircleRotatedRectColliding(xCenterCircle, rect) {
                 player.transform.x = playerX
             }
@@ -97,10 +102,35 @@ func checkPlayerCollision(playerX, playerY float64) {
                 player.transform.y = playerY
             }
 
+            for _, bullet := range bullets {
+                if RotatedRectsColliding(createRectFromTransform(bullet.transform), rect) {
+                    removeGameObject(bullet)
+                }
+            }
+
         }
     }
 }
+
+func createRectFromTransform(transform Transform) Rect {
+    return Rect{
+        Center: Vector2{
+            transform.x, transform.y,
+        },
+        Width: transform.width,
+        Height: transform.height,
+        Angle: transform.rotation,
+    }
+}
  
+func removeGameObject(target GameObject) {
+    for i, gameObj := range gameObjects {
+        if gameObj == target {
+            gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+        }
+    }
+}
+
 func main() {
     gameObjects = append(gameObjects, &player)
 
