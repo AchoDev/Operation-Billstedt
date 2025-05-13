@@ -145,7 +145,7 @@ func (g *Rifle) Shoot(transform *Transform) {
     }
 
     go func () {
-        for i := 0; i < 10; i++ {
+        for i := 0; i < 5; i++ {
             // Create a bullet
             bullet := Bullet{
                 transform: Transform{

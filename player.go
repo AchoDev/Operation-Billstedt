@@ -75,10 +75,17 @@ func (player *Player) Update() {
 		player.currentGun = createGun(&Rifle{}, false)
 	}
 
-	if isKeyJustPressed(ebiten.Key7) {
-		gameObjects = append(gameObjects, createEnemy(100, 100))
+	if isKeyJustPressed(ebiten.Key6) {
+		gameObjects = append(gameObjects, createEnemy(300, 100, EnemyTypeNick))
 	}
 
+	if isKeyJustPressed(ebiten.Key7) {
+		gameObjects = append(gameObjects, createEnemy(100, 100, EnemyTypeEvren))
+	}
+
+	if isKeyJustPressed(ebiten.Key8) {
+		gameObjects = append(gameObjects, createEnemy(100, 100, EnemyTypeEmran))
+	}
 }
 
 func move(player *Player) {
