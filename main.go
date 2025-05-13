@@ -67,10 +67,38 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 func checkPlayerCollision(playerX, playerY float64) {
     xCenterCircle := Circle{
         Center: Vector2{player.transform.x, playerY},
-        Radius: player.transform.width,
+        Radius: player.transform.width / 2,
     }
 
-    yCenterCircle := 
+    yCenterCircle := Circle{
+        Center: Vector2{playerX, player.transform.y},
+        Radius: player.transform.width / 2,
+    }
+
+    for _, gameObj := range gameObjects {
+        if collider, ok := gameObj.(*Collider); ok {
+            rect := Rect{
+                Center: Vector2{
+                    collider.transform.x,
+                    collider.transform.y,
+                },
+                Width: collider.transform.width,
+                Height: collider.transform.height,
+            }
+
+            fmt.Println(rect)
+            fmt.Println(yCenterCircle)
+
+            if CircleRotatedRectColliding(xCenterCircle, rect) {
+                player.transform.x = playerX
+            }
+
+            if CircleRotatedRectColliding(yCenterCircle, rect) {
+                player.transform.y = playerY
+            }
+
+        }
+    }
 }
  
 func main() {
@@ -78,7 +106,7 @@ func main() {
 
     collider := Collider{
         transform: Transform{
-            500, 500, 300, 300, 0,
+            1000, 500, 100, 100, 0,
         },
     }
     gameObjects = append(gameObjects, &collider)

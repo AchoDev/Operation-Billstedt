@@ -32,3 +32,13 @@ func drawRotatedRect(screen *ebiten.Image, x, y, width, height, angle float64, c
     // Draw the rotated rectangle onto the screen
     screen.DrawImage(rect, op)
 }
+
+func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
+    rect := ebiten.NewImage(int(transform.width), int(transform.height))
+    rect.Fill(color)
+    op := &ebiten.DrawImageOptions{}
+    op.GeoM.Translate(-transform.width / 2, -transform.height / 2)
+    op.GeoM.Translate(transform.x, transform.y)
+
+    screen.DrawImage(rect, op)
+}

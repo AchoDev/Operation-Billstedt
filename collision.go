@@ -105,17 +105,25 @@ func CircleRotatedRectColliding(circle Circle, rect Rect) bool {
     dy := closestPoint.y - circle.Center.y
     distanceSquared := dx*dx + dy*dy
 
-    return distanceSquared <= circle.Radius*circle.Radius
+    const epsilon = 1e-6
+    return distanceSquared <= circle.Radius*circle.Radius+epsilon
 }
 
 func closestPointOnRect(point Vector2, corners []Vector2) Vector2 {
     closest := corners[0]
     minDistanceSquared := distanceSquared(point, closest)
 
-    for _, corner := range corners[1:] {
-        distSquared := distanceSquared(point, corner)
+    for i := 0; i < len(corners); i++ {
+        j := (i + 1) % len(corners) // Next corner (wrap around)
+        edgeStart := corners[i]
+        edgeEnd := corners[j]
+
+        // Project the point onto the edge and clamp to the edge's endpoints
+        projection := projectPointOntoEdge(point, edgeStart, edgeEnd)
+        distSquared := distanceSquared(point, projection)
+
         if distSquared < minDistanceSquared {
-            closest = corner
+            closest = projection
             minDistanceSquared = distSquared
         }
     }
@@ -123,6 +131,25 @@ func closestPointOnRect(point Vector2, corners []Vector2) Vector2 {
     return closest
 }
 
+func projectPointOntoEdge(point, edgeStart, edgeEnd Vector2) Vector2 {
+    edge := Vector2{
+        x: edgeEnd.x - edgeStart.x,
+        y: edgeEnd.y - edgeStart.y,
+    }
+    edgeLengthSquared := edge.x*edge.x + edge.y*edge.y
+
+    if edgeLengthSquared == 0 {
+        return edgeStart // Edge is a point
+    }
+
+    t := ((point.x-edgeStart.x)*edge.x + (point.y-edgeStart.y)*edge.y) / edgeLengthSquared
+    t = math.Max(0, math.Min(1, t)) // Clamp t to [0, 1]
+
+    return Vector2{
+        x: edgeStart.x + t*edge.x,
+        y: edgeStart.y + t*edge.y,
+    }
+}
 func distanceSquared(v1, v2 Vector2) float64 {
     dx := v1.x - v2.x
     dy := v1.y - v2.y
@@ -141,11 +168,7 @@ func (collider *Collider) Update() {
 }
 
 func (collider *Collider) Draw(screen *ebiten.Image) {
-    rect := ebiten.NewImage(int(collider.transform.width), int(collider.transform.height))
-    rect.Fill(color.RGBA{0, 100, 0, 255})
-    opts := &ebiten.DrawImageOptions{}
-    opts.GeoM.Translate(collider.transform.x, collider.transform.y)
-    screen.DrawImage(rect, opts)
+    drawRect(screen, collider.transform, color.RGBA{255, 100, 200, 255})
 }
 
 func (collider *Collider) GetTransform() Transform {
