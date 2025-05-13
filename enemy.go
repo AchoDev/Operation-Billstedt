@@ -52,10 +52,28 @@ type Enemy struct {
 }
 
 func (enemy *Enemy) Update() {
+    colliders := getGameobjectsOfType[*Collider]()
+
+    path := runPathfindingAlgorithm(enemy.transform, player.transform, colliders, 10, Vector2{2000, 2000})
     
+    pointDistance := math.Sqrt(
+        math.Pow(enemy.transform.x - path[0].x, 2) + 
+        math.Pow(enemy.transform.y - path[0].y, 2),
+    ) 
+
+    fmt.Println(pointDistance)
+
+    target := Vector2{}
+
+    if pointDistance < 50 {
+        target = path[1]
+    } else {
+        target = path[0]
+    }
+
     enemy.transform.rotation = math.Atan2(
-        enemy.transform.y - player.transform.y,
-        enemy.transform.x - player.transform.x,
+        enemy.transform.y - target.y,
+        enemy.transform.x - target.x,
     ) + math.Pi
 
     direction := Vector2{

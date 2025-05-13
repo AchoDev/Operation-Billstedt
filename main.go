@@ -131,6 +131,17 @@ func removeGameObject(target GameObject) {
     }
 }
 
+func getGameobjectsOfType[T GameObject]() []T {
+    var list []T
+    for _, gameObj := range gameObjects {
+        if obj, ok := gameObj.(T); ok {
+            list = append(list, obj)
+        }
+    }
+
+    return list
+}
+
 func main() {
     gameObjects = append(gameObjects, &player)
 
