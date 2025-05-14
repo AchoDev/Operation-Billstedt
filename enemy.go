@@ -51,9 +51,10 @@ type Enemy struct {
 	enemyType   EnemyType
 	currentPath []Vector2
 	currentGoal Vector2
+	velocity    Vector2
 }
 
-var pathFindingGridSize = 10
+var pathFindingGridSize = 30
 
 func (enemy *Enemy) Update() {
 	colliders := getGameobjectsOfType[*Collider]()
@@ -86,8 +87,6 @@ func (enemy *Enemy) Update() {
 			x: float64(int(path[0].x) / pathFindingGridSize),
 			y: float64(int(path[0].y) / pathFindingGridSize),
 		}
-
-		fmt.Println(pathPos, enemyGridPos)
 		if enemyGridPos.x == pathPos.x && enemyGridPos.y == pathPos.y {
 			fmt.Println("deleting latest link")
 			enemy.currentPath = enemy.currentPath[1:]
@@ -95,9 +94,6 @@ func (enemy *Enemy) Update() {
 		}
 
 		target = path[0]
-
-		// fmt.Println(target)
-
 	} else {
 		target = Vector2{
 			x: player.transform.x,
@@ -105,14 +101,31 @@ func (enemy *Enemy) Update() {
 		}
 	}
 
-	enemy.transform.rotation = math.Atan2(
+	targetRotation := math.Atan2(
 		(enemyGridPos.y*float64(pathFindingGridSize))-target.y,
 		(enemyGridPos.x*float64(pathFindingGridSize))-target.x,
 	) + math.Pi
 
+	// rotationDiff := targetRotation - enemy.transform.rotation
+
+	// // Normalize the angle to the range [-Pi, Pi]
+	// for rotationDiff > math.Pi {
+	// 	rotationDiff -= 2 * math.Pi
+	// }
+	// for rotationDiff < -math.Pi {
+	// 	rotationDiff += 2 * math.Pi
+	// }
+
+	// enemy.transform.rotation += rotationDiff * 0.1 // Smoothing factor
+
+	enemy.transform.rotation = math.Atan2(
+		enemy.transform.y-player.transform.y,
+		enemy.transform.x-player.transform.x,
+	) + math.Pi
+
 	direction := Vector2{
-		x: math.Cos(enemy.transform.rotation),
-		y: math.Sin(enemy.transform.rotation),
+		x: math.Cos(targetRotation),
+		y: math.Sin(targetRotation),
 	}
 
 	var speed float64
@@ -123,11 +136,32 @@ func (enemy *Enemy) Update() {
 	case EnemyTypeEmran:
 		speed = 2
 	case EnemyTypeNick:
-		speed = 5
+		speed = 10
 	}
 
-	enemy.transform.x += direction.x * speed
-	enemy.transform.y += direction.y * speed
+	enemy.velocity.x += direction.x
+	enemy.velocity.y += direction.y
+
+	if enemy.velocity.x > speed {
+		enemy.velocity.x = speed
+	} else if enemy.velocity.x < -speed {
+		enemy.velocity.x = -speed
+	}
+	if enemy.velocity.y > speed {
+		enemy.velocity.y = speed
+	} else if enemy.velocity.y < -speed {
+		enemy.velocity.y = -speed
+	}
+
+	// Apply velocity to position
+	enemy.transform.x += enemy.velocity.x
+	enemy.transform.y += enemy.velocity.y
+
+	// Optional: friction (if you want smoothing, otherwise remove these lines)
+	enemy.velocity.x *= 0.9
+	enemy.velocity.y *= 0.9
+
+	fmt.Println(enemy.velocity)
 
 	distance := math.Sqrt(
 		math.Pow(enemy.transform.x-player.transform.x, 2) +
