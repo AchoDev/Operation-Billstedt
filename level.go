@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -15,6 +17,7 @@ type Level interface {
     GetTiles() []Tile
     GetSprites() map[string]*ebiten.Image
     UpdateLevel()
+    SetTiles([]Tile)
 }
 
 type Level1 struct {
@@ -29,22 +32,27 @@ func DrawLevel(screen *ebiten.Image, level Level) {
     sprites := level.GetSprites()
 
     for _, tile := range tiles {
+
+
+
         tileImage := sprites[tile.sprite]
         if tileImage == nil {
+            fmt.Println("Tile image not found for sprite:", tile.sprite)
             continue
         }
 
-        scale := Vector2{
-            x: float64(tile.width * 20) / float64(tileImage.Bounds().Dx()),
-            y: float64(tile.height * 20) / float64(tileImage.Bounds().Dy()),
-        }
-
-        op := &ebiten.DrawImageOptions{}
-        op.GeoM.Translate(float64(tile.x), float64(tile.y))
-        op.GeoM.Scale(scale.x, scale.y)
+        
+        gridSize := 100
+        drawImage(screen, tileImage, Transform{
+            x:      float64(tile.x * gridSize),
+            y:      float64(tile.y * gridSize),
+            width:  float64(tile.width * gridSize),
+            height: float64(tile.height * gridSize),
+            rotation: 0,
+        })
     }
 
-
+    
     
 }
 
@@ -56,10 +64,9 @@ func (level *Level1) GetSprites() map[string]*ebiten.Image {
     return level.sprites
 }
 
-func (level *Level1) UpdateLevel() {
+func (level *Level1) UpdateLevel() {}
 
-
-
+func (level *Level1) SetTiles(tiles []Tile) {
+    level.tiles = tiles
 }
-
 

@@ -44,7 +44,6 @@ func (g *Game) Update() error {
 	}
 
 	currentLevel.UpdateLevel()
-
 	UpdateLevelEditor(currentLevel)
 
 	checkCollisions(playerX, playerY)
@@ -69,6 +68,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		gameObject.Draw(screen)
 	}
 
+	DrawLevel(screen, currentLevel)
 	DrawLevelEditor(screen, currentLevel)
 }
 
