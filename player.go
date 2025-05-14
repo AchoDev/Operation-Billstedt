@@ -32,16 +32,16 @@ func CreatePlayer() Player {
 			width:  30,
 			height: 30,
 		},
-		velocity: Vector2{0, 0},
-        shooting: false,
+		velocity:   Vector2{0, 0},
+		shooting:   false,
 		currentGun: &Pistol{},
 	}
 }
 
 type Player struct {
-	transform Transform
-	velocity  Vector2
-    shooting bool
+	transform  Transform
+	velocity   Vector2
+	shooting   bool
 	currentGun Gun
 }
 
@@ -59,13 +59,12 @@ func (player *Player) Update() {
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !player.shooting {
 		player.shooting = true
-        player.currentGun.Shoot(&player.transform)
+		player.currentGun.Shoot(&player.transform)
 	}
 
-    if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-        player.shooting = false
-    }
-
+	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		player.shooting = false
+	}
 
 	if ebiten.IsKeyPressed(ebiten.Key1) {
 		player.currentGun = createGun(&Pistol{}, false)
@@ -84,7 +83,7 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.Key8) {
-		gameObjects = append(gameObjects, createEnemy(100, 100, EnemyTypeEmran))
+		gameObjects = append(gameObjects, createEnemy(500, 500, EnemyTypeEmran))
 	}
 }
 

@@ -7,146 +7,183 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
-    var gun Gun
+	var gun Gun
 
-    switch enemyType {
-    case EnemyTypeEvren:
-        gun = &Pistol{}
-    case EnemyTypeEmran:
-        gun = &Shotgun{}
-    case EnemyTypeNick:
-        gun = &Rifle{}
-    }
+	switch enemyType {
+	case EnemyTypeEvren:
+		gun = &Pistol{}
+	case EnemyTypeEmran:
+		gun = &Shotgun{}
+	case EnemyTypeNick:
+		gun = &Rifle{}
+	}
 
+	enemy := Enemy{
+		transform: Transform{
+			x:      float64(x),
+			y:      float64(y),
+			width:  50,
+			height: 50,
+		},
+		gun:       createGun(gun, true),
+		enemyType: enemyType,
+	}
 
-    enemy := Enemy{
-        transform: Transform{
-            x:      float64(x),
-            y:      float64(y),
-            width:  50,
-            height: 50,
-        },
-        gun: createGun(gun, true),
-        enemyType: enemyType,
-    }
-
-    return &enemy
+	return &enemy
 }
 
 type EnemyType int
 
 const (
-    EnemyTypeEvren EnemyType = iota
-    EnemyTypeEmran
-    EnemyTypeNick
+	EnemyTypeEvren EnemyType = iota
+	EnemyTypeEmran
+	EnemyTypeNick
 )
 
 type Enemy struct {
-    transform Transform
-    gun Gun
-    enemyType EnemyType
+	transform   Transform
+	gun         Gun
+	enemyType   EnemyType
+	currentPath []Vector2
+	currentGoal Vector2
 }
 
+var pathFindingGridSize = 10
+
 func (enemy *Enemy) Update() {
-    colliders := getGameobjectsOfType[*Collider]()
+	colliders := getGameobjectsOfType[*Collider]()
 
-    path := runPathfindingAlgorithm(enemy.transform, player.transform, colliders, 10, Vector2{2000, 2000})
-    
-    pointDistance := math.Sqrt(
-        math.Pow(enemy.transform.x - path[0].x, 2) + 
-        math.Pow(enemy.transform.y - path[0].y, 2),
-    ) 
+	// path will be set below based on the currentGoal
 
-    fmt.Println(pointDistance)
+	var path []Vector2
 
-    target := Vector2{}
+	if math.Round(enemy.currentGoal.x) == math.Round(player.transform.x) && math.Round(enemy.currentGoal.y) == math.Round(player.transform.y) {
+		path = enemy.currentPath
+	} else {
+		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{2000, 2000})
+		fmt.Println(enemy.currentGoal, player.transform.x, player.transform.y)
+	}
 
-    if pointDistance < 50 {
-        target = path[1]
-    } else {
-        target = path[0]
-    }
+	enemy.currentGoal = Vector2{
+		x: player.transform.x,
+		y: player.transform.y,
+	}
+	enemy.currentPath = path
+	var target Vector2
+	enemyGridPos := Vector2{
+		x: float64(int(enemy.transform.x) / pathFindingGridSize),
+		y: float64(int(enemy.transform.y) / pathFindingGridSize),
+	}
 
-    enemy.transform.rotation = math.Atan2(
-        enemy.transform.y - target.y,
-        enemy.transform.x - target.x,
-    ) + math.Pi
+	if len(path) > 1 {
 
-    direction := Vector2{
-        x: math.Cos(enemy.transform.rotation),
-        y: math.Sin(enemy.transform.rotation),
-    }
+		pathPos := Vector2{
+			x: float64(int(path[0].x) / pathFindingGridSize),
+			y: float64(int(path[0].y) / pathFindingGridSize),
+		}
 
-    var speed float64
+		fmt.Println(pathPos, enemyGridPos)
+		if enemyGridPos.x == pathPos.x && enemyGridPos.y == pathPos.y {
+			fmt.Println("deleting latest link")
+			enemy.currentPath = enemy.currentPath[1:]
+			path = enemy.currentPath
+		}
 
-    switch enemy.enemyType {
-    case EnemyTypeEvren:
-        speed = 3.5
-    case EnemyTypeEmran:
-        speed = 2
-    case EnemyTypeNick:
-        speed = 5
-    }
+		target = path[0]
 
-    enemy.transform.x += direction.x * speed
-    enemy.transform.y += direction.y * speed
+		// fmt.Println(target)
 
-    distance := math.Sqrt(
-        math.Pow(enemy.transform.x-player.transform.x, 2) +
-        math.Pow(enemy.transform.y-player.transform.y, 2),
-    )
+	} else {
+		target = Vector2{
+			x: player.transform.x,
+			y: player.transform.y,
+		}
+	}
 
-    var attackDistance float64
+	enemy.transform.rotation = math.Atan2(
+		(enemyGridPos.y*float64(pathFindingGridSize))-target.y,
+		(enemyGridPos.x*float64(pathFindingGridSize))-target.x,
+	) + math.Pi
 
-    switch enemy.enemyType {
-    case EnemyTypeEvren:
-        attackDistance = 500
-    case EnemyTypeEmran:
-        attackDistance = 200
-    case EnemyTypeNick:
-        attackDistance = 750
-    }
+	direction := Vector2{
+		x: math.Cos(enemy.transform.rotation),
+		y: math.Sin(enemy.transform.rotation),
+	}
 
-    if distance < attackDistance {
-        enemy.gun.Shoot(&enemy.transform)
-    }
+	var speed float64
+
+	switch enemy.enemyType {
+	case EnemyTypeEvren:
+		speed = 3.5
+	case EnemyTypeEmran:
+		speed = 2
+	case EnemyTypeNick:
+		speed = 5
+	}
+
+	enemy.transform.x += direction.x * speed
+	enemy.transform.y += direction.y * speed
+
+	distance := math.Sqrt(
+		math.Pow(enemy.transform.x-player.transform.x, 2) +
+			math.Pow(enemy.transform.y-player.transform.y, 2),
+	)
+
+	var attackDistance float64
+
+	switch enemy.enemyType {
+	case EnemyTypeEvren:
+		attackDistance = 500
+	case EnemyTypeEmran:
+		attackDistance = 200
+	case EnemyTypeNick:
+		attackDistance = 750
+	}
+
+	if distance < attackDistance {
+		enemy.gun.Shoot(&enemy.transform)
+	}
 
 }
 func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
-    var col color.RGBA
+	var col color.RGBA
 
-    switch enemy.enemyType {
-    case EnemyTypeEvren:
-        col = color.RGBA{0, 255, 0, 255}
-    case EnemyTypeEmran:
-        col = color.RGBA{255, 0, 255, 255}
-    case EnemyTypeNick:
-        col = color.RGBA{0, 0, 255, 255}
-    }
+	switch enemy.enemyType {
+	case EnemyTypeEvren:
+		col = color.RGBA{0, 255, 0, 255}
+	case EnemyTypeEmran:
+		col = color.RGBA{255, 0, 255, 255}
+	case EnemyTypeNick:
+		col = color.RGBA{0, 0, 255, 255}
+	}
 
-    drawRotatedRect(
-        screen,
-        enemy.transform.x,
-        enemy.transform.y,
-        enemy.transform.width,
-        enemy.transform.height,
-        enemy.transform.rotation,
-        col,
-    )
+	drawRotatedRect(
+		screen,
+		enemy.transform.x,
+		enemy.transform.y,
+		enemy.transform.width,
+		enemy.transform.height,
+		enemy.transform.rotation,
+		col,
+	)
 
-    textX := enemy.transform.x - enemy.transform.width/2
-    textY := enemy.transform.y - enemy.transform.height
+	for _, point := range enemy.currentPath {
+		vector.DrawFilledRect(screen, float32(point.x-float64(pathFindingGridSize/2)), float32(point.y-float64(pathFindingGridSize/2)), float32(pathFindingGridSize), float32(pathFindingGridSize), color.RGBA{255, 0, 0, 50}, true)
+	}
 
+	textX := enemy.transform.x - enemy.transform.width/2
+	textY := enemy.transform.y - enemy.transform.height
 
-    ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
-    ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY - 20))
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY-20))
 }
 
 func (enemy *Enemy) GetTransform() Transform {
-    return enemy.transform
+	return enemy.transform
 }
