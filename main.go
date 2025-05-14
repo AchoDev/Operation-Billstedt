@@ -17,6 +17,13 @@ var camera Vector2 = Vector2{
 	y: 0,
 }
 
+var currentLevel Level = &Level1{
+	tiles: []Tile{},
+	sprites: map[string]*ebiten.Image{
+		"rail": loadImage("assets/tiles/rail.png"),
+	},
+}
+
 type Game struct{}
 
 func (g *Game) Update() error {
@@ -35,6 +42,10 @@ func (g *Game) Update() error {
 			gameObjects = append(gameObjects, &player)
 		}
 	}
+
+	currentLevel.UpdateLevel()
+
+	UpdateLevelEditor(currentLevel)
 
 	checkCollisions(playerX, playerY)
 
@@ -57,6 +68,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, gameObject := range gameObjects {
 		gameObject.Draw(screen)
 	}
+
+	DrawLevelEditor(screen, currentLevel)
 }
 
 func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight int) {
@@ -171,4 +184,12 @@ func findPlayer() *Player {
 	}
 
 	return nil
+}
+
+func loadImage(path string) *ebiten.Image {
+	img, _, err := ebitenutil.NewImageFromFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return img
 }

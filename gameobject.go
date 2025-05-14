@@ -42,3 +42,12 @@ func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
 
     screen.DrawImage(rect, op)
 }
+
+func drawImage(screen *ebiten.Image, image *ebiten.Image, transform Transform) {
+    op := &ebiten.DrawImageOptions{}
+    op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
+    op.GeoM.Translate(transform.x, transform.y) // Offset the sprite position
+    op.GeoM.Rotate(transform.rotation + 3.14/2) // Rotate the sprite
+    op.GeoM.Scale(transform.width / float64(image.Bounds().Dx()), transform.height / float64(image.Bounds().Dy()))
+    screen.DrawImage(image, op)
+}
