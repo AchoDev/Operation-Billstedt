@@ -77,7 +77,7 @@ func (bullet *Bullet) Draw(screen *ebiten.Image) {
         bullet.transform.width,
         bullet.transform.height,
         bullet.angle,
-        color.RGBA{255, 0, 0, 255},
+        color.RGBA{255, 238, 66, 255},
     )
 }
 

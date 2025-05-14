@@ -204,3 +204,61 @@ func StartGunCooldown(gun Gun) {
         gun.SetCooldownTimer(-1)
     }()
 }
+
+
+type Minigun struct {
+    cooldownTimer float64
+    isEnemy       bool
+}
+
+func (g *Minigun) Shoot(transform *Transform) {
+
+    if g.cooldownTimer != -1 {
+        return
+    }
+
+    go func() {
+        for i := 0; i < 20; i++ { // Fire 20 bullets in rapid succession
+            bullet := Bullet{
+                transform: Transform{
+                    x:      transform.x,
+                    y:      transform.y,
+                    width:  25,
+                    height: 10,
+                },
+                angle:     transform.rotation, // Set the angle based on the player's rotation
+                speed:     15,                // Faster bullet speed
+                fromEnemy: g.isEnemy,
+            }
+            gameObjects = append(gameObjects, &bullet)
+
+            time.Sleep(50 * time.Millisecond) // Sleep for 50 milliseconds between bullets
+        }
+    }()
+
+    StartGunCooldown(g)
+}
+
+func (g *Minigun) GetCooldown() int {
+    return 3000 // Cooldown in milliseconds
+}
+
+func (g *Minigun) GetCooldownTimer() float64 {
+    return g.cooldownTimer
+}
+
+func (g *Minigun) SetCooldownTimer(timer float64) {
+    g.cooldownTimer = timer
+}
+
+func (g *Minigun) IsEnemy() bool {
+    return g.isEnemy
+}
+
+func (g *Minigun) SetIsEnemy(isEnemy bool) {
+    g.isEnemy = isEnemy
+}
+
+func (g *Minigun) Name() string {
+    return "Minigun"
+}

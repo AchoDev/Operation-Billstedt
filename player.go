@@ -4,6 +4,8 @@ import (
 	"image/color"
 	"math"
 
+	"strings"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -24,6 +26,8 @@ func clampVector(vector Vector2, min float64, max float64) Vector2 {
 	}
 }
 
+
+
 func CreatePlayer() Player {
 	return Player{
 		transform: Transform{
@@ -35,6 +39,12 @@ func CreatePlayer() Player {
 		velocity:   Vector2{0, 0},
 		shooting:   false,
 		currentGun: &Pistol{},
+		sprites: map[string]*ebiten.Image{
+			"minigun": loadImage("assets/leo/minigun.png"),
+			"rifle": loadImage("assets/leo/rifle.png"),
+			"pistol": loadImage("assets/leo/rifle.png"),
+			"shotgun": loadImage("assets/leo/rifle.png"),
+		},
 	}
 }
 
@@ -43,6 +53,7 @@ type Player struct {
 	velocity   Vector2
 	shooting   bool
 	currentGun Gun
+	sprites    map[string]*ebiten.Image
 }
 
 func (player *Player) Update() {
@@ -72,6 +83,8 @@ func (player *Player) Update() {
 		player.currentGun = createGun(&Shotgun{}, false)
 	} else if ebiten.IsKeyPressed(ebiten.Key3) {
 		player.currentGun = createGun(&Rifle{}, false)
+	} else if ebiten.IsKeyPressed(ebiten.Key4) {
+		player.currentGun = createGun(&Minigun{}, false)
 	}
 
 	if isKeyJustPressed(ebiten.Key6) {
@@ -123,15 +136,46 @@ func move(player *Player) {
 }
 
 func (player *Player) Draw(screen *ebiten.Image) {
-	drawRotatedRect(
-		screen,
-		player.transform.x-camera.x,
-		player.transform.y-camera.y,
-		player.transform.width,
-		player.transform.height,
-		player.transform.rotation,
-		color.Color(color.RGBA{255, 0, 0, 255}),
-	)
+	// drawRotatedRect(
+	// 	screen,
+	// 	player.transform.x-camera.x,
+	// 	player.transform.y-camera.y,
+	// 	player.transform.width,
+	// 	player.transform.height,
+	// 	player.transform.rotation,
+	// 	color.Color(color.RGBA{255, 0, 0, 255}),
+	// )
+	sprite := player.sprites[strings.ToLower(player.currentGun.Name())]
+
+	if sprite != nil {
+
+		scaleX := player.transform.width / float64(sprite.Bounds().Dx()) * 4
+		scaleY := player.transform.height / float64(sprite.Bounds().Dy()) * 4
+
+		offset := Vector2{
+			110,
+			-500,
+		}	
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-float64(sprite.Bounds().Dx())/2, -float64(sprite.Bounds().Dy())/2) // Center the sprite
+		op.GeoM.Translate(offset.x, offset.y) // Offset the sprite position
+        op.GeoM.Rotate(player.transform.rotation + math.Pi/2) // Rotate the sprite
+		op.GeoM.Scale(scaleX, scaleY)
+		op.GeoM.Translate(player.transform.x-camera.x, player.transform.y-camera.y)
+		
+        screen.DrawImage(sprite, op)
+	} else {
+		drawRotatedRect(
+			screen,
+			player.transform.x-camera.x,
+			player.transform.y-camera.y,
+			player.transform.width,
+			player.transform.height,
+			player.transform.rotation,
+			color.Color(color.RGBA{255, 0, 0, 255}),
+		)
+	}
 }
 
 func (player *Player) GetTransform() Transform {

@@ -59,8 +59,6 @@ var pathFindingGridSize = 30
 func (enemy *Enemy) Update() {
 	colliders := getGameobjectsOfType[*Collider]()
 
-	// path will be set below based on the currentGoal
-
 	var path []Vector2
 
 	if math.Round(enemy.currentGoal.x) == math.Round(player.transform.x) && math.Round(enemy.currentGoal.y) == math.Round(player.transform.y) {
