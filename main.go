@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"log"
 	"os"
+	"runtime/pprof"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -197,6 +198,19 @@ func getGameobjectsOfType[T GameObject]() []T {
 }
 
 func main() {
+
+	cpuProfile, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer cpuProfile.Close()
+
+
+	if err := pprof.StartCPUProfile(cpuProfile); err != nil {
+		log.Fatal(err)
+	}
+	defer pprof.StopCPUProfile()
+
 	gameObjects = append(gameObjects, &player)
 
 	collider := Collider{
@@ -211,9 +225,8 @@ func main() {
 	// ebiten.SetWindowSize(2000 / 2, 1700 / 2)
 	ebiten.SetWindowTitle("Operation Billstedt")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	err := ebiten.RunGame(&Game{})
 
-	if err != nil {
+	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
 	}
 }

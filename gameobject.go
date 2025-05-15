@@ -23,11 +23,21 @@ func drawImage(screen *ebiten.Image, image *ebiten.Image, transform Transform) {
 }
 
 func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
+    if transform.x + transform.width / 2 < camera.x - camera.width / 2 || transform.x - transform.width / 2 > camera.x + camera.width / 2 {
+        return
+    }
+
+    if transform.y + transform.height / 2 < camera.y - camera.height / 2 || transform.y - transform.height / 2 > camera.y + camera.height / 2 {
+        return
+    }
+
+
 	transform.x -= camera.x
 	transform.y -= camera.y
-
+    
 	transform.x += camera.width / 2
 	transform.y += camera.height / 2
+    
 
 	drawAbsoluteImageWithOptions(screen, image, transform, options)
 }
@@ -42,8 +52,8 @@ func drawAbsoluteImage(screen *ebiten.Image, image *ebiten.Image, transform Tran
 	drawAbsoluteImageWithOptions(screen, image, transform, defaultImageOptions())
 }
 
-func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
-	op := &ebiten.DrawImageOptions{}
+func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {    
+    op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
 	op.GeoM.Translate(-options.Anchor.x, -options.Anchor.y)                             // Center the sprite
 	op.GeoM.Rotate(transform.rotation)                                                  // Rotate the sprite
