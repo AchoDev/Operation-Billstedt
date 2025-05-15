@@ -30,13 +30,23 @@ var camera Camera = Camera{
 	zoom:   1,
 }
 
+type LoadedLevel struct {
+	Tiles []Tile `json:"tiles"`
+}
+
 var currentLevel Level = &Level1{
-	tiles: loadJson("level-tilesheets/level1.json", &[]Tile{}),
+	tiles: loadJson("level-tilesheets/level1.json", &LoadedLevel{}).Tiles,
 	sprites: map[string]*ebiten.Image{
-		"rail":                     loadImage("assets/tiles/rail.png"),
-		"station-floor-corner":     loadImage("assets/tiles/station-floor-corner.png"),
-		"station-floor":            loadImage("assets/tiles/station-floor.png"),
-		"station-floor-protective": loadImage("assets/tiles/station-floor-protective.png"),
+		"rail":                           loadImage("assets/tiles/rail.png"),
+		"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
+		"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
+		"station-floor-corner":           loadImage("assets/tiles/station-floor-corner.png"),
+		"station-floor":                  loadImage("assets/tiles/station-floor.png"),
+		"station-floor-protective":       loadImage("assets/tiles/station-floor-protective.png"),
+		"station-floor-protective-right": loadImage("assets/tiles/station-floor-protective-right.png"),
+
+		"bench":    loadImage("assets/tiles/bench.png"),
+		"elevator": loadImage("assets/tiles/elevator.png"),
 	},
 }
 
@@ -74,7 +84,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.White)
+	screen.Fill(color.Black)
 
 	DrawLevel(screen, currentLevel)
 
@@ -238,6 +248,5 @@ func loadJson[T any](path string, target *T) T {
 		log.Fatal(err)
 	}
 	fmt.Println("Loaded JSON file:", path)
-
 	return *target
 }

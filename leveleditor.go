@@ -16,6 +16,7 @@ var pos = Vector2{300, 1000}
 var selectedSprite int
 var currentScale float64 = 1
 var levelEditorActivated bool = true
+var selectedTool int = 0
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if !levelEditorActivated {
@@ -105,6 +106,13 @@ func UpdateLevelEditor(level Level) {
 		currentScale += yoff * 0.5
 	}
 
+	if isKeyJustPressed(ebiten.Key1) {
+		selectedTool = 0
+	}
+	if isKeyJustPressed(ebiten.Key2) {
+		selectedTool = 1
+	}
+
 	if isKeyJustPressed(ebiten.KeyTab) {
 		selectedSprite++
 		if selectedSprite >= len(level.GetSprites()) {
@@ -138,7 +146,10 @@ func UpdateLevelEditor(level Level) {
 	}
 
 	if isKeyJustPressed(ebiten.KeyO) {
-		jsonData, err := json.Marshal(level.GetTiles())
+		data := map[string]interface{}{
+			"tiles": level.GetTiles(),
+		}
+		jsonData, err := json.Marshal(data)
 		if err != nil {
 			fmt.Println("Error marshalling tiles to JSON:", err)
 			return
