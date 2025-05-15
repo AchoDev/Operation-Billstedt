@@ -5,7 +5,6 @@ import "github.com/hajimehoshi/ebiten/v2"
 func getMousePosition() Vector2 {
 	x, y := ebiten.CursorPosition()
 
-
 	worldX := float64(x)
 	worldY := float64(y)
 

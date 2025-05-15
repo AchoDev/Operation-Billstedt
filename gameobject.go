@@ -23,11 +23,11 @@ func drawImage(screen *ebiten.Image, image *ebiten.Image, transform Transform) {
 }
 
 func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
-    if transform.x + transform.width / 2 < camera.x - camera.width / 2 || transform.x - transform.width / 2 > camera.x + camera.width / 2 {
+    if transform.x + transform.width / 2 < camera.x - camera.width / camera.zoom / 2 || transform.x - transform.width / 2 > camera.x + camera.width / camera.zoom / 2  {
         return
     }
 
-    if transform.y + transform.height / 2 < camera.y - camera.height / 2 || transform.y - transform.height / 2 > camera.y + camera.height / 2 {
+    if transform.y + transform.height / 2 < camera.y - camera.height / camera.zoom / 2 || transform.y - transform.height / 2 > camera.y + camera.height / camera.zoom / 2 {
         return
     }
 
@@ -38,7 +38,7 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
     transform.x *= camera.zoom
     transform.y *= camera.zoom
 
-    
+
 	transform.x += camera.width / 2
 	transform.y += camera.height / 2
 

@@ -176,6 +176,13 @@ func UpdateLevelEditor(level Level) {
 		camera.y += 10
 	}
 
+    if ebiten.IsKeyPressed(ebiten.KeyQ) {
+        camera.zoom -= 0.01
+    }
+    if ebiten.IsKeyPressed(ebiten.KeyE) {
+        camera.zoom += 0.01
+    }
+
 	if isMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 
 		sprites := level.GetSprites()
