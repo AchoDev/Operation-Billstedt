@@ -15,7 +15,7 @@ import (
 var pos = Vector2{300, 1000}
 var selectedSprite int
 var currentScale float64 = 1
-var levelEditorActivated bool = true
+var levelEditorActivated bool = false
 var selectedTool int = 0
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {

@@ -33,10 +33,13 @@ var camera Camera = Camera{
 
 type LoadedLevel struct {
 	Tiles []Tile `json:"tiles"`
+	Colliders []Point `json:"colliders"`
 }
 
+var loadedLevel LoadedLevel = loadJson("level-tilesheets/level1.json", &LoadedLevel{})
+
 var currentLevel Level = &Level1{
-	tiles: loadJson("level-tilesheets/level1.json", &LoadedLevel{}).Tiles,
+	tiles: loadedLevel.Tiles,
 	sprites: map[string]*ebiten.Image{
 		"rail":                           loadImage("assets/tiles/rail.png"),
 		"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
@@ -49,6 +52,7 @@ var currentLevel Level = &Level1{
 		"bench":    loadImage("assets/tiles/bench.png"),
 		"elevator": loadImage("assets/tiles/elevator.png"),
 	},
+	colliders: loadedLevel.Colliders,
 }
 
 type Game struct{}
@@ -226,6 +230,8 @@ func main() {
 	// ebiten.SetWindowSize(2000 / 2, 1700 / 2)
 	ebiten.SetWindowTitle("Operation Billstedt")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+
+	currentLevel.StartLevel()
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)

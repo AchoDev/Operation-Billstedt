@@ -165,7 +165,7 @@ func (collider *Collider) Update() {
 
 func (collider *Collider) Draw(screen *ebiten.Image) {
 	tr := collider.GetTransform()
-	drawRect(screen, tr, color.RGBA{255, 100, 200, 255})
+	drawRect(screen, tr, color.RGBA{255, 100, 200, 100})
 }
 
 func (collider *Collider) GetTransform() Transform {

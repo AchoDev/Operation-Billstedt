@@ -17,13 +17,35 @@ type Tile struct {
 type Level interface {
 	GetTiles() []Tile
 	GetSprites() map[string]*ebiten.Image
+    GetColliders() []Point
 	UpdateLevel()
 	SetTiles([]Tile)
+    SetColliders([]Point)
+    StartLevel()
 }
 
 type Level1 struct {
 	tiles   []Tile
+    colliders []Point
 	sprites map[string]*ebiten.Image
+    dynamicColliders []*Collider
+}
+
+func (level *Level1) StartLevel() {
+    level.dynamicColliders = []*Collider{
+        {
+            transform: Transform{
+                x:      260,
+                y:      0,
+                width:  100,
+                height: 1200,
+            },
+        },
+    }
+
+    for _, collider := range level.dynamicColliders {
+        gameObjects = append(gameObjects, collider)
+    }
 }
 
 func DrawLevel(screen *ebiten.Image, level Level) {
@@ -63,3 +85,11 @@ func (level *Level1) UpdateLevel() {}
 func (level *Level1) SetTiles(tiles []Tile) {
 	level.tiles = tiles
 }
+func (level *Level1) GetColliders() []Point {
+    return level.colliders
+}
+
+func (level *Level1) SetColliders(colliders []Point) {
+    level.colliders = colliders
+}
+

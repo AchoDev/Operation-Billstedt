@@ -28,7 +28,7 @@ func clampVector(vector Vector2, min float64, max float64) Vector2 {
 func CreatePlayer() Player {
 	return Player{
 		transform: Transform{
-			x:      0,
+			x:      650,
 			y:      0,
 			width:  30,
 			height: 30,
