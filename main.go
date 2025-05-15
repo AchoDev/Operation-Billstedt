@@ -101,7 +101,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 60)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 80)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 80)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 100)
 	screen.DrawImage(rect, nil)
 }
 

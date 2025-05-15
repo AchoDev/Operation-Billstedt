@@ -35,8 +35,16 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 	transform.x -= camera.x
 	transform.y -= camera.y
     
+    transform.x *= camera.zoom
+    transform.y *= camera.zoom
+
+    
 	transform.x += camera.width / 2
 	transform.y += camera.height / 2
+
+
+    transform.width *= camera.zoom
+    transform.height *= camera.zoom
     
 
 	drawAbsoluteImageWithOptions(screen, image, transform, options)

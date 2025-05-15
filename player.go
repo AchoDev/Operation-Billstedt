@@ -95,6 +95,14 @@ func (player *Player) Update() {
 	if isKeyJustPressed(ebiten.Key8) {
 		gameObjects = append(gameObjects, createEnemy(500, 500, EnemyTypeEmran))
 	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyE) {
+		camera.zoom += 0.01
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		camera.zoom -= 0.01
+	}
 }
 
 func move(player *Player) {
