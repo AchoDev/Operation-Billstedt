@@ -70,13 +70,9 @@ func (bullet *Bullet) Update() {
 }
 
 func (bullet *Bullet) Draw(screen *ebiten.Image) {
-	drawRotatedRect(
+	drawRect(
 		screen,
-		bullet.transform.x-camera.x,
-		bullet.transform.y-camera.y,
-		bullet.transform.width,
-		bullet.transform.height,
-		bullet.angle,
+		bullet.transform,
 		color.RGBA{255, 238, 66, 255},
 	)
 }

@@ -12,52 +12,58 @@ type GameObject interface {
 	GetTransform() Transform
 }
 
-func drawRotatedRect(screen *ebiten.Image, x, y, width, height, angle float64, color color.Color) {
-	// Create a rectangle image
-	rect := ebiten.NewImage(int(width), int(height))
-	rect.Fill(color)
-
-	// Create a GeoM (geometric matrix) for transformations
-	op := &ebiten.DrawImageOptions{}
-
-	// Translate the rectangle to its center for rotation
-	op.GeoM.Translate(-width/2, -height/2)
-
-	// Rotate the rectangle
-	op.GeoM.Rotate(angle)
-
-	// Translate the rectangle back to its position
-	op.GeoM.Translate(x, y)
-
-	// Draw the rotated rectangle onto the screen
-	screen.DrawImage(rect, op)
-}
-
 func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
 	rect := ebiten.NewImage(int(transform.width), int(transform.height))
 	rect.Fill(color)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-transform.width/2, -transform.height/2)
-	op.GeoM.Translate(transform.x, transform.y)
-
-	screen.DrawImage(rect, op)
+	drawImageWithOptions(screen, rect, transform, defaultImageOptions())
 }
 
 func drawImage(screen *ebiten.Image, image *ebiten.Image, transform Transform) {
+	drawImageWithOptions(screen, image, transform, defaultImageOptions())
+}
+
+func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
+	transform.x -= camera.x
+	transform.y -= camera.y
+
+	transform.x += camera.width / 2
+	transform.y += camera.height / 2
+
+	drawAbsoluteImageWithOptions(screen, image, transform, options)
+}
+
+func drawAbsoluteRect(screen *ebiten.Image, transform Transform, color color.Color) {
+	rect := ebiten.NewImage(int(transform.width), int(transform.height))
+	rect.Fill(color)
+	drawAbsoluteImage(screen, rect, transform)
+}
+
+func drawAbsoluteImage(screen *ebiten.Image, image *ebiten.Image, transform Transform) {
+	drawAbsoluteImageWithOptions(screen, image, transform, defaultImageOptions())
+}
+
+func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
+	op.GeoM.Translate(-options.Anchor.x, -options.Anchor.y)                             // Center the sprite
 	op.GeoM.Rotate(transform.rotation)                                                  // Rotate the sprite
 	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
-	op.GeoM.Translate(transform.x, transform.y) // Offset the sprite position
+	op.GeoM.Scale(options.Scale, options.Scale)              // Scale the sprite
+	op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
+	op.ColorScale.ScaleAlpha(float32(options.Alpha) / 255.0) // Set the alpha value
 	screen.DrawImage(image, op)
 }
 
-func drawTransparentImage(screen *ebiten.Image, image *ebiten.Image, transform Transform, alpha int) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
-	op.GeoM.Rotate(transform.rotation)                                                  // Rotate the sprite
-	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
-	op.GeoM.Translate(transform.x, transform.y)      // Offset the sprite position
-	op.ColorScale.ScaleAlpha(float32(alpha) / 255.0) // Set the alpha value
-	screen.DrawImage(image, op)
+type ImageOptions struct {
+	Anchor Vector2
+	Alpha  float64
+	Scale  float64
+}
+
+func defaultImageOptions() ImageOptions {
+	return ImageOptions{
+		Anchor: Vector2{0, 0},
+		Alpha:  255,
+		Scale:  1,
+	}
 }

@@ -7,7 +7,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
@@ -192,22 +191,24 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 		col = color.RGBA{0, 0, 255, 255}
 	}
 
-	drawRotatedRect(
+	drawRect(
 		screen,
-		enemy.transform.x-camera.x,
-		enemy.transform.y-camera.y,
-		enemy.transform.width,
-		enemy.transform.height,
-		enemy.transform.rotation,
+		enemy.transform,
 		col,
 	)
 
 	for _, point := range enemy.currentPath {
-		vector.DrawFilledRect(screen, float32(point.x-float64(pathFindingGridSize/2)-camera.x), float32(point.y-float64(pathFindingGridSize/2)-camera.y), float32(pathFindingGridSize), float32(pathFindingGridSize), color.RGBA{255, 0, 0, 50}, true)
+		drawRect(screen, Transform{
+			x:        point.x - float64(pathFindingGridSize/2),
+			y:        point.y - float64(pathFindingGridSize/2),
+			width:    float64(pathFindingGridSize),
+			height:   float64(pathFindingGridSize),
+			rotation: 0,
+		}, color.RGBA{255, 0, 0, 50})
 	}
 
-	textX := enemy.transform.x - enemy.transform.width/2 - camera.x
-	textY := enemy.transform.y - enemy.transform.height - camera.y
+	textX := enemy.transform.x - enemy.transform.width/2
+	textY := enemy.transform.y - enemy.transform.height
 
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY-20))

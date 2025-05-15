@@ -42,8 +42,8 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 
 		gridSize := 100
 		drawImage(screen, tileImage, Transform{
-			x:        float64(tile.X*gridSize) - camera.x,
-			y:        float64(tile.Y*gridSize) - camera.y,
+			x:        float64(tile.X * gridSize),
+			y:        float64(tile.Y * gridSize),
 			width:    float64(tile.Width * gridSize),
 			height:   float64(tile.Height * gridSize),
 			rotation: 0,

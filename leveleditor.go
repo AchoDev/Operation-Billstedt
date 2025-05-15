@@ -20,7 +20,7 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 		return
 	}
 
-	drawRect(screen, Transform{
+	drawAbsoluteRect(screen, Transform{
 		x:        pos.x,
 		y:        pos.y,
 		width:    1200,
@@ -49,7 +49,7 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 
 		if counter == selectedSprite {
 			size := 10.0
-			drawRect(screen, Transform{
+			drawAbsoluteRect(screen, Transform{
 				x:        transform.x,
 				y:        transform.y,
 				width:    transform.width + size*2,
@@ -58,22 +58,24 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 			}, color.RGBA{255, 129, 129, 255})
 		}
 
-		drawImage(screen, sprite, transform)
+		drawAbsoluteImage(screen, sprite, transform)
 
 		counter++
 	}
 
 	gridPos := getMouseGridPosition()
 	sprite := sprites[keys[selectedSprite]]
-	drawTransparentImage(screen, sprite, Transform{
-		x:        float64(gridPos.x*100) - camera.x,
-		y:        float64(gridPos.y*100) - camera.y,
+	op := defaultImageOptions()
+	op.Alpha = 100
+	drawAbsoluteImageWithOptions(screen, sprite, Transform{
+		x:        float64(gridPos.x * 100),
+		y:        float64(gridPos.y * 100),
 		width:    100,
 		height:   100,
 		rotation: 0,
-	}, 100)
+	}, op)
 
-	drawRect(screen, Transform{
+	drawAbsoluteRect(screen, Transform{
 		x:        1200,
 		y:        100,
 		width:    300,
@@ -177,6 +179,9 @@ func getMouseGridPosition() Vector2 {
 	cursorX, cursorY := ebiten.CursorPosition()
 	cursorX += int(camera.x)
 	cursorY += int(camera.y)
+
+	cursorX -= int(camera.width / 2)
+	cursorY -= int(camera.height / 2)
 
 	gridPosition := Vector2{
 		x: math.Round(float64(cursorX) / 100),

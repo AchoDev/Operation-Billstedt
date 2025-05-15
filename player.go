@@ -1,7 +1,7 @@
 package main
 
 import (
-	"image/color"
+	"fmt"
 	"math"
 
 	"strings"
@@ -29,8 +29,8 @@ func clampVector(vector Vector2, min float64, max float64) Vector2 {
 func CreatePlayer() Player {
 	return Player{
 		transform: Transform{
-			x:      500,
-			y:      500,
+			x:      0,
+			y:      0,
 			width:  30,
 			height: 30,
 		},
@@ -57,12 +57,16 @@ type Player struct {
 func (player *Player) Update() {
 	move(player)
 
-	mouseX, mouseY := ebiten.CursorPosition()
+	mousePos := getMousePosition()
+
+	fmt.Println(mousePos.x - player.transform.x)
+	// fmt.Println(player.transform.x, player.transform.y)
 
 	angle := math.Atan2(
-		float64(mouseY)-player.transform.y,
-		float64(mouseX)-player.transform.x,
+		mousePos.y-player.transform.y,
+		mousePos.x-player.transform.x,
 	)
+	// fmt.Println(angle)
 
 	player.transform.rotation = angle
 
@@ -134,44 +138,27 @@ func move(player *Player) {
 }
 
 func (player *Player) Draw(screen *ebiten.Image) {
-	// drawRotatedRect(
-	// 	screen,
-	// 	player.transform.x-camera.x,
-	// 	player.transform.y-camera.y,
-	// 	player.transform.width,
-	// 	player.transform.height,
-	// 	player.transform.rotation,
-	// 	color.Color(color.RGBA{255, 0, 0, 255}),
-	// )
 	sprite := player.sprites[strings.ToLower(player.currentGun.Name())]
 
 	if sprite != nil {
 
-		scaleX := player.transform.width / float64(sprite.Bounds().Dx()) * 4
-		scaleY := player.transform.height / float64(sprite.Bounds().Dy()) * 4
-
 		offset := Vector2{
-			110,
-			-500,
+			-110,
+			500,
 		}
 
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-float64(sprite.Bounds().Dx())/2, -float64(sprite.Bounds().Dy())/2) // Center the sprite
-		op.GeoM.Translate(offset.x, offset.y)                                                 // Offset the sprite position
-		op.GeoM.Rotate(player.transform.rotation + math.Pi/2)                                 // Rotate the sprite
-		op.GeoM.Scale(scaleX, scaleY)
-		op.GeoM.Translate(player.transform.x-camera.x, player.transform.y-camera.y)
+		op := defaultImageOptions()
+		op.Anchor = offset
+		op.Scale = 4
 
-		screen.DrawImage(sprite, op)
-	} else {
-		drawRotatedRect(
+		tr := player.GetTransform()
+		tr.rotation += math.Pi / 2
+
+		drawImageWithOptions(
 			screen,
-			player.transform.x-camera.x,
-			player.transform.y-camera.y,
-			player.transform.width,
-			player.transform.height,
-			player.transform.rotation,
-			color.Color(color.RGBA{255, 0, 0, 255}),
+			sprite,
+			tr,
+			op,
 		)
 	}
 }
