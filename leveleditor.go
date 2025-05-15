@@ -14,6 +14,8 @@ import (
 
 var pos = Vector2{300, 1000}
 var selectedSprite int
+var currentScale float64 = 1
+var levelEditorActivated bool = true
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if !levelEditorActivated {
@@ -70,8 +72,8 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	drawImageWithOptions(screen, sprite, Transform{
 		x:        float64(gridPos.x * 100),
 		y:        float64(gridPos.y * 100),
-		width:    100,
-		height:   100,
+		width:    100 * currentScale,
+		height:   100 * currentScale,
 		rotation: 0,
 	}, op)
 
@@ -97,10 +99,41 @@ func UpdateLevelEditor(level Level) {
 		return
 	}
 
+	// Detect mouse scroll to change selected sprite
+	_, yoff := ebiten.Wheel()
+	if yoff != 0 {
+		currentScale += yoff * 0.5
+	}
+
 	if isKeyJustPressed(ebiten.KeyTab) {
 		selectedSprite++
 		if selectedSprite >= len(level.GetSprites()) {
 			selectedSprite = 0
+		}
+	}
+
+	if isMouseButtonJustPressed(ebiten.MouseButtonRight) {
+		mousePosition := getMousePosition()
+
+		fmt.Println("Searching for tile to delete at:", mousePosition)
+
+		tiles := level.GetTiles()
+		for i, tile := range tiles {
+			tileTr := Transform{
+				x:      tile.X * 100,
+				y:      tile.Y * 100,
+				width:  tile.Width * 100,
+				height: tile.Height * 100,
+				// rotation: 0,
+			}
+			halfWidth := tileTr.width / 2
+			halfHeight := tileTr.height / 2
+			if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
+				mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
+				tiles = append(tiles[:i], tiles[i+1:]...)
+				level.SetTiles(tiles)
+				break
+			}
 		}
 	}
 
@@ -149,7 +182,7 @@ func UpdateLevelEditor(level Level) {
 				tiles := level.GetTiles()
 
 				for i, tile := range tiles {
-					if tile.X == int(gridPosition.x) && tile.Y == int(gridPosition.y) {
+					if tile.X == gridPosition.x && tile.Y == gridPosition.y {
 						tiles = append(tiles[:i], tiles[i+1:]...)
 						level.SetTiles(tiles)
 						fmt.Println("Replaced tile at", gridPosition)
@@ -157,10 +190,10 @@ func UpdateLevelEditor(level Level) {
 				}
 
 				tiles = append(tiles, Tile{
-					X:      int(gridPosition.x),
-					Y:      int(gridPosition.y),
-					Width:  1,
-					Height: 1,
+					X:      gridPosition.x,
+					Y:      gridPosition.y,
+					Width:  currentScale,
+					Height: currentScale,
 					Sprite: name,
 				})
 
@@ -176,6 +209,15 @@ func UpdateLevelEditor(level Level) {
 }
 
 func getMouseGridPosition() Vector2 {
+
+	gridStep := 1.0
+
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		gridStep = 0.5
+	} else if ebiten.IsKeyPressed(ebiten.KeyControl) {
+		gridStep = 0.1
+	}
+
 	cursorX, cursorY := ebiten.CursorPosition()
 	cursorX += int(camera.x)
 	cursorY += int(camera.y)
@@ -183,9 +225,12 @@ func getMouseGridPosition() Vector2 {
 	cursorX -= int(camera.width / 2)
 	cursorY -= int(camera.height / 2)
 
+	worldX := float64(cursorX) / 100
+	worldY := float64(cursorY) / 100
+
 	gridPosition := Vector2{
-		x: math.Round(float64(cursorX) / 100),
-		y: math.Round(float64(cursorY) / 100),
+		x: math.Round(worldX/gridStep) * gridStep,
+		y: math.Round(worldY/gridStep) * gridStep,
 	}
 
 	return gridPosition

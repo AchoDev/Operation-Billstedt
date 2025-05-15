@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 
 	"strings"
@@ -59,14 +58,10 @@ func (player *Player) Update() {
 
 	mousePos := getMousePosition()
 
-	fmt.Println(mousePos.x - player.transform.x)
-	// fmt.Println(player.transform.x, player.transform.y)
-
 	angle := math.Atan2(
 		mousePos.y-player.transform.y,
 		mousePos.x-player.transform.x,
 	)
-	// fmt.Println(angle)
 
 	player.transform.rotation = angle
 

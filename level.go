@@ -7,10 +7,10 @@ import (
 )
 
 type Tile struct {
-	X      int
-	Y      int
-	Width  int
-	Height int
+	X      float64
+	Y      float64
+	Width  float64
+	Height float64
 	Sprite string
 }
 
@@ -26,8 +26,6 @@ type Level1 struct {
 	sprites map[string]*ebiten.Image
 }
 
-var levelEditorActivated bool = false
-
 func DrawLevel(screen *ebiten.Image, level Level) {
 	tiles := level.GetTiles()
 	sprites := level.GetSprites()
@@ -42,10 +40,10 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 
 		gridSize := 100
 		drawImage(screen, tileImage, Transform{
-			x:        float64(tile.X * gridSize),
-			y:        float64(tile.Y * gridSize),
-			width:    float64(tile.Width * gridSize),
-			height:   float64(tile.Height * gridSize),
+			x:        tile.X * float64(gridSize),
+			y:        tile.Y * float64(gridSize),
+			width:    tile.Width * float64(gridSize),
+			height:   tile.Height * float64(gridSize),
 			rotation: 0,
 		})
 	}
