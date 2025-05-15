@@ -39,8 +39,8 @@ func CreatePlayer() Player {
 		sprites: map[string]*ebiten.Image{
 			"minigun": loadImage("assets/leo/minigun.png"),
 			"rifle":   loadImage("assets/leo/rifle.png"),
-			"pistol":  loadImage("assets/leo/rifle.png"),
-			"shotgun": loadImage("assets/leo/rifle.png"),
+			"pistol":  loadImage("assets/leo/pistol.png"),
+			"shotgun": loadImage("assets/leo/shotgun.png"),
 		},
 	}
 }
