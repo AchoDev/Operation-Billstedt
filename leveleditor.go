@@ -230,14 +230,17 @@ func getMouseGridPosition() Vector2 {
 	}
 
 	cursorX, cursorY := ebiten.CursorPosition()
-	cursorX += int(camera.x)
-	cursorY += int(camera.y)
+    worldX := float64(cursorX) / camera.zoom
+    worldY := float64(cursorY) / camera.zoom
 
-	cursorX -= int(camera.width / 2)
-	cursorY -= int(camera.height / 2)
+	worldX += camera.x
+	worldY += camera.y
 
-	worldX := float64(cursorX) / 100
-	worldY := float64(cursorY) / 100
+	worldX -= camera.width / 2 / camera.zoom
+	worldY -= camera.height / 2 / camera.zoom
+
+	worldX /= 100
+	worldY /=  100
 
 	gridPosition := Vector2{
 		x: math.Round(worldX/gridStep) * gridStep,

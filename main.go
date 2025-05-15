@@ -28,7 +28,7 @@ var camera Camera = Camera{
 	y:      0,
 	width:  1920,
 	height: 1080,
-	zoom:   1,
+	zoom:   1.6,
 }
 
 type LoadedLevel struct {
@@ -112,7 +112,7 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 
 func moveCamera() {
 	diff := Vector2{
-		x: player.transform.x - camera.x,
+		x: 650 - camera.x,
 		y: player.transform.y - camera.y,
 	}
 
