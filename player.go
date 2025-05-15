@@ -26,8 +26,6 @@ func clampVector(vector Vector2, min float64, max float64) Vector2 {
 	}
 }
 
-
-
 func CreatePlayer() Player {
 	return Player{
 		transform: Transform{
@@ -41,8 +39,8 @@ func CreatePlayer() Player {
 		currentGun: &Pistol{},
 		sprites: map[string]*ebiten.Image{
 			"minigun": loadImage("assets/leo/minigun.png"),
-			"rifle": loadImage("assets/leo/rifle.png"),
-			"pistol": loadImage("assets/leo/rifle.png"),
+			"rifle":   loadImage("assets/leo/rifle.png"),
+			"pistol":  loadImage("assets/leo/rifle.png"),
 			"shotgun": loadImage("assets/leo/rifle.png"),
 		},
 	}
@@ -155,16 +153,16 @@ func (player *Player) Draw(screen *ebiten.Image) {
 		offset := Vector2{
 			110,
 			-500,
-		}	
+		}
 
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(-float64(sprite.Bounds().Dx())/2, -float64(sprite.Bounds().Dy())/2) // Center the sprite
-		op.GeoM.Translate(offset.x, offset.y) // Offset the sprite position
-        op.GeoM.Rotate(player.transform.rotation + math.Pi/2) // Rotate the sprite
+		op.GeoM.Translate(offset.x, offset.y)                                                 // Offset the sprite position
+		op.GeoM.Rotate(player.transform.rotation + math.Pi/2)                                 // Rotate the sprite
 		op.GeoM.Scale(scaleX, scaleY)
 		op.GeoM.Translate(player.transform.x-camera.x, player.transform.y-camera.y)
-		
-        screen.DrawImage(sprite, op)
+
+		screen.DrawImage(sprite, op)
 	} else {
 		drawRotatedRect(
 			screen,

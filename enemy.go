@@ -65,7 +65,6 @@ func (enemy *Enemy) Update() {
 		path = enemy.currentPath
 	} else {
 		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{2000, 2000})
-		fmt.Println(enemy.currentGoal, player.transform.x, player.transform.y)
 	}
 
 	enemy.currentGoal = Vector2{
@@ -159,8 +158,6 @@ func (enemy *Enemy) Update() {
 	enemy.velocity.x *= 0.9
 	enemy.velocity.y *= 0.9
 
-	fmt.Println(enemy.velocity)
-
 	distance := math.Sqrt(
 		math.Pow(enemy.transform.x-player.transform.x, 2) +
 			math.Pow(enemy.transform.y-player.transform.y, 2),
@@ -197,8 +194,8 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
 	drawRotatedRect(
 		screen,
-		enemy.transform.x,
-		enemy.transform.y,
+		enemy.transform.x-camera.x,
+		enemy.transform.y-camera.y,
 		enemy.transform.width,
 		enemy.transform.height,
 		enemy.transform.rotation,
@@ -206,11 +203,11 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	)
 
 	for _, point := range enemy.currentPath {
-		vector.DrawFilledRect(screen, float32(point.x-float64(pathFindingGridSize/2)), float32(point.y-float64(pathFindingGridSize/2)), float32(pathFindingGridSize), float32(pathFindingGridSize), color.RGBA{255, 0, 0, 50}, true)
+		vector.DrawFilledRect(screen, float32(point.x-float64(pathFindingGridSize/2)-camera.x), float32(point.y-float64(pathFindingGridSize/2)-camera.y), float32(pathFindingGridSize), float32(pathFindingGridSize), color.RGBA{255, 0, 0, 50}, true)
 	}
 
-	textX := enemy.transform.x - enemy.transform.width/2
-	textY := enemy.transform.y - enemy.transform.height
+	textX := enemy.transform.x - enemy.transform.width/2 - camera.x
+	textY := enemy.transform.y - enemy.transform.height - camera.y
 
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY-20))

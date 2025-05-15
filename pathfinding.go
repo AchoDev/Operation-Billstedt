@@ -8,14 +8,14 @@ import (
 
 // Point represents a point in the grid
 type Point struct {
-    X, Y int
+	X, Y int
 }
 
 // Node represents a node in the priority queue
 type Node struct {
-    Point    Point
-    Priority float64
-    Index    int
+	Point    Point
+	Priority float64
+	Index    int
 }
 
 // PriorityQueue implements a priority queue for A* algorithm
@@ -24,158 +24,156 @@ type PriorityQueue []*Node
 func (pq PriorityQueue) Len() int { return len(pq) }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-    return pq[i].Priority < pq[j].Priority
+	return pq[i].Priority < pq[j].Priority
 }
 
 func (pq PriorityQueue) Swap(i, j int) {
-    pq[i], pq[j] = pq[j], pq[i]
-    pq[i].Index = i
-    pq[j].Index = j
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].Index = i
+	pq[j].Index = j
 }
 
 func (pq *PriorityQueue) Push(x interface{}) {
-    n := len(*pq)
-    node := x.(*Node)
-    node.Index = n
-    *pq = append(*pq, node)
+	n := len(*pq)
+	node := x.(*Node)
+	node.Index = n
+	*pq = append(*pq, node)
 }
 
 func (pq *PriorityQueue) Pop() interface{} {
-    old := *pq
-    n := len(old)
-    node := old[n-1]
-    old[n-1] = nil
-    node.Index = -1
-    *pq = old[0 : n-1]
-    return node
+	old := *pq
+	n := len(old)
+	node := old[n-1]
+	old[n-1] = nil
+	node.Index = -1
+	*pq = old[0 : n-1]
+	return node
 }
 
 // Heuristic calculates the Manhattan distance between two points
 func Heuristic(a, b Point) float64 {
-    return math.Abs(float64(a.X-b.X)) + math.Abs(float64(a.Y-b.Y))
+	return math.Abs(float64(a.X-b.X)) + math.Abs(float64(a.Y-b.Y))
 }
 
 // Neighbors returns the neighboring points of a given point
 func Neighbors(p Point, grid [][]int) []Point {
-    directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
-    var neighbors []Point
+	directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}}
+	var neighbors []Point
 
-    for _, d := range directions {
-        np := Point{p.X + d.X, p.Y + d.Y}
-        if np.X >= 0 && np.X < len(grid) && np.Y >= 0 && np.Y < len(grid[0]) && grid[np.X][np.Y] == 0 {
-            neighbors = append(neighbors, np)
-        }
-    }
+	for _, d := range directions {
+		np := Point{p.X + d.X, p.Y + d.Y}
+		if np.X >= 0 && np.X < len(grid) && np.Y >= 0 && np.Y < len(grid[0]) && grid[np.X][np.Y] == 0 {
+			neighbors = append(neighbors, np)
+		}
+	}
 
-    return neighbors
+	return neighbors
 }
 
 // AStar implements the A* algorithm
 func AStar(start, goal Point, grid [][]int) []Point {
-    pq := &PriorityQueue{}
-    heap.Init(pq)
-    heap.Push(pq, &Node{Point: start, Priority: 0})
+	pq := &PriorityQueue{}
+	heap.Init(pq)
+	heap.Push(pq, &Node{Point: start, Priority: 0})
 
-    cameFrom := make(map[Point]Point)
-    gScore := make(map[Point]float64)
-    gScore[start] = 0
+	cameFrom := make(map[Point]Point)
+	gScore := make(map[Point]float64)
+	gScore[start] = 0
 
-    fScore := make(map[Point]float64)
-    fScore[start] = Heuristic(start, goal)
+	fScore := make(map[Point]float64)
+	fScore[start] = Heuristic(start, goal)
 
-    for pq.Len() > 0 {
-        current := heap.Pop(pq).(*Node).Point
+	for pq.Len() > 0 {
+		current := heap.Pop(pq).(*Node).Point
 
-        if current == goal {
-            var path []Point
-            for current != start {
-                path = append([]Point{current}, path...)
-                current = cameFrom[current]
-            }
-            path = append([]Point{start}, path...)
-            return path
-        }
+		if current == goal {
+			var path []Point
+			for current != start {
+				path = append([]Point{current}, path...)
+				current = cameFrom[current]
+			}
+			path = append([]Point{start}, path...)
+			return path
+		}
 
-        for _, neighbor := range Neighbors(current, grid) {
-            tentativeGScore := gScore[current] + 1
+		for _, neighbor := range Neighbors(current, grid) {
+			tentativeGScore := gScore[current] + 1
 
-            if g, ok := gScore[neighbor]; !ok || tentativeGScore < g {
-                cameFrom[neighbor] = current
-                gScore[neighbor] = tentativeGScore
-                fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal)
-                heap.Push(pq, &Node{Point: neighbor, Priority: fScore[neighbor]})
-            }
-        }
-    }
+			if g, ok := gScore[neighbor]; !ok || tentativeGScore < g {
+				cameFrom[neighbor] = current
+				gScore[neighbor] = tentativeGScore
+				fScore[neighbor] = tentativeGScore + Heuristic(neighbor, goal)
+				heap.Push(pq, &Node{Point: neighbor, Priority: fScore[neighbor]})
+			}
+		}
+	}
 
-    return nil // No path found
+	return nil // No path found
 }
 
 func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSize int, worldSize Vector2) []Vector2 {
-    // grid size = size of grid tile in pixels
-    // world size = size of world in pixels
-    
-    grid := [][]int{}
+	// grid size = size of grid tile in pixels
+	// world size = size of world in pixels
 
-    gridWidth := int(worldSize.x / float64(gridSize))
-    gridHeight := int(worldSize.y / float64(gridSize))
+	grid := [][]int{}
 
-    for x := 0; x < gridWidth; x++ {
-        grid = append(grid, []int{})
+	gridWidth := int(worldSize.x / float64(gridSize))
+	gridHeight := int(worldSize.y / float64(gridSize))
 
-        for y := 0; y < gridHeight; y++ {
-            grid[x] = append(grid[x], 0)
-        }
-    }
+	for x := 0; x < gridWidth; x++ {
+		grid = append(grid, []int{})
 
-    for _, collider := range colliders {
+		for y := 0; y < gridHeight; y++ {
+			grid[x] = append(grid[x], 0)
+		}
+	}
 
-        x := int(collider.transform.x / float64(gridSize))
-        y := int(collider.transform.y / float64(gridSize))
+	for _, collider := range colliders {
 
-        width := int(collider.transform.width / float64(gridSize))
-        height := int(collider.transform.height / float64(gridSize))
+		x := int(collider.transform.x / float64(gridSize))
+		y := int(collider.transform.y / float64(gridSize))
 
+		width := int(collider.transform.width / float64(gridSize))
+		height := int(collider.transform.height / float64(gridSize))
 
+		for i := 0; i < width; i++ {
+			for j := 0; j < height; j++ {
+				grid[i+x][j+y] = 1
+			}
+		}
+	}
 
-        for i := 0; i < width; i++ {
-            for j := 0; j < height; j++ {
-                grid[i + x][j + y] = 1
-            }
-        }
-    }
+	startPoint := Point{
+		X: int(start.x / float64(gridSize)),
+		Y: int(start.y / float64(gridSize)),
+	}
 
-    startPoint := Point{
-        X: int(start.x / float64(gridSize)),
-        Y: int(start.y / float64(gridSize)),
-    }
+	endPoint := Point{
+		X: int(end.x / float64(gridSize)),
+		Y: int(end.y / float64(gridSize)),
+	}
 
-    endPoint := Point{
-        X: int(end.x / float64(gridSize)),
-        Y: int(end.y / float64(gridSize)),
-    }
+	path := AStar(startPoint, endPoint, grid)
 
-    path := AStar(startPoint, endPoint, grid)
-    
-    vectorPath := []Vector2{}
+	vectorPath := []Vector2{}
 
-    for _, point := range path {
-        vectorPath = append(vectorPath, Vector2{
-            x: float64(point.X * gridSize),
-            y: float64(point.Y * gridSize),
-        })
-    }
+	for _, point := range path {
+		vectorPath = append(vectorPath, Vector2{
+			x: float64(point.X * gridSize),
+			y: float64(point.Y * gridSize),
+		})
+	}
 
-    if len(path) == 0 {
-        fmt.Println("pathfinding returns no path")
-        return []Vector2{}
-    }
+	if len(path) == 0 {
+		fmt.Println("pathfinding returns no path")
+		return []Vector2{}
+	}
 
-    return vectorPath
-    
-    // nextPoint := path[0]
-    // return Vector2{
-    //     x: float64(nextPoint.X * gridSize),
-    //     y: float64(nextPoint.Y * gridSize),
-    // }
+	return vectorPath
+
+	// nextPoint := path[0]
+	// return Vector2{
+	//     x: float64(nextPoint.X * gridSize),
+	//     y: float64(nextPoint.Y * gridSize),
+	// }
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"image/color"
 	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -18,9 +20,12 @@ var camera Vector2 = Vector2{
 }
 
 var currentLevel Level = &Level1{
-	tiles: []Tile{},
+	tiles: loadJson("level-tilesheets/level1.json", &[]Tile{}),
 	sprites: map[string]*ebiten.Image{
-		"rail": loadImage("assets/tiles/rail.png"),
+		"rail":                     loadImage("assets/tiles/rail.png"),
+		"station-floor-corner":     loadImage("assets/tiles/station-floor-corner.png"),
+		"station-floor":            loadImage("assets/tiles/station-floor.png"),
+		"station-floor-protective": loadImage("assets/tiles/station-floor-protective.png"),
 	},
 }
 
@@ -31,22 +36,23 @@ func (g *Game) Update() error {
 	playerX := player.transform.x
 	playerY := player.transform.y
 
-	for _, gameObject := range gameObjects {
-		gameObject.Update()
-	}
-
-	if isKeyJustPressed(ebiten.Key9) {
-		fmt.Println("Creating new player")
-		if findPlayer() == nil {
-			player = CreatePlayer()
-			gameObjects = append(gameObjects, &player)
+	if !levelEditorActivated {
+		for _, gameObject := range gameObjects {
+			gameObject.Update()
 		}
+
+		if isKeyJustPressed(ebiten.Key9) {
+			fmt.Println("Creating new player")
+			if findPlayer() == nil {
+				player = CreatePlayer()
+				gameObjects = append(gameObjects, &player)
+			}
+		}
+		currentLevel.UpdateLevel()
+		checkCollisions(playerX, playerY)
 	}
 
-	currentLevel.UpdateLevel()
 	UpdateLevelEditor(currentLevel)
-
-	checkCollisions(playerX, playerY)
 
 	updateKeyState()
 	updateMouseState()
@@ -62,13 +68,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 60)
 	screen.DrawImage(rect, nil)
+
+	DrawLevel(screen, currentLevel)
 
 	for _, gameObject := range gameObjects {
 		gameObject.Draw(screen)
 	}
 
-	DrawLevel(screen, currentLevel)
 	DrawLevelEditor(screen, currentLevel)
 }
 
@@ -192,4 +200,20 @@ func loadImage(path string) *ebiten.Image {
 		log.Fatal(err)
 	}
 	return img
+}
+
+func loadJson[T any](path string, target *T) T {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(target)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Loaded JSON file:", path)
+
+	return *target
 }

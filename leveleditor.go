@@ -1,113 +1,197 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"image/color"
 	"math"
+	"os"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-var pos = Vector2{300, 900}
+var pos = Vector2{300, 1000}
 var selectedSprite int
 
-
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
-    if !levelEditorActivated {
-        return
-    }
-    
-    counter := 0
-    // y := 1080.0
-    for _, sprite := range level.GetSprites() {
-        transform := Transform{
-            x:      float64(counter * 20) + pos.x,
-            y:      pos.y,
-            width:  100,
-            height: 100,
-            rotation: 0,
-        }
+	if !levelEditorActivated {
+		return
+	}
 
-        if counter == selectedSprite {
-            size := 10.0
-            drawRect(screen, Transform{
-                x:      transform.x - size,
-                y:      transform.y - size,
-                width:  transform.width + size*2,
-                height: transform.height + size*2,
-                rotation: 0,
-            }, color.RGBA{100, 0, 0, 255})
-        }
+	drawRect(screen, Transform{
+		x:        pos.x,
+		y:        pos.y,
+		width:    1200,
+		height:   150,
+		rotation: 0,
+	}, color.RGBA{0, 0, 0, 200})
 
-        drawImage(screen, sprite, transform)
+	counter := 0
+	sprites := level.GetSprites()
+	keys := make([]string, 0, len(sprites))
+	for k := range sprites {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 
+	// y := 1080.0
+	for _, name := range keys {
+		sprite := sprites[name]
+		transform := Transform{
+			x:        float64(counter*120) + pos.x,
+			y:        pos.y,
+			width:    100,
+			height:   100,
+			rotation: 0,
+		}
 
-        counter++
-    }
+		if counter == selectedSprite {
+			size := 10.0
+			drawRect(screen, Transform{
+				x:        transform.x,
+				y:        transform.y,
+				width:    transform.width + size*2,
+				height:   transform.height + size*2,
+				rotation: 0,
+			}, color.RGBA{255, 129, 129, 255})
+		}
 
-    drawRect(screen, Transform{
-        x:      1200,
-        y: 100,
-        width:  300,
-        height: 100,  
-        rotation: 0,
-    }, color.RGBA{0, 0, 0, 255})
+		drawImage(screen, sprite, transform)
 
-    ebitenutil.DebugPrintAt(screen, "Level Editor", 1050, 100)
-    ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%f", pos), 1050, 130)
+		counter++
+	}
+
+	gridPos := getMouseGridPosition()
+	sprite := sprites[keys[selectedSprite]]
+	drawTransparentImage(screen, sprite, Transform{
+		x:        float64(gridPos.x*100) - camera.x,
+		y:        float64(gridPos.y*100) - camera.y,
+		width:    100,
+		height:   100,
+		rotation: 0,
+	}, 100)
+
+	drawRect(screen, Transform{
+		x:        1200,
+		y:        100,
+		width:    300,
+		height:   100,
+		rotation: 0,
+	}, color.RGBA{0, 0, 0, 255})
+
+	ebitenutil.DebugPrintAt(screen, "Level Editor", 1050, 100)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%f", pos), 1050, 130)
 }
 
 func UpdateLevelEditor(level Level) {
-    
-    if isKeyJustPressed(ebiten.KeyP) {
-        levelEditorActivated = !levelEditorActivated
-    }
 
-    if isKeyJustPressed(ebiten.KeyTab) {
-        selectedSprite++
-        if selectedSprite >= len(level.GetSprites()) {
-            selectedSprite = 0
-        }
-    }
+	if isKeyJustPressed(ebiten.KeyP) {
+		levelEditorActivated = !levelEditorActivated
+	}
 
-    if isMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+	if !levelEditorActivated {
+		return
+	}
 
-        sprites := level.GetSprites()
+	if isKeyJustPressed(ebiten.KeyTab) {
+		selectedSprite++
+		if selectedSprite >= len(level.GetSprites()) {
+			selectedSprite = 0
+		}
+	}
 
-        counter := 0
-        for name := range sprites {
-            if counter == selectedSprite {
+	if isKeyJustPressed(ebiten.KeyO) {
+		jsonData, err := json.Marshal(level.GetTiles())
+		if err != nil {
+			fmt.Println("Error marshalling tiles to JSON:", err)
+			return
+		}
 
-                cursorX, cursorY := ebiten.CursorPosition()
+		err = os.WriteFile("level-output.json", jsonData, 0644)
 
-                gridPosition := Vector2{
-                    x: math.Round(float64(cursorX) / 100),
-                    y: math.Round(float64(cursorY) / 100),
-                }
+		if err != nil {
+			fmt.Println("Error writing JSON to file:", err)
+			return
+		}
+	}
 
-                tiles := level.GetTiles()
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		camera.x -= 10
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyD) {
+		camera.x += 10
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		camera.y -= 10
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyS) {
+		camera.y += 10
+	}
 
-                tiles = append(tiles, Tile{
-                    x:      int(gridPosition.x),
-                    y:      int(gridPosition.y),
-                    width:  1,
-                    height: 1,
-                    sprite: name,
-                    collide: false,
-                })
+	if isMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 
-                level.SetTiles(tiles)
+		sprites := level.GetSprites()
+		keys := make([]string, 0, len(sprites))
+		for k := range sprites {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
 
-                fmt.Println("Added tile at", gridPosition)
-                break
-            }
+		counter := 0
+		for _, name := range keys {
+			if counter == selectedSprite {
 
-            counter++
-        }
-    }
+				gridPosition := getMouseGridPosition()
+				tiles := level.GetTiles()
 
-    if !levelEditorActivated {
-        return
-    }
+				for i, tile := range tiles {
+					if tile.X == int(gridPosition.x) && tile.Y == int(gridPosition.y) {
+						tiles = append(tiles[:i], tiles[i+1:]...)
+						level.SetTiles(tiles)
+						fmt.Println("Replaced tile at", gridPosition)
+					}
+				}
+
+				tiles = append(tiles, Tile{
+					X:      int(gridPosition.x),
+					Y:      int(gridPosition.y),
+					Width:  1,
+					Height: 1,
+					Sprite: name,
+				})
+
+				level.SetTiles(tiles)
+
+				fmt.Println("Added tile at", gridPosition)
+				break
+			}
+
+			counter++
+		}
+	}
+}
+
+func getMouseGridPosition() Vector2 {
+	cursorX, cursorY := ebiten.CursorPosition()
+	cursorX += int(camera.x)
+	cursorY += int(camera.y)
+
+	gridPosition := Vector2{
+		x: math.Round(float64(cursorX) / 100),
+		y: math.Round(float64(cursorY) / 100),
+	}
+
+	return gridPosition
+}
+
+func getOrderedSprites(level Level) []string {
+	sprites := level.GetSprites()
+	keys := make([]string, 0, len(sprites))
+	for k := range sprites {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
 }
