@@ -70,6 +70,7 @@ func (bullet *Bullet) Update() {
 }
 
 func (bullet *Bullet) Draw(screen *ebiten.Image) {
+	bullet.transform.rotation = bullet.angle
 	drawRect(
 		screen,
 		bullet.transform,
