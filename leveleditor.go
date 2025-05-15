@@ -67,7 +67,7 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	sprite := sprites[keys[selectedSprite]]
 	op := defaultImageOptions()
 	op.Alpha = 100
-	drawAbsoluteImageWithOptions(screen, sprite, Transform{
+	drawImageWithOptions(screen, sprite, Transform{
 		x:        float64(gridPos.x * 100),
 		y:        float64(gridPos.y * 100),
 		width:    100,

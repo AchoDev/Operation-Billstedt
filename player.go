@@ -103,9 +103,9 @@ func (player *Player) Update() {
 }
 
 func move(player *Player) {
-	acceleration := 8.0
+	acceleration := 4.0
 	movement := Vector2{0, 0}
-	max_vel := 10.0
+	max_vel := 7.5
 
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
 		movement.x = 1
