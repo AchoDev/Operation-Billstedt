@@ -126,23 +126,26 @@ func UpdateLevelEditor(level Level) {
 		fmt.Println("Searching for tile to delete at:", mousePosition)
 
 		tiles := level.GetTiles()
-		for i, tile := range tiles {
-			tileTr := Transform{
-				x:      tile.X * 100,
-				y:      tile.Y * 100,
-				width:  tile.Width * 100,
-				height: tile.Height * 100,
-				// rotation: 0,
-			}
-			halfWidth := tileTr.width / 2
-			halfHeight := tileTr.height / 2
-			if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
-				mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
-				tiles = append(tiles[:i], tiles[i+1:]...)
-				level.SetTiles(tiles)
-				break
-			}
-		}
+
+        // Reverse the tiles list
+        
+        for i := len(tiles) - 1; i >= 0; i-- {
+            tile := tiles[i]
+            tileTr := Transform{
+                x:      tile.X * 100,
+                y:      tile.Y * 100,
+                width:  tile.Width * 100,
+                height: tile.Height * 100,
+            }
+            halfWidth := tileTr.width / 2
+            halfHeight := tileTr.height / 2
+            if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
+                mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
+                tiles = append(tiles[:i], tiles[i+1:]...)
+                level.SetTiles(tiles)
+                break
+            }
+        }
 	}
 
 	if isKeyJustPressed(ebiten.KeyO) {
