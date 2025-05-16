@@ -67,6 +67,33 @@ func (bullet *Bullet) Update() {
 			break
 		}
 	}
+
+	for _, collider := range currentLevel.GetColliders() {
+		if RotatedRectsColliding(
+			Rect{
+				Center: Vector2{bullet.transform.x, bullet.transform.y},
+				Width:  bullet.transform.width,
+				Height: bullet.transform.height,
+				Angle:  bullet.angle,
+			},
+			Rect{
+				Center: Vector2{
+					collider.X * 100,
+					collider.Y * 100,
+				},
+				Width:  collider.Width * 100,
+				Height: collider.Height * 100,
+			},
+		) {
+			for i := 0; i < len(gameObjects); i++ {
+				if gameObjects[i] == bullet {
+					gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+					break
+				}
+			}
+			break
+		}
+	}
 }
 
 func (bullet *Bullet) Draw(screen *ebiten.Image) {

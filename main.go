@@ -99,15 +99,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	DrawLevelEditor(screen, currentLevel)
 
-	rect := ebiten.NewImage(200, 100)
-	rect.Fill(color.RGBA{0, 0, 0, 255})
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 60)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 80)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 100)
-	screen.DrawImage(rect, nil)
+	// rect := ebiten.NewImage(200, 100)
+	// rect.Fill(color.RGBA{0, 0, 0, 255})
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 60)
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 80)
+	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 100)
+	// screen.DrawImage(rect, nil)
 }
 
 func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight int) {
@@ -138,12 +138,22 @@ func checkCollisions(playerX, playerY float64) {
 	var bullets []*Bullet
 
 	for _, gameObj := range gameObjects {
+
+		if gameObj == nil {
+			continue
+		}
+
 		if bullet, ok := gameObj.(*Bullet); ok {
 			bullets = append(bullets, bullet)
 		}
 	}
 
 	for _, gameObj := range gameObjects {
+
+		if gameObj == nil {
+			continue
+		}
+
 		if collider, ok := gameObj.(*Collider); ok {
 			rect := Rect{
 				Center: Vector2{
