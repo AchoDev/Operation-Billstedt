@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -12,9 +13,22 @@ type GameObject interface {
 	GetTransform() Transform
 }
 
-func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
-	rect := ebiten.NewImage(int(transform.width), int(transform.height))
+var rectCache = make(map[string]*ebiten.Image)
+
+func getCachedRect(width, height int, color color.Color) *ebiten.Image {
+    key := fmt.Sprintf("%dx%d-%v", width, height, color)
+	if rect, ok := rectCache[key]; ok {
+		return rect
+	}
+
+	rect := ebiten.NewImage(width, height)
 	rect.Fill(color)
+	rectCache[key] = rect
+	return rect
+}
+
+func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
+	rect := getCachedRect(int(transform.width), int(transform.height), color)
 	drawImageWithOptions(screen, rect, transform, defaultImageOptions())
 }
 
@@ -52,8 +66,7 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 }
 
 func drawAbsoluteRect(screen *ebiten.Image, transform Transform, color color.Color) {
-	rect := ebiten.NewImage(int(transform.width), int(transform.height))
-	rect.Fill(color)
+	rect := getCachedRect(int(transform.width), int(transform.height), color)
 	drawAbsoluteImage(screen, rect, transform)
 }
 
