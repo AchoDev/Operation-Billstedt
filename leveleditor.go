@@ -134,6 +134,10 @@ func UpdateLevelEditor(level Level) {
 
 		// Reverse the tiles list
 
+		if selectedTool == 1 {
+			tiles = level.GetColliders()
+		}
+
 		for i := len(tiles) - 1; i >= 0; i-- {
 			tile := tiles[i]
 			tileTr := Transform{
@@ -146,8 +150,15 @@ func UpdateLevelEditor(level Level) {
 			halfHeight := tileTr.height / 2
 			if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
 				mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
+
 				tiles = append(tiles[:i], tiles[i+1:]...)
-				level.SetTiles(tiles)
+
+				if selectedTool == 1 {
+					level.SetColliders(tiles)
+					break
+				} else {
+					level.SetTiles(tiles)
+				}
 				break
 			}
 		}
@@ -155,7 +166,8 @@ func UpdateLevelEditor(level Level) {
 
 	if isKeyJustPressed(ebiten.KeyO) {
 		data := map[string]interface{}{
-			"tiles": level.GetTiles(),
+			"tiles":     level.GetTiles(),
+			"colliders": level.GetColliders(),
 		}
 		jsonData, err := json.Marshal(data)
 		if err != nil {
@@ -205,6 +217,29 @@ func UpdateLevelEditor(level Level) {
 			if counter == selectedSprite {
 
 				gridPosition := getMouseGridPosition()
+
+				if selectedTool == 1 {
+
+					fmt.Println("Creating collider at", gridPosition)
+					colliders := level.GetColliders()
+					for _, collider := range colliders {
+						if collider.X == gridPosition.x && collider.Y == gridPosition.y {
+							fmt.Println("Collider already exists at", gridPosition)
+							return
+						}
+					}
+					colliders = append(colliders, Tile{
+						X:      gridPosition.x,
+						Y:      gridPosition.y,
+						Width:  currentScale,
+						Height: currentScale,
+					})
+					level.SetColliders(colliders)
+					fmt.Println("Added collider at", gridPosition)
+
+					break
+				}
+
 				tiles := level.GetTiles()
 
 				for i, tile := range tiles {

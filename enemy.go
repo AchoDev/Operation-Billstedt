@@ -58,12 +58,24 @@ var pathFindingGridSize = 30
 func (enemy *Enemy) Update() {
 	colliders := getGameobjectsOfType[*Collider]()
 
+	for _, col := range currentLevel.GetColliders() {
+		collider := &Collider{
+			transform: Transform{
+				x:      col.X * 100,
+				y:      col.Y * 100,
+				width:  col.Width * 100,
+				height: col.Height * 100,
+			},
+		}
+		colliders = append(colliders, collider)
+	}
+
 	var path []Vector2
 
 	if math.Round(enemy.currentGoal.x) == math.Round(player.transform.x) && math.Round(enemy.currentGoal.y) == math.Round(player.transform.y) {
 		path = enemy.currentPath
 	} else {
-		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{2000, 2000})
+		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{4000, 4000})
 	}
 
 	enemy.currentGoal = Vector2{

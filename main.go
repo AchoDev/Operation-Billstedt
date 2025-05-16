@@ -32,8 +32,8 @@ var camera Camera = Camera{
 }
 
 type LoadedLevel struct {
-	Tiles []Tile `json:"tiles"`
-	Colliders []Point `json:"colliders"`
+	Tiles     []Tile `json:"tiles"`
+	Colliders []Tile `json:"colliders"`
 }
 
 var loadedLevel LoadedLevel = loadJson("level-tilesheets/level1.json", &LoadedLevel{})
@@ -170,6 +170,25 @@ func checkCollisions(playerX, playerY float64) {
 
 		}
 	}
+
+	for _, col := range currentLevel.GetColliders() {
+		rect := Rect{
+			Center: Vector2{
+				col.X * 100,
+				col.Y * 100,
+			},
+			Width:  col.Width * 100,
+			Height: col.Height * 100,
+		}
+
+		if CircleRotatedRectColliding(xCenterCircle, rect) {
+			player.transform.x = playerX
+		}
+
+		if CircleRotatedRectColliding(yCenterCircle, rect) {
+			player.transform.y = playerY
+		}
+	}
 }
 
 func createRectFromTransform(transform Transform) Rect {
@@ -209,7 +228,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer cpuProfile.Close()
-
 
 	if err := pprof.StartCPUProfile(cpuProfile); err != nil {
 		log.Fatal(err)

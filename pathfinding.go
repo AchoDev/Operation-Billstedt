@@ -115,52 +115,59 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
 	// grid size = size of grid tile in pixels
 	// world size = size of world in pixels
 
-	grid := [][]int{}
+	minWorldX := -2000.0
+	minWorldY := -2000.0
+	maxWorldX := worldSize.x + math.Abs(minWorldX)
+	maxWorldY := worldSize.y + math.Abs(minWorldY)
 
-	gridWidth := int(worldSize.x / float64(gridSize))
-	gridHeight := int(worldSize.y / float64(gridSize))
+	// Calculate grid dimensions and offsets
+	gridWidth := int((maxWorldX - minWorldX) / float64(gridSize))
+	gridHeight := int((maxWorldY - minWorldY) / float64(gridSize))
 
+	// Initialize grid
+	grid := make([][]int, gridWidth)
 	for x := 0; x < gridWidth; x++ {
-		grid = append(grid, []int{})
-
-		for y := 0; y < gridHeight; y++ {
-			grid[x] = append(grid[x], 0)
-		}
+		grid[x] = make([]int, gridHeight)
 	}
 
+	// Mark colliders in the grid
 	for _, collider := range colliders {
-
-		x := int(collider.transform.x / float64(gridSize))
-		y := int(collider.transform.y / float64(gridSize))
-
+		x := int((collider.transform.x - minWorldX) / float64(gridSize))
+		y := int((collider.transform.y - minWorldY) / float64(gridSize))
 		width := int(collider.transform.width / float64(gridSize))
 		height := int(collider.transform.height / float64(gridSize))
 
 		for i := 0; i < width; i++ {
 			for j := 0; j < height; j++ {
-				grid[i+x][j+y] = 1
+				gridX := x + i
+				gridY := y + j
+				if gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight {
+					grid[gridX][gridY] = 1
+				}
 			}
 		}
 	}
 
+	// Convert start and end positions to grid coordinates (with offset)
 	startPoint := Point{
-		X: int(start.x / float64(gridSize)),
-		Y: int(start.y / float64(gridSize)),
+		X: int((start.x - minWorldX) / float64(gridSize)),
+		Y: int((start.y - minWorldY) / float64(gridSize)),
 	}
-
 	endPoint := Point{
-		X: int(end.x / float64(gridSize)),
-		Y: int(end.y / float64(gridSize)),
+		X: int((end.x - minWorldX) / float64(gridSize)),
+		Y: int((end.y - minWorldY) / float64(gridSize)),
 	}
 
 	path := AStar(startPoint, endPoint, grid)
 
 	vectorPath := []Vector2{}
-
 	for _, point := range path {
+		// Convert grid coordinates back to world coordinates
+		worldX := float64(point.X)*float64(gridSize) + minWorldX
+		worldY := float64(point.Y)*float64(gridSize) + minWorldY
 		vectorPath = append(vectorPath, Vector2{
-			x: float64(point.X * gridSize),
-			y: float64(point.Y * gridSize),
+			x: worldX,
+			y: worldY,
 		})
 	}
 

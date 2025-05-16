@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -18,16 +19,16 @@ type Tile struct {
 type Level interface {
 	GetTiles() []Tile
 	GetSprites() map[string]*ebiten.Image
-	GetColliders() []Point
+	GetColliders() []Tile
 	UpdateLevel()
 	SetTiles([]Tile)
-	SetColliders([]Point)
+	SetColliders([]Tile)
 	StartLevel()
 }
 
 type Level1 struct {
 	tiles            []Tile
-	colliders        []Point
+	colliders        []Tile
 	sprites          map[string]*ebiten.Image
 	dynamicColliders []*Collider
 
@@ -75,6 +76,7 @@ func (level *Level1) StartLevel() {
 func DrawLevel(screen *ebiten.Image, level Level) {
 	tiles := level.GetTiles()
 	sprites := level.GetSprites()
+	gridSize := 100.0
 
 	for _, tile := range tiles {
 
@@ -84,7 +86,6 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 			continue
 		}
 
-		gridSize := 100.0
 		drawImage(screen, tileImage, Transform{
 			x:        tile.X * float64(gridSize),
 			y:        tile.Y * float64(gridSize),
@@ -92,6 +93,17 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 			height:   tile.Height * float64(gridSize),
 			rotation: 0,
 		})
+	}
+
+	if levelEditorActivated {
+		for _, collider := range level.GetColliders() {
+			drawRect(screen, Transform{
+				x:      float64(collider.X) * gridSize,
+				y:      float64(collider.Y) * gridSize,
+				width:  collider.Width * gridSize,
+				height: collider.Height * gridSize,
+			}, color.RGBA{255, 100, 200, 255})
+		}
 	}
 
 }
@@ -109,10 +121,10 @@ func (level *Level1) UpdateLevel() {}
 func (level *Level1) SetTiles(tiles []Tile) {
 	level.tiles = tiles
 }
-func (level *Level1) GetColliders() []Point {
+func (level *Level1) GetColliders() []Tile {
 	return level.colliders
 }
 
-func (level *Level1) SetColliders(colliders []Point) {
+func (level *Level1) SetColliders(colliders []Tile) {
 	level.colliders = colliders
 }
