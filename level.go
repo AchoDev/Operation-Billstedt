@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -17,35 +18,58 @@ type Tile struct {
 type Level interface {
 	GetTiles() []Tile
 	GetSprites() map[string]*ebiten.Image
-    GetColliders() []Point
+	GetColliders() []Point
 	UpdateLevel()
 	SetTiles([]Tile)
-    SetColliders([]Point)
-    StartLevel()
+	SetColliders([]Point)
+	StartLevel()
 }
 
 type Level1 struct {
-	tiles   []Tile
-    colliders []Point
-	sprites map[string]*ebiten.Image
-    dynamicColliders []*Collider
+	tiles            []Tile
+	colliders        []Point
+	sprites          map[string]*ebiten.Image
+	dynamicColliders []*Collider
+
+	train *Train
 }
 
 func (level *Level1) StartLevel() {
-    level.dynamicColliders = []*Collider{
-        {
-            transform: Transform{
-                x:      260,
-                y:      0,
-                width:  100,
-                height: 1200,
-            },
-        },
-    }
+	level.dynamicColliders = []*Collider{
+		{
+			transform: Transform{
+				x:      260,
+				y:      0,
+				width:  100,
+				height: 1200,
+			},
+		},
+	}
 
-    for _, collider := range level.dynamicColliders {
-        gameObjects = append(gameObjects, collider)
-    }
+	level.train = &Train{
+		transform: Transform{
+			x:      240,
+			y:      -1000,
+			width:  100,
+			height: 100,
+		},
+		parts: map[string]*ebiten.Image{
+			"front":  loadImage("assets/sprites/u2-front.png"),
+			"middle": loadImage("assets/sprites/u2-middle.png"),
+		},
+		length: 3,
+	}
+
+	gameObjects = append(gameObjects, level.train)
+
+	go func() {
+		time.Sleep(time.Second * 2)
+		level.train.Drive(1500, 0.2)
+	}()
+
+	for _, collider := range level.dynamicColliders {
+		gameObjects = append(gameObjects, collider)
+	}
 }
 
 func DrawLevel(screen *ebiten.Image, level Level) {
@@ -86,10 +110,9 @@ func (level *Level1) SetTiles(tiles []Tile) {
 	level.tiles = tiles
 }
 func (level *Level1) GetColliders() []Point {
-    return level.colliders
+	return level.colliders
 }
 
 func (level *Level1) SetColliders(colliders []Point) {
-    level.colliders = colliders
+	level.colliders = colliders
 }
-

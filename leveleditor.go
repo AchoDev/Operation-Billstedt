@@ -70,6 +70,11 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	sprite := sprites[keys[selectedSprite]]
 	op := defaultImageOptions()
 	op.Alpha = 100
+
+	if selectedTool == 1 {
+		sprite = ebiten.NewImage(100, 100)
+		sprite.Fill(color.RGBA{255, 100, 200, 255})
+	}
 	drawImageWithOptions(screen, sprite, Transform{
 		x:        float64(gridPos.x * 100),
 		y:        float64(gridPos.y * 100),
@@ -127,25 +132,25 @@ func UpdateLevelEditor(level Level) {
 
 		tiles := level.GetTiles()
 
-        // Reverse the tiles list
-        
-        for i := len(tiles) - 1; i >= 0; i-- {
-            tile := tiles[i]
-            tileTr := Transform{
-                x:      tile.X * 100,
-                y:      tile.Y * 100,
-                width:  tile.Width * 100,
-                height: tile.Height * 100,
-            }
-            halfWidth := tileTr.width / 2
-            halfHeight := tileTr.height / 2
-            if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
-                mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
-                tiles = append(tiles[:i], tiles[i+1:]...)
-                level.SetTiles(tiles)
-                break
-            }
-        }
+		// Reverse the tiles list
+
+		for i := len(tiles) - 1; i >= 0; i-- {
+			tile := tiles[i]
+			tileTr := Transform{
+				x:      tile.X * 100,
+				y:      tile.Y * 100,
+				width:  tile.Width * 100,
+				height: tile.Height * 100,
+			}
+			halfWidth := tileTr.width / 2
+			halfHeight := tileTr.height / 2
+			if mousePosition.x >= tileTr.x-halfWidth && mousePosition.x <= tileTr.x+halfWidth &&
+				mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
+				tiles = append(tiles[:i], tiles[i+1:]...)
+				level.SetTiles(tiles)
+				break
+			}
+		}
 	}
 
 	if isKeyJustPressed(ebiten.KeyO) {
@@ -179,12 +184,12 @@ func UpdateLevelEditor(level Level) {
 		camera.y += 10
 	}
 
-    if ebiten.IsKeyPressed(ebiten.KeyQ) {
-        camera.zoom -= 0.01
-    }
-    if ebiten.IsKeyPressed(ebiten.KeyE) {
-        camera.zoom += 0.01
-    }
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		camera.zoom -= 0.01
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyE) {
+		camera.zoom += 0.01
+	}
 
 	if isMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 
@@ -240,8 +245,8 @@ func getMouseGridPosition() Vector2 {
 	}
 
 	cursorX, cursorY := ebiten.CursorPosition()
-    worldX := float64(cursorX) / camera.zoom
-    worldY := float64(cursorY) / camera.zoom
+	worldX := float64(cursorX) / camera.zoom
+	worldY := float64(cursorY) / camera.zoom
 
 	worldX += camera.x
 	worldY += camera.y
@@ -250,7 +255,7 @@ func getMouseGridPosition() Vector2 {
 	worldY -= camera.height / 2 / camera.zoom
 
 	worldX /= 100
-	worldY /=  100
+	worldY /= 100
 
 	gridPosition := Vector2{
 		x: math.Round(worldX/gridStep) * gridStep,
