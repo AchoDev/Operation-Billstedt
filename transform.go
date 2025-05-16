@@ -8,3 +8,7 @@ type Transform struct {
 
     rotation float64
 }
+
+func (t *Transform) GetPosition() Vector2 {
+    return Vector2{t.x, t.y}
+}

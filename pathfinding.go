@@ -115,6 +115,16 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
 	// grid size = size of grid tile in pixels
 	// world size = size of world in pixels
 
+	if isInsideCollider(start.GetPosition(), colliders) {
+		fmt.Println("start is inside a collider")
+		return []Vector2{}
+	}
+
+	if isInsideCollider(end.GetPosition(), colliders) {
+		fmt.Println("end is inside a collider")
+		return []Vector2{}
+	}
+
 	minWorldX := -2000.0
 	minWorldY := -2000.0
 	maxWorldX := worldSize.x + math.Abs(minWorldX)
@@ -183,4 +193,16 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
 	//     x: float64(nextPoint.X * gridSize),
 	//     y: float64(nextPoint.Y * gridSize),
 	// }
+}
+
+func isInsideCollider(position Vector2, colliders []*Collider) bool {
+    for _, collider := range colliders {
+        if position.x >= collider.transform.x &&
+            position.x <= collider.transform.x+collider.transform.width &&
+            position.y >= collider.transform.y &&
+            position.y <= collider.transform.y+collider.transform.height {
+            return true
+        }
+    }
+    return false
 }

@@ -76,6 +76,10 @@ func (enemy *Enemy) Update() {
 		path = enemy.currentPath
 	} else {
 		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{4000, 4000})
+		
+		if len(path) != 0 {
+			path = path[1:]
+		}
 	}
 
 	enemy.currentGoal = Vector2{
@@ -101,7 +105,21 @@ func (enemy *Enemy) Update() {
 			path = enemy.currentPath
 		}
 
+		forwardVec := Vector2{
+			x: path[0].x - enemy.transform.x,
+			y: path[0].y - enemy.transform.y,
+		}
+		dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
+		
+		if dotProduct < 0 {
+			fmt.Println("skipping backward path node")
+			enemy.currentPath = enemy.currentPath[1:]
+			path = enemy.currentPath
+		}
+
 		target = path[0]
+		target.x -= float64(pathFindingGridSize/2)
+		// target.y -= float64(pathFindingGridSize/2)
 	} else {
 		target = Vector2{
 			x: player.transform.x,
@@ -166,8 +184,8 @@ func (enemy *Enemy) Update() {
 	enemy.transform.y += enemy.velocity.y
 
 	// Optional: friction (if you want smoothing, otherwise remove these lines)
-	enemy.velocity.x *= 0.9
-	enemy.velocity.y *= 0.9
+	enemy.velocity.x *= 0.8
+	enemy.velocity.y *= 0.8
 
 	distance := math.Sqrt(
 		math.Pow(enemy.transform.x-player.transform.x, 2) +
