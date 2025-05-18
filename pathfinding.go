@@ -142,15 +142,18 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
 
 	// Mark colliders in the grid
 	for _, collider := range colliders {
-		x := int((collider.transform.x - minWorldX) / float64(gridSize))
-		y := int((collider.transform.y - minWorldY) / float64(gridSize))
-		width := int(collider.transform.width / float64(gridSize))
-		height := int(collider.transform.height / float64(gridSize))
+		halfW := collider.transform.width / 2
+		halfH := collider.transform.height / 2
+		startX := int(math.Floor((collider.transform.x - halfW - minWorldX) / float64(gridSize)))
+		startY := int(math.Floor((collider.transform.y - halfH - minWorldY) / float64(gridSize)))
+		endX := int(math.Ceil((collider.transform.x + halfW - minWorldX) / float64(gridSize)))
+		endY := int(math.Ceil((collider.transform.y + halfH - minWorldY) / float64(gridSize)))
 
-		for i := 0; i < width; i++ {
-			for j := 0; j < height; j++ {
-				gridX := x + i
-				gridY := y + j
+		endX += 2
+		endY += 2
+
+		for gridX := startX; gridX < endX; gridX++ {
+			for gridY := startY; gridY < endY; gridY++ {
 				if gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight {
 					grid[gridX][gridY] = 1
 				}
@@ -196,13 +199,13 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
 }
 
 func isInsideCollider(position Vector2, colliders []*Collider) bool {
-    for _, collider := range colliders {
-        if position.x >= collider.transform.x &&
-            position.x <= collider.transform.x+collider.transform.width &&
-            position.y >= collider.transform.y &&
-            position.y <= collider.transform.y+collider.transform.height {
-            return true
-        }
-    }
-    return false
+	for _, collider := range colliders {
+		if position.x >= collider.transform.x &&
+			position.x <= collider.transform.x+collider.transform.width &&
+			position.y >= collider.transform.y &&
+			position.y <= collider.transform.y+collider.transform.height {
+			return true
+		}
+	}
+	return false
 }
