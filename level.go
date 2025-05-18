@@ -13,6 +13,7 @@ type Tile struct {
 	Y      float64
 	Width  float64
 	Height float64
+	Rotation float64
 	Sprite string
 }
 
@@ -91,7 +92,7 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 			y:        tile.Y * float64(gridSize),
 			width:    tile.Width * float64(gridSize),
 			height:   tile.Height * float64(gridSize),
-			rotation: 0,
+			rotation: tile.Rotation,
 		})
 	}
 

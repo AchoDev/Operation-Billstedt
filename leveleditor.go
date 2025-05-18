@@ -17,6 +17,7 @@ var selectedSprite int
 var currentScale float64 = 1
 var levelEditorActivated bool = false
 var selectedTool int = 0
+var currentRotation float64 = 0
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if !levelEditorActivated {
@@ -80,19 +81,20 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 		y:        float64(gridPos.y * 100),
 		width:    100 * currentScale,
 		height:   100 * currentScale,
-		rotation: 0,
+		rotation: currentRotation,
 	}, op)
 
 	drawAbsoluteRect(screen, Transform{
 		x:        1200,
-		y:        100,
+		y:        150,
 		width:    300,
 		height:   100,
 		rotation: 0,
 	}, color.RGBA{0, 0, 0, 255})
 
 	ebitenutil.DebugPrintAt(screen, "Level Editor", 1050, 100)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%f", pos), 1050, 130)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%f", pos), 1050, 120)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Scale: %f", currentScale), 1050, 140)
 }
 
 func UpdateLevelEditor(level Level) {
@@ -108,7 +110,23 @@ func UpdateLevelEditor(level Level) {
 	// Detect mouse scroll to change selected sprite
 	_, yoff := ebiten.Wheel()
 	if yoff != 0 {
-		currentScale += yoff * 0.5
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			var direction float64
+			if yoff > 0 {
+				direction = 1
+			} else {
+				direction = -1
+			}
+
+			currentScale += direction * 0.5
+
+			currentScale = math.Round(currentScale*2) / 2
+
+		} else {
+			currentScale += yoff * 0.5
+		}
+			
+		currentScale = math.Max(currentScale, 0.1)
 	}
 
 	if isKeyJustPressed(ebiten.Key1) {
@@ -119,10 +137,34 @@ func UpdateLevelEditor(level Level) {
 	}
 
 	if isKeyJustPressed(ebiten.KeyTab) {
-		selectedSprite++
+
+		direction := 1
+
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			direction = -1
+		}
+
+		selectedSprite += direction
 		if selectedSprite >= len(level.GetSprites()) {
 			selectedSprite = 0
 		}
+	}
+
+	if isKeyJustPressed(ebiten.KeyR) {
+		currentRotation += math.Pi / 2
+		if currentRotation >= 2*math.Pi {
+			currentRotation = 0
+		}
+	}
+
+	if isKeyJustPressed(ebiten.KeyUp) {
+		currentScale += 0.25
+		currentScale = math.Round(currentScale*4) / 4
+	}
+
+	if isKeyJustPressed(ebiten.KeyDown) {
+		currentScale -= 0.25
+		currentScale = math.Round(currentScale*4) / 4
 	}
 
 	if isMouseButtonJustPressed(ebiten.MouseButtonRight) {
@@ -242,19 +284,20 @@ func UpdateLevelEditor(level Level) {
 
 				tiles := level.GetTiles()
 
-				for i, tile := range tiles {
-					if tile.X == gridPosition.x && tile.Y == gridPosition.y {
-						tiles = append(tiles[:i], tiles[i+1:]...)
-						level.SetTiles(tiles)
-						fmt.Println("Replaced tile at", gridPosition)
-					}
-				}
+				// for i, tile := range tiles {
+				// 	if tile.X == gridPosition.x && tile.Y == gridPosition.y {
+				// 		tiles = append(tiles[:i], tiles[i+1:]...)
+				// 		level.SetTiles(tiles)
+				// 		fmt.Println("Replaced tile at", gridPosition)
+				// 	}
+				// }
 
 				tiles = append(tiles, Tile{
 					X:      gridPosition.x,
 					Y:      gridPosition.y,
 					Width:  currentScale,
 					Height: currentScale,
+					Rotation: currentRotation,
 					Sprite: name,
 				})
 

@@ -53,6 +53,9 @@ var currentLevel Level = &Level1{
 		"elevator": loadImage("assets/tiles/elevator.png"),
 
 		"stairs": loadImage("assets/tiles/stairs.png"),
+
+		"shadow": loadImage("assets/tiles/shadow.png"),
+		"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
 	},
 	colliders: loadedLevel.Colliders,
 }
@@ -168,12 +171,10 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 			}
 
 			if CircleRotatedRectColliding(xCenterCircle, rect) {
-				fmt.Println("X collision")
 				tr.x = startPosition.x
 			}
 
 			if CircleRotatedRectColliding(yCenterCircle, rect) {
-				fmt.Println("X collision")
 				tr.y = startPosition.y
 			}
 
