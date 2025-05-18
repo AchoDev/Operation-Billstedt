@@ -51,9 +51,21 @@ type Enemy struct {
 	currentPath []Vector2
 	currentGoal Vector2
 	velocity    Vector2
+	pathChan <-chan []Vector2
 }
 
-var pathFindingGridSize = 25
+var pathFindingGridSize = 20
+
+func runPathfindingAlgorithmAsync(start, end Transform, colliders []*Collider, gridSize int, worldSize Vector2) <-chan []Vector2 {
+    resultChan := make(chan []Vector2, 1)
+
+    go func() {
+        result := runPathfindingAlgorithm(start, end, colliders, gridSize, worldSize)
+        resultChan <- result
+    }()
+
+    return resultChan
+}
 
 func (enemy *Enemy) Update() {
 	colliders := getGameobjectsOfType[*Collider]()
@@ -72,21 +84,38 @@ func (enemy *Enemy) Update() {
 
 	var path []Vector2
 
-	if math.Round(enemy.currentGoal.x) == math.Round(player.transform.x) && math.Round(enemy.currentGoal.y) == math.Round(player.transform.y) {
+	if (enemy.currentGoal.x != player.transform.x || enemy.currentGoal.y != player.transform.y) && enemy.pathChan == nil  {
 		path = enemy.currentPath
-	} else {
-		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{4000, 4000})
-
-		if len(path) != 0 {
-			path = path[1:]
+		enemy.currentGoal = Vector2{
+			x: player.transform.x,
+			y: player.transform.y,
 		}
+		enemy.pathChan = runPathfindingAlgorithmAsync(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{14000, 14000})
+	}
+
+
+	select {
+	case path := <-enemy.pathChan:
+		enemy.pathChan = nil
+		enemy.currentPath = path
+		if len(path) == 0 {
+			fmt.Println("No path found.")
+		} else {
+			fmt.Println("Path found:", path)
+			// Ensure path is not empty
+			if len(path) != 0 {
+				enemy.currentPath = path[1:]
+			}
+		}
+	default:
+		fmt.Println("Pathfinding still running...")
 	}
 
 	enemy.currentGoal = Vector2{
 		x: player.transform.x,
 		y: player.transform.y,
 	}
-	enemy.currentPath = path
+
 	var target Vector2
 	enemyGridPos := Vector2{
 		x: float64(int(enemy.transform.x) / pathFindingGridSize),
@@ -104,20 +133,20 @@ func (enemy *Enemy) Update() {
 			path = enemy.currentPath
 		}
 
-		forwardVec := Vector2{
-			x: path[0].x - enemy.transform.x,
-			y: path[0].y - enemy.transform.y,
-		}
-		dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
+		// forwardVec := Vector2{
+		// 	x: path[0].x - enemy.transform.x,
+		// 	y: path[0].y - enemy.transform.y,
+		// }
+		// dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
 
-		if dotProduct < 0 && len(enemy.currentPath) > 1 {
-			enemy.currentPath = enemy.currentPath[1:]
-			path = enemy.currentPath
-		}
+		// if dotProduct < 0 && len(enemy.currentPath) > 1 {
+		// 	enemy.currentPath = enemy.currentPath[1:]
+		// 	path = enemy.currentPath
+		// }
 
 		target = path[0]
-		target.x -= float64(pathFindingGridSize / 2)
-		target.y -= float64(pathFindingGridSize / 2)
+		target.x += float64(pathFindingGridSize / 2)
+		target.y += float64(pathFindingGridSize / 2)
 	} else {
 		target = Vector2{
 			x: player.transform.x,

@@ -141,19 +141,6 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 		Radius: tr.width / 2,
 	}
 
-	var bullets []*Bullet
-
-	for _, gameObj := range gameObjects {
-
-		if gameObj == nil {
-			continue
-		}
-
-		if bullet, ok := gameObj.(*Bullet); ok {
-			bullets = append(bullets, bullet)
-		}
-	}
-
 	for _, gameObj := range gameObjects {
 
 		if gameObj == nil {
@@ -177,13 +164,6 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 			if CircleRotatedRectColliding(yCenterCircle, rect) {
 				tr.y = startPosition.y
 			}
-
-			for _, bullet := range bullets {
-				if RotatedRectsColliding(createRectFromTransform(bullet.transform), rect) {
-					removeGameObject(bullet)
-				}
-			}
-
 		}
 	}
 
