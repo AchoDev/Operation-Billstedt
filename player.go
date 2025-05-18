@@ -85,7 +85,7 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.Key6) {
-		gameObjects = append(gameObjects, createEnemy(300, 100, EnemyTypeNick))
+		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeNick))
 	}
 
 	if isKeyJustPressed(ebiten.Key7) {

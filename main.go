@@ -75,7 +75,7 @@ func (g *Game) Update() error {
 			}
 		}
 		currentLevel.UpdateLevel()
-		checkCollisions(playerX, playerY)
+		checkCollisions(&player.transform, Vector2{playerX, playerY})
 
 		moveCamera()
 	}
@@ -124,15 +124,16 @@ func moveCamera() {
 	camera.y += diff.y * 0.1
 }
 
-func checkCollisions(playerX, playerY float64) {
+func checkCollisions(tr *Transform, startPosition Vector2) {
+
 	xCenterCircle := Circle{
-		Center: Vector2{player.transform.x, playerY},
-		Radius: player.transform.width / 2,
+		Center: Vector2{tr.x, startPosition.y},
+		Radius: tr.width / 2,
 	}
 
 	yCenterCircle := Circle{
-		Center: Vector2{playerX, player.transform.y},
-		Radius: player.transform.width / 2,
+		Center: Vector2{startPosition.x, tr.y},
+		Radius: tr.width / 2,
 	}
 
 	var bullets []*Bullet
@@ -165,11 +166,13 @@ func checkCollisions(playerX, playerY float64) {
 			}
 
 			if CircleRotatedRectColliding(xCenterCircle, rect) {
-				player.transform.x = playerX
+				fmt.Println("X collision")
+				tr.x = startPosition.x
 			}
-
+			
 			if CircleRotatedRectColliding(yCenterCircle, rect) {
-				player.transform.y = playerY
+				fmt.Println("X collision")
+				tr.y = startPosition.y
 			}
 
 			for _, bullet := range bullets {
@@ -192,11 +195,11 @@ func checkCollisions(playerX, playerY float64) {
 		}
 
 		if CircleRotatedRectColliding(xCenterCircle, rect) {
-			player.transform.x = playerX
+			tr.x = startPosition.x
 		}
 
 		if CircleRotatedRectColliding(yCenterCircle, rect) {
-			player.transform.y = playerY
+			tr.y = startPosition.y
 		}
 	}
 }

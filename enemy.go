@@ -53,7 +53,7 @@ type Enemy struct {
 	velocity    Vector2
 }
 
-var pathFindingGridSize = 30
+var pathFindingGridSize = 25
 
 func (enemy *Enemy) Update() {
 	colliders := getGameobjectsOfType[*Collider]()
@@ -100,7 +100,6 @@ func (enemy *Enemy) Update() {
 			y: float64(int(path[0].y) / pathFindingGridSize),
 		}
 		if enemyGridPos.x == pathPos.x && enemyGridPos.y == pathPos.y {
-			fmt.Println("deleting latest link")
 			enemy.currentPath = enemy.currentPath[1:]
 			path = enemy.currentPath
 		}
@@ -112,7 +111,6 @@ func (enemy *Enemy) Update() {
 		dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
 		
 		if dotProduct < 0 {
-			fmt.Println("skipping backward path node")
 			enemy.currentPath = enemy.currentPath[1:]
 			path = enemy.currentPath
 		}
@@ -179,6 +177,9 @@ func (enemy *Enemy) Update() {
 		enemy.velocity.y = -speed
 	}
 
+	startX := enemy.transform.x
+	startY := enemy.transform.y
+
 	// Apply velocity to position
 	enemy.transform.x += enemy.velocity.x
 	enemy.transform.y += enemy.velocity.y
@@ -191,6 +192,11 @@ func (enemy *Enemy) Update() {
 		math.Pow(enemy.transform.x-player.transform.x, 2) +
 			math.Pow(enemy.transform.y-player.transform.y, 2),
 	)
+
+	checkCollisions(&enemy.transform, Vector2{
+		x: startX,
+		y: startY,
+	})
 
 	var attackDistance float64
 
