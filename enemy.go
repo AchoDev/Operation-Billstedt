@@ -76,7 +76,7 @@ func (enemy *Enemy) Update() {
 		path = enemy.currentPath
 	} else {
 		path = runPathfindingAlgorithm(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{4000, 4000})
-		
+
 		if len(path) != 0 {
 			path = path[1:]
 		}
@@ -109,15 +109,15 @@ func (enemy *Enemy) Update() {
 			y: path[0].y - enemy.transform.y,
 		}
 		dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
-		
-		if dotProduct < 0 {
+
+		if dotProduct < 0 && len(enemy.currentPath) > 1 {
 			enemy.currentPath = enemy.currentPath[1:]
 			path = enemy.currentPath
 		}
 
 		target = path[0]
-		target.x -= float64(pathFindingGridSize/2)
-		// target.y -= float64(pathFindingGridSize/2)
+		target.x -= float64(pathFindingGridSize / 2)
+		target.y -= float64(pathFindingGridSize / 2)
 	} else {
 		target = Vector2{
 			x: player.transform.x,
