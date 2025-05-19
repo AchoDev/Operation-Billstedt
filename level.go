@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"math/rand/v2"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -33,29 +34,32 @@ type Level1 struct {
 	sprites          map[string]*ebiten.Image
 	dynamicColliders []*Collider
 
-	train *Train
+	phase int
 }
 
 func (level *Level1) StartLevel() {
-	level.train = &Train{
-		transform: Transform{
-			x:      240,
-			y:      -1000,
-			width:  100,
-			height: 100,
-		},
-		parts: map[string]*ebiten.Image{
-			"front":  loadImage("assets/sprites/u2-front.png"),
-			"middle": loadImage("assets/sprites/u2-middle.png"),
-		},
-		length: 3,
-	}
+	train := CreateTrain(Transform{
+		x:      240,
+		y:      -1000,
+		width:  100,
+		height: 100,
+	})
 
-	gameObjects = append(gameObjects, level.train)
+	train2 := CreateTrain(Transform{
+		x: 600,
+		y: 1000,
+	})
+
+	gameObjects = append(gameObjects, train)
 
 	go func() {
-		time.Sleep(time.Second * 2)
-		level.train.Drive(1500, 0.2)
+		time.Sleep(time.Second * time.Duration(rand.IntN(5)))
+		train.Drive(2000, 0.2)
+	}()
+
+	go func() {
+		time.Sleep(time.Second * time.Duration(rand.IntN(5)))
+		train2.Drive(2000, 0.2)
 	}()
 
 	for _, collider := range level.dynamicColliders {
