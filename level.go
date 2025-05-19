@@ -12,6 +12,7 @@ import (
 type Tile struct {
 	X      float64
 	Y      float64
+	Z      float64
 	Width  float64
 	Height float64
 	Rotation float64
@@ -34,7 +35,7 @@ type Level1 struct {
 	sprites          map[string]*ebiten.Image
 	dynamicColliders []*Collider
 
-	phase int
+	// phase int
 }
 
 func (level *Level1) StartLevel() {
@@ -43,22 +44,23 @@ func (level *Level1) StartLevel() {
 		y:      -1000,
 		width:  100,
 		height: 100,
-	})
+	}, 1)
 
 	train2 := CreateTrain(Transform{
-		x: 600,
-		y: 1000,
-	})
+		x: 1250,
+		y: 1500,
+	}, -1)
 
 	gameObjects = append(gameObjects, train)
+	gameObjects = append(gameObjects, train2)
 
 	go func() {
-		time.Sleep(time.Second * time.Duration(rand.IntN(5)))
+		pausableSleep(time.Second * time.Duration(rand.IntN(5)))
 		train.Drive(2000, 0.2)
 	}()
 
 	go func() {
-		time.Sleep(time.Second * time.Duration(rand.IntN(5)))
+		pausableSleep(time.Second * time.Duration(rand.IntN(5)))
 		train2.Drive(2000, 0.2)
 	}()
 
@@ -80,23 +82,28 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 			continue
 		}
 
-		drawImage(screen, tileImage, Transform{
+		op := defaultImageOptions()
+		if levelEditorActivated && tile.Z != float64(currentZ){
+			op.Alpha = 50
+		}
+
+		drawImageWithOptions(screen, tileImage, Transform{
 			x:        tile.X * float64(gridSize),
 			y:        tile.Y * float64(gridSize),
 			width:    tile.Width * float64(gridSize),
 			height:   tile.Height * float64(gridSize),
 			rotation: tile.Rotation,
-		})
+		}, op)
 	}
 
-	if levelEditorActivated {
+	if levelEditorActivated && selectedTool == 1{
 		for _, collider := range level.GetColliders() {
 			drawRect(screen, Transform{
 				x:      float64(collider.X) * gridSize,
 				y:      float64(collider.Y) * gridSize,
 				width:  collider.Width * gridSize,
 				height: collider.Height * gridSize,
-			}, color.RGBA{255, 100, 200, 255})
+			}, color.RGBA{255, 100, 200, 50})
 		}
 	}
 

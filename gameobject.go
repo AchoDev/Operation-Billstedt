@@ -78,6 +78,12 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
 	op.GeoM.Translate(-options.Anchor.x, -options.Anchor.y)                             // Center the sprite
+	if options.FlipX {
+		op.GeoM.Scale(-1, 1) // Flip the sprite horizontally
+	}
+	if options.FlipY {
+		op.GeoM.Scale(1, -1)
+	}
 	op.GeoM.Rotate(transform.rotation)
 
 	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
@@ -92,6 +98,8 @@ type ImageOptions struct {
 	Alpha             float64
 	Scale             float64
 	OriginalImageSize bool
+	FlipX 		  bool
+	FlipY bool
 }
 
 func defaultImageOptions() ImageOptions {
@@ -100,5 +108,7 @@ func defaultImageOptions() ImageOptions {
 		Alpha:             255,
 		Scale:             1,
 		OriginalImageSize: false,
+		FlipX: false,
+		FlipY: false,
 	}
 }

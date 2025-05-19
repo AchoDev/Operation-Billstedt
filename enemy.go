@@ -98,17 +98,11 @@ func (enemy *Enemy) Update() {
 	case path := <-enemy.pathChan:
 		enemy.pathChan = nil
 		enemy.currentPath = path
-		if len(path) == 0 {
-			fmt.Println("No path found.")
-		} else {
-			fmt.Println("Path found:", path)
-			// Ensure path is not empty
-			if len(path) != 0 {
-				enemy.currentPath = path[1:]
-			}
+		if len(path) != 0 {
+			enemy.currentPath = path[1:]
 		}
+		
 	default:
-		fmt.Println("Pathfinding still running...")
 	}
 
 	enemy.currentGoal = Vector2{

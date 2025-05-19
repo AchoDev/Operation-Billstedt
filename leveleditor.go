@@ -18,6 +18,7 @@ var currentScale float64 = 1
 var levelEditorActivated bool = false
 var selectedTool int = 0
 var currentRotation float64 = 0
+var currentZ int = 0
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if !levelEditorActivated {
@@ -27,10 +28,14 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	drawAbsoluteRect(screen, Transform{
 		x:        pos.x,
 		y:        pos.y,
-		width:    1200,
+		width:    5000,
 		height:   150,
 		rotation: 0,
 	}, color.RGBA{0, 0, 0, 200})
+
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Z layer: %.0f", float64(currentZ)), 10, 950)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentRotation)), 10, 970)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentScale)), 10, 990)
 
 	counter := 0
 	sprites := level.GetSprites()
@@ -83,24 +88,15 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 		height:   100 * currentScale,
 		rotation: currentRotation,
 	}, op)
-
-	drawAbsoluteRect(screen, Transform{
-		x:        1200,
-		y:        150,
-		width:    300,
-		height:   100,
-		rotation: 0,
-	}, color.RGBA{0, 0, 0, 255})
-
-	ebitenutil.DebugPrintAt(screen, "Level Editor", 1050, 100)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%f", pos), 1050, 120)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Scale: %f", currentScale), 1050, 140)
 }
 
 func UpdateLevelEditor(level Level) {
 
 	if isKeyJustPressed(ebiten.KeyP) {
 		levelEditorActivated = !levelEditorActivated
+		pauseMutex.Lock()
+		isPaused = levelEditorActivated
+		pauseMutex.Unlock()
 	}
 
 	if !levelEditorActivated {
@@ -204,6 +200,17 @@ func UpdateLevelEditor(level Level) {
 				break
 			}
 		}
+	}
+
+	if isKeyJustPressed(ebiten.KeyLeft) {
+		currentZ -= 1
+		if currentZ <= 0 {
+			currentZ = 0
+		}
+	}
+
+	if isKeyJustPressed(ebiten.KeyRight) {
+		currentZ += 1
 	}
 
 	if isKeyJustPressed(ebiten.KeyO) {

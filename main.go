@@ -93,6 +93,8 @@ func (g *Game) Update() error {
 	return nil
 }
 
+var debugRect *ebiten.Image = ebiten.NewImage(200, 100)
+
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 
@@ -105,14 +107,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	DrawLevelEditor(screen, currentLevel)
 
 	// rect := ebiten.NewImage(200, 100)
-	// rect.Fill(color.RGBA{0, 0, 0, 255})
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 0)
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 20)
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 40)
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 60)
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 80)
-	// ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 100)
-	// screen.DrawImage(rect, nil)
+	rect := debugRect
+	rect.Fill(color.Black)
+	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Playtest 1", 0, 0)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 20)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 40)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 60)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 80)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 100)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 120)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %.2f %.2f", player.transform.x, player.transform.y), 0, 140)
+
+	screen.DrawImage(rect, nil)
 }
 
 func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight int) {

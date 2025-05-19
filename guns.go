@@ -160,7 +160,7 @@ func (g *Rifle) Shoot(transform *Transform) {
             }
             gameObjects = append(gameObjects, &bullet)
             
-            time.Sleep(100 * time.Millisecond) // Sleep for 100 milliseconds
+            pausableSleep(100 * time.Millisecond) // Sleep for 100 milliseconds
         }
     }()
 
@@ -197,7 +197,7 @@ func StartGunCooldown(gun Gun) {
         start := time.Now()
         
         for gun.GetCooldownTimer() > 0 {
-            time.Sleep(1 * time.Millisecond)
+            pausableSleep(1 * time.Millisecond)
             gun.SetCooldownTimer(float64(gun.GetCooldown()) - float64(time.Since(start).Milliseconds()))
         }
 
@@ -232,7 +232,7 @@ func (g *Minigun) Shoot(transform *Transform) {
             }
             gameObjects = append(gameObjects, &bullet)
 
-            time.Sleep(50 * time.Millisecond) // Sleep for 50 milliseconds between bullets
+            pausableSleep(50 * time.Millisecond) // Sleep for 50 milliseconds between bullets
         }
     }()
 
