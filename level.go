@@ -37,17 +37,6 @@ type Level1 struct {
 }
 
 func (level *Level1) StartLevel() {
-	level.dynamicColliders = []*Collider{
-		{
-			transform: Transform{
-				x:      260,
-				y:      0,
-				width:  100,
-				height: 1200,
-			},
-		},
-	}
-
 	level.train = &Train{
 		transform: Transform{
 			x:      240,

@@ -232,13 +232,6 @@ func main() {
 
 	gameObjects = append(gameObjects, &player)
 
-	collider := Collider{
-		transform: Transform{
-			1000, 500, 100, 100, 0,
-		},
-	}
-	gameObjects = append(gameObjects, &collider)
-
 	ebiten.SetWindowSize(1920, 1080)
 	// ebiten.SetWindowSize(2000, 1700)
 	// ebiten.SetWindowSize(2000 / 2, 1700 / 2)
