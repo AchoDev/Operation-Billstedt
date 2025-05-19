@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image/color"
 	"math"
 	"time"
 
@@ -29,12 +30,30 @@ func (train *Train) Draw(screen *ebiten.Image) {
 	y := train.transform.y - 150
 
 	for i := 0; i < train.length; i++ {
+		if i != 0 {
+			drawRect(screen, Transform{
+				x:      train.transform.x + 2.5,
+				y:      y + 350,
+				width: 60,
+				height: 40,
+			}, color.Black)
+		}
+
+		y -= 680
+	}
+
+	y = train.transform.y - 150
+
+	for i := 0; i < train.length; i++ {	
 		drawImageWithOptions(screen, middle, Transform{
 			x:      train.transform.x,
 			y:      y,
 			width:  train.transform.width,
 			height: train.transform.height,
 		}, op)
+
+
+
 		y -= 680
 	}
 }
