@@ -117,7 +117,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// rect := ebiten.NewImage(200, 100)
 	rect := debugRect
 	rect.Fill(color.Black)
-	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Playtest 1", 0, 0)
+	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Prev. Version 2", 0, 0)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 20)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 40)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 60)

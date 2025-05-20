@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
@@ -26,8 +23,8 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 		transform: Transform{
 			x:      float64(x),
 			y:      float64(y),
-			width:  50,
-			height: 50,
+			width:  30,
+			height: 30,
 		},
 		gun:       createGun(gun, true),
 		enemyType: enemyType,
@@ -233,21 +230,51 @@ func (enemy *Enemy) Update() {
 }
 func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
-	var col color.RGBA
+	// var col color.RGBA
+
+	// switch enemy.enemyType {
+	// case EnemyTypeEvren:
+	// 	col = color.RGBA{0, 255, 0, 255}
+	// case EnemyTypeEmran:
+	// 	col = color.RGBA{255, 0, 255, 255}
+	// case EnemyTypeNick:
+	// 	col = color.RGBA{0, 0, 255, 255}
+	// }
+
+	// drawRect(
+	// 	screen,
+	// 	enemy.transform,
+	// 	col,
+	// )
+
+	var image *ebiten.Image
 
 	switch enemy.enemyType {
 	case EnemyTypeEvren:
-		col = color.RGBA{0, 255, 0, 255}
+		image = getCachedImage("enemies/evren")
 	case EnemyTypeEmran:
-		col = color.RGBA{255, 0, 255, 255}
+		image = getCachedImage("enemies/emran")
 	case EnemyTypeNick:
-		col = color.RGBA{0, 0, 255, 255}
+		image = getCachedImage("enemies/nick")
 	}
 
-	drawRect(
+	offset := Vector2{
+		-110,
+		500,
+	}
+
+	op := defaultImageOptions()
+	op.Anchor = offset
+	op.Scale = 4
+
+	tr := enemy.GetTransform()
+	tr.rotation += math.Pi / 2
+
+	drawImageWithOptions(
 		screen,
-		enemy.transform,
-		col,
+		image,
+		tr,
+		op,
 	)
 
 	// for _, point := range enemy.currentPath {
@@ -259,12 +286,6 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	// 		rotation: 0,
 	// 	}, color.RGBA{255, 0, 0, 50})
 	// }
-
-	textX := enemy.transform.x - enemy.transform.width/2
-	textY := enemy.transform.y - enemy.transform.height
-
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY-20))
 }
 
 func (enemy *Enemy) GetTransform() Transform {

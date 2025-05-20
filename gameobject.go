@@ -5,6 +5,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type GameObject interface {
@@ -14,6 +15,7 @@ type GameObject interface {
 }
 
 var rectCache = make(map[string]*ebiten.Image)
+var imageCache = make(map[string]*ebiten.Image)
 
 func getCachedRect(width, height int, color color.Color) *ebiten.Image {
     key := fmt.Sprintf("%dx%d-%v", width, height, color)
@@ -25,6 +27,19 @@ func getCachedRect(width, height int, color color.Color) *ebiten.Image {
 	rect.Fill(color)
 	rectCache[key] = rect
 	return rect
+}
+
+func getCachedImage(path string) *ebiten.Image {
+	if image, ok := imageCache[path]; ok {
+		return image
+	}
+
+	image, _, err := ebitenutil.NewImageFromFile("assets/" + path + ".png")
+	if err != nil {
+		panic(err)
+	}
+	imageCache[path] = image
+	return image
 }
 
 func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
