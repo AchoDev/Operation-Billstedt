@@ -229,6 +229,8 @@ func UpdateLevelEditor(level Level) {
 		if err != nil {
 			fmt.Println("Error writing JSON to file:", err)
 			return
+		} else {
+			fmt.Println("Level saved to level-output.json")
 		}
 	}
 

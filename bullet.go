@@ -23,7 +23,7 @@ func (bullet *Bullet) Update() {
 		var target GameObject
 
 		if bullet.fromEnemy {
-			if player, ok := gameObject.(*Player); ok {
+			if player, ok := gameObject.(*Player); ok && !invincible {
 				target = player
 			} else {
 				continue

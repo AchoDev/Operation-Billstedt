@@ -28,7 +28,7 @@ var camera Camera = Camera{
 	y:      0,
 	width:  1920,
 	height: 1080,
-	zoom:   1.6,
+	zoom:   1.2,
 }
 
 type LoadedLevel struct {
@@ -79,6 +79,11 @@ func (g *Game) Update() error {
 				gameObjects = append(gameObjects, &player)
 			}
 		}
+
+		if isKeyJustPressed(ebiten.KeyK) {
+			invincible = !invincible
+		}
+
 		currentLevel.UpdateLevel()
 		checkCollisions(&player.transform, Vector2{playerX, playerY})
 
@@ -93,7 +98,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
-var debugRect *ebiten.Image = ebiten.NewImage(200, 100)
+var debugRect *ebiten.Image = ebiten.NewImage(200, 170)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
@@ -116,7 +121,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 80)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 100)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 120)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %.2f %.2f", player.transform.x, player.transform.y), 0, 140)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %d", len(getGameobjectsOfType[*Enemy]())), 0, 140)
 
 	screen.DrawImage(rect, nil)
 }
@@ -127,7 +132,7 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 
 func moveCamera() {
 	diff := Vector2{
-		x: 650 - camera.x,
+		x: 750 - camera.x,
 		y: player.transform.y - camera.y,
 	}
 

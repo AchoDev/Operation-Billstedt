@@ -247,7 +247,7 @@ func (train *Train) Drive(distance float64, speed float64) {
 		times -= 1
 
 		if times > 0 {
-			pausableSleep(time.Second * time.Duration(rand.Intn(15)))
+			pausableSleep(time.Second * time.Duration(10 + rand.Intn(20)))
 			train.transform.y = startY
 			train.Drive(distance, speed)
 		}

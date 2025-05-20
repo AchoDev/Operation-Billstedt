@@ -45,6 +45,8 @@ func CreatePlayer() Player {
 	}
 }
 
+var invincible bool = false
+
 type Player struct {
 	transform  Transform
 	velocity   Vector2

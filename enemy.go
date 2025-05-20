@@ -17,9 +17,9 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 	case EnemyTypeEvren:
 		gun = &Pistol{}
 	case EnemyTypeEmran:
-		gun = &Shotgun{}
-	case EnemyTypeNick:
 		gun = &Rifle{}
+	case EnemyTypeNick:
+		gun = &Shotgun{}
 	}
 
 	enemy := Enemy{
@@ -179,11 +179,11 @@ func (enemy *Enemy) Update() {
 
 	switch enemy.enemyType {
 	case EnemyTypeEvren:
-		speed = 3.5
+		speed = 5
 	case EnemyTypeEmran:
-		speed = 2
+		speed = 3.5
 	case EnemyTypeNick:
-		speed = 10
+		speed = 6
 	}
 
 	enemy.velocity.x += direction.x
@@ -227,9 +227,9 @@ func (enemy *Enemy) Update() {
 	case EnemyTypeEvren:
 		attackDistance = 500
 	case EnemyTypeEmran:
-		attackDistance = 200
+		attackDistance = 600
 	case EnemyTypeNick:
-		attackDistance = 750
+		attackDistance = 200
 	}
 
 	if distance < attackDistance {
@@ -256,15 +256,15 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 		col,
 	)
 
-	for _, point := range enemy.currentPath {
-		drawRect(screen, Transform{
-			x:        point.x - float64(pathFindingGridSize/2),
-			y:        point.y - float64(pathFindingGridSize/2),
-			width:    float64(pathFindingGridSize),
-			height:   float64(pathFindingGridSize),
-			rotation: 0,
-		}, color.RGBA{255, 0, 0, 50})
-	}
+	// for _, point := range enemy.currentPath {
+	// 	drawRect(screen, Transform{
+	// 		x:        point.x - float64(pathFindingGridSize/2),
+	// 		y:        point.y - float64(pathFindingGridSize/2),
+	// 		width:    float64(pathFindingGridSize),
+	// 		height:   float64(pathFindingGridSize),
+	// 		rotation: 0,
+	// 	}, color.RGBA{255, 0, 0, 50})
+	// }
 
 	textX := enemy.transform.x - enemy.transform.width/2
 	textY := enemy.transform.y - enemy.transform.height
