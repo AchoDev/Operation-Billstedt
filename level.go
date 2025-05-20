@@ -116,7 +116,11 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 		}
 
 		for _, gameObject := range gameObjects {
-			fmt.Println("GameObject Z:", gameObject.GetTransform().z, z)
+			
+			if levelEditorActivated && hideGameobjects {
+				continue
+			}
+
 			if gameObject.GetTransform().z == z {
 				gameObject.Draw(screen)
 			}

@@ -14,7 +14,7 @@ import (
 
 var pos = Vector2{300, 1000}
 var selectedSprite int
-var currentScale float64 = 1
+var currentScale Vector2 = Vector2{1, 1}
 var levelEditorActivated bool = false
 var selectedTool int = 0
 var currentRotation float64 = 0
@@ -37,7 +37,7 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Z layer: %.0f", float64(currentZEditor)), 10, 950)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentRotation)), 10, 970)
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentScale)), 10, 990)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Scale: %.2f", currentScale), 10, 990)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Onion: %t", onionSkin), 10, 1010)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Hide Gameobjects: %t", hideGameobjects), 10, 1030)
 
@@ -88,8 +88,8 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	drawImageWithOptions(screen, sprite, Transform{
 		x:        float64(gridPos.x * 100),
 		y:        float64(gridPos.y * 100),
-		width:    100 * currentScale,
-		height:   100 * currentScale,
+		width:    100 * currentScale.x,
+		height:   100 * currentScale.y,
 		rotation: currentRotation,
 	}, op)
 }
@@ -118,15 +118,18 @@ func UpdateLevelEditor(level Level) {
 				direction = -1
 			}
 
-			currentScale += direction * 0.5
+			currentScale.x += direction * 0.5
+			currentScale.y += direction * 0.5
 
-			currentScale = math.Round(currentScale*2) / 2
-
+			currentScale.x = math.Round(currentScale.x*2) / 2
+			currentScale.y = math.Round(currentScale.y*2) / 2
 		} else {
-			currentScale += yoff * 0.5
+			currentScale.x += yoff * 0.5
+			currentScale.y += yoff * 0.5
 		}
 			
-		currentScale = math.Max(currentScale, 0.1)
+		currentScale.x = math.Max(currentScale.x, 0.1)
+		currentScale.y = math.Max(currentScale.y, 0.1)
 	}
 
 	if isKeyJustPressed(ebiten.Key1) {
@@ -166,13 +169,25 @@ func UpdateLevelEditor(level Level) {
 	}
 
 	if isKeyJustPressed(ebiten.KeyUp) {
-		currentScale += 0.25
-		currentScale = math.Round(currentScale*4) / 4
+		currentScale.x += 0.25
+		currentScale.y += 0.25
+		currentScale.x = math.Round(currentScale.x*4) / 4
+		currentScale.y = math.Round(currentScale.y*4) / 4
+
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			currentScale.x -= 0.25
+		}
 	}
 
 	if isKeyJustPressed(ebiten.KeyDown) {
-		currentScale -= 0.25
-		currentScale = math.Round(currentScale*4) / 4
+		currentScale.x -= 0.25
+		currentScale.y -= 0.25
+		currentScale.x = math.Round(currentScale.x*4) / 4
+		currentScale.y = math.Round(currentScale.y*4) / 4
+
+		if ebiten.IsKeyPressed(ebiten.KeyShift) {
+			currentScale.x += 0.25
+		}
 	}
 
 	if isMouseButtonJustPressed(ebiten.MouseButtonRight) {
@@ -307,8 +322,8 @@ func UpdateLevelEditor(level Level) {
 						X:      gridPosition.x,
 						Y:      gridPosition.y,
 						Z: 	float64(currentZEditor),
-						Width:  currentScale,
-						Height: currentScale,
+						Width:  currentScale.x,
+						Height: currentScale.y,
 					})
 					level.SetColliders(colliders)
 					fmt.Println("Added collider at", gridPosition)
@@ -330,8 +345,8 @@ func UpdateLevelEditor(level Level) {
 					X:      gridPosition.x,
 					Y:      gridPosition.y,
 					Z: 	float64(currentZEditor),
-					Width:  currentScale,
-					Height: currentScale,
+					Width:  currentScale.x,
+					Height: currentScale.y,
 					Rotation: currentRotation,
 					Sprite: name,
 				})
