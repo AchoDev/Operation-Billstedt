@@ -168,7 +168,7 @@ func (g *Rifle) Shoot(transform *Transform) {
 }
 
 func (g *Rifle) GetCooldown() int {
-    return 1000 // Cooldown in milliseconds
+    return 5000 // Cooldown in milliseconds
 }
 
 func (g *Rifle) GetCooldownTimer() float64 {
@@ -240,7 +240,7 @@ func (g *Minigun) Shoot(transform *Transform) {
 }
 
 func (g *Minigun) GetCooldown() int {
-    return 3000 // Cooldown in milliseconds
+    return 10000 // Cooldown in milliseconds
 }
 
 func (g *Minigun) GetCooldownTimer() float64 {

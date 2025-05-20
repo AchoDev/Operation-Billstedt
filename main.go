@@ -98,7 +98,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
-var debugRect *ebiten.Image = ebiten.NewImage(200, 170)
+var debugRect *ebiten.Image = ebiten.NewImage(230, 170)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)

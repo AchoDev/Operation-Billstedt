@@ -79,6 +79,54 @@ func (enemy *Enemy) Update() {
 		colliders = append(colliders, collider)
 	}
 
+	for _, e := range getGameobjectsOfType[*Enemy]() {
+		if enemy == e {
+			continue
+		}
+		
+		collider := &Collider{
+			transform: Transform{
+				x:      e.transform.x,
+				y:      e.transform.y,
+				width:  e.transform.width,
+				height: e.transform.height,
+			},
+		}
+
+		colliders = append(colliders, collider)
+	}
+
+	for _, bullet := range getGameobjectsOfType[*Bullet]() {
+		if bullet.fromEnemy {
+			continue
+		}
+
+		predictionSteps := 10       // Number of steps to predict
+    stepSize := 50.0            // Distance between each step (in world units)
+    colliderWidth := 10.0       // Width of each predicted collider
+    colliderHeight := 10.0      // Height of each predicted collider
+
+    // Predict the bullet's trajectory
+    for i := 1; i <= predictionSteps; i++ {
+		angle := bullet.angle
+		predictedX := bullet.transform.x + math.Cos(angle)*bullet.speed*stepSize*float64(i)
+		predictedY := bullet.transform.y + math.Sin(angle)*bullet.speed*stepSize*float64(i)
+
+        // Create a small collider at the predicted position
+        collider := &Collider{
+            transform: Transform{
+                x:      predictedX,
+                y:      predictedY,
+                width:  colliderWidth,
+                height: colliderHeight,
+            },
+        }
+
+        // Add the collider to the list
+        colliders = append(colliders, collider)
+    }
+	}
+
 	path := enemy.currentPath
 
 	if (enemy.currentGoal.x != player.transform.x || enemy.currentGoal.y != player.transform.y) && enemy.pathChan == nil  {

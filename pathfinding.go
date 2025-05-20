@@ -138,6 +138,37 @@ func isInsideCollider(position Vector2, colliders []*Collider) bool {
     return false
 }
 
+func moveOutOfCollider(position Point, grid [][]int) Point {
+
+    gridWidth := len(grid)
+    gridHeight := len(grid[0])
+
+    if grid[position.X][position.Y] > 0 {
+        directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}
+        for _, d := range directions {
+            adjustedPoint := Point{position.X + d.X, position.Y + d.Y}
+            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
+            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
+            grid[adjustedPoint.X][adjustedPoint.Y] != 1 {
+                position = adjustedPoint
+            break
+            }
+        }
+
+        for _, d := range directions {
+            adjustedPoint := Point{position.X + d.X, position.Y + d.Y}
+            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
+            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
+            grid[adjustedPoint.X][adjustedPoint.Y] == 0 {
+                position = adjustedPoint
+            break
+            }
+        }
+    }
+
+    return position
+}
+
 // runPathfindingAlgorithm initializes the grid, marks colliders, and runs A*
 func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSize int, worldSize Vector2) []Vector2 {
     minWorldX, minWorldY := -14000.0, -14000.0
@@ -191,28 +222,8 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
         Y: int((start.y - minWorldY) / float64(gridSize)),
     }
 
-    if grid[endPoint.X][endPoint.Y] > 0 {
-        directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}
-        for _, d := range directions {
-            adjustedPoint := Point{endPoint.X + d.X, endPoint.Y + d.Y}
-            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
-            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
-            grid[adjustedPoint.X][adjustedPoint.Y] != 1 {
-                endPoint = adjustedPoint
-            break
-            }
-        }
-
-        for _, d := range directions {
-            adjustedPoint := Point{endPoint.X + d.X, endPoint.Y + d.Y}
-            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
-            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
-            grid[adjustedPoint.X][adjustedPoint.Y] == 0 {
-                endPoint = adjustedPoint
-            break
-            }
-        }
-    }
+    startPoint = moveOutOfCollider(startPoint, grid)
+    endPoint = moveOutOfCollider(endPoint, grid)
 
 
 
