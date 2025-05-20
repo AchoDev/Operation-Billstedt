@@ -6,7 +6,6 @@ import (
 	"image/color"
 	"log"
 	"os"
-	"runtime/pprof"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -98,7 +97,7 @@ func (g *Game) Update() error {
 	return nil
 }
 
-var debugRect *ebiten.Image = ebiten.NewImage(230, 170)
+var debugRect *ebiten.Image = ebiten.NewImage(220, 200)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
@@ -125,6 +124,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 100)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 120)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %d", len(getGameobjectsOfType[*Enemy]())), 0, 140)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Invincibility: %t", invincible), 0, 160)
 
 	screen.DrawImage(rect, nil)
 }
@@ -236,16 +236,8 @@ func getGameobjectsOfType[T GameObject]() []T {
 
 func main() {
 
-	cpuProfile, err := os.Create("cpu.prof")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cpuProfile.Close()
 
-	if err := pprof.StartCPUProfile(cpuProfile); err != nil {
-		log.Fatal(err)
-	}
-	defer pprof.StopCPUProfile()
+	gameObjects = append(gameObjects, NewHealthBar())
 
 	gameObjects = append(gameObjects, &player)
 

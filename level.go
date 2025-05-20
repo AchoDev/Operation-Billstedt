@@ -42,14 +42,14 @@ type Level1 struct {
 func (level *Level1) StartLevel() {
 	train := CreateTrain(Transform{
 		x:      240,
-		y:      -1000,
+		y:      -3000,
 		width:  100,
 		height: 100,
 	}, 1)
 
 	train2 := CreateTrain(Transform{
 		x: 1250,
-		y: 1500,
+		y: 3000,
 	}, -1)
 
 	gameObjects = append(gameObjects, train)
@@ -57,12 +57,12 @@ func (level *Level1) StartLevel() {
 
 	go func() {
 		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
-		train.Drive(2000, 0.2)
+		train.Drive(4000, 0.2)
 	}()
 
 	go func() {
 		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
-		train2.Drive(2500, 0.2)
+		train2.Drive(4000, 0.2)
 	}()
 
 	for _, collider := range level.dynamicColliders {
@@ -74,6 +74,8 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 	tiles := level.GetTiles()
 	sprites := level.GetSprites()
 	gridSize := 100.0
+
+
 
 	// Create a map to group tiles by their Z order
 	tilesByZ := make(map[float64][]Tile)
@@ -87,6 +89,8 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 		zOrders = append(zOrders, z)
 	}
 	sort.Float64s(zOrders)
+
+	highestZ := zOrders[len(zOrders)-1]
 
 	// Iterate through tiles in sorted Z order
 	for _, z := range zOrders {
@@ -124,6 +128,13 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 			if gameObject.GetTransform().z == z {
 				gameObject.Draw(screen)
 			}
+		}
+	}
+
+	// Draw game objects with a higher Z level than the highest tile Z
+	for _, gameObject := range gameObjects {
+		if gameObject.GetTransform().z > highestZ {
+			gameObject.Draw(screen)
 		}
 	}
 

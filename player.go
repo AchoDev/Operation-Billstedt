@@ -42,6 +42,7 @@ func CreatePlayer() Player {
 			"pistol":  loadImage("assets/leo/pistol.png"),
 			"shotgun": loadImage("assets/leo/shotgun.png"),
 		},
+		health:   100,
 	}
 }
 
@@ -53,6 +54,7 @@ type Player struct {
 	shooting   bool
 	currentGun Gun
 	sprites    map[string]*ebiten.Image
+	health    int
 }
 
 func (player *Player) Update() {

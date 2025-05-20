@@ -101,30 +101,30 @@ func (enemy *Enemy) Update() {
 			continue
 		}
 
-		predictionSteps := 10       // Number of steps to predict
-    stepSize := 50.0            // Distance between each step (in world units)
-    colliderWidth := 10.0       // Width of each predicted collider
-    colliderHeight := 10.0      // Height of each predicted collider
+		predictionSteps := 10       
+		stepSize := 50.0
+		colliderWidth := 10.0
+		colliderHeight := 10.0
 
-    // Predict the bullet's trajectory
-    for i := 1; i <= predictionSteps; i++ {
-		angle := bullet.angle
-		predictedX := bullet.transform.x + math.Cos(angle)*bullet.speed*stepSize*float64(i)
-		predictedY := bullet.transform.y + math.Sin(angle)*bullet.speed*stepSize*float64(i)
+		// Predict the bullet's trajectory
+		for i := 1; i <= predictionSteps; i++ {
+			angle := bullet.angle
+			predictedX := bullet.transform.x + math.Cos(angle)*bullet.speed*stepSize*float64(i)
+			predictedY := bullet.transform.y + math.Sin(angle)*bullet.speed*stepSize*float64(i)
 
-        // Create a small collider at the predicted position
-        collider := &Collider{
-            transform: Transform{
-                x:      predictedX,
-                y:      predictedY,
-                width:  colliderWidth,
-                height: colliderHeight,
-            },
-        }
+			// Create a small collider at the predicted position
+			collider := &Collider{
+				transform: Transform{
+					x:      predictedX,
+					y:      predictedY,
+					width:  colliderWidth,
+					height: colliderHeight,
+				},
+			}
 
-        // Add the collider to the list
-        colliders = append(colliders, collider)
-    }
+			// Add the collider to the list
+			colliders = append(colliders, collider)
+		}
 	}
 
 	path := enemy.currentPath

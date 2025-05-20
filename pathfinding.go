@@ -225,8 +225,6 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
     startPoint = moveOutOfCollider(startPoint, grid)
     endPoint = moveOutOfCollider(endPoint, grid)
 
-
-
     path := AStar(startPoint, endPoint, grid)
 
     var vectorPath []Vector2

@@ -57,11 +57,13 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 		transform.height = float64(image.Bounds().Dy())
 	}
 
-	if transform.x+transform.width/2 < camera.x-camera.width/camera.zoom/2 || transform.x-transform.width/2 > camera.x+camera.width/camera.zoom/2 {
+
+
+	if transform.x+(transform.width * options.Scale)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width * options.Scale)/2 > camera.x+camera.width/camera.zoom/2 {
 		return
 	}
 
-	if transform.y+transform.height/2 < camera.y-camera.height/camera.zoom/2 || transform.y-transform.height/2 > camera.y+camera.height/camera.zoom/2 {
+	if transform.y+(transform.height * options.Scale)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height * options.Scale)/2 > camera.y+camera.height/camera.zoom/2 {
 		return
 	}
 

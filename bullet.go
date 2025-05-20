@@ -53,8 +53,15 @@ func (bullet *Bullet) Update() {
 				Angle:  tr.rotation,
 			},
 		) {
-			// Remove the gameObject from the list
-			gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+			if player, ok := target.(*Player); ok {
+				player.health -= 10
+				if player.health <= 0 {
+					// Remove the gameObject from the list
+					gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+				}
+			} else {
+				gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+			}
 
 			// Remove the bullet from the list
 			for j := 0; j < len(gameObjects); j++ {
