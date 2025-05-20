@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"math/rand"
@@ -124,16 +123,8 @@ func (train *Train) Draw(screen *ebiten.Image) {
 		height: 1,
 		rotation: math.Pi / 2 * train.direction,
 	}, lightOp)
-
-	if train.direction == -1 {
-		fmt.Println(y)
-	}
 	
 	y = train.transform.y - (distance + startDistance) * train.direction
-	
-	if train.direction == -1 {
-		fmt.Println(y)
-	}
 
 	for i := 0; i < train.length; i++ {	
 		drawImageWithOptions(screen, middle, Transform{
