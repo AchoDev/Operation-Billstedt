@@ -2,7 +2,6 @@ package main
 
 import (
 	"container/heap"
-	"fmt"
 	"math"
 )
 
@@ -191,7 +190,6 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
         X: int((start.x - minWorldX) / float64(gridSize)),
         Y: int((start.y - minWorldY) / float64(gridSize)),
     }
-    fmt.Println(grid[endPoint.X][endPoint.Y])
 
     if grid[endPoint.X][endPoint.Y] > 0 {
         directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}
@@ -214,12 +212,6 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
             break
             }
         }
-
-        fmt.Println("Adjusted end point to:", endPoint)
-
-
-
-
     }
 
 

@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"math/rand/v2"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -52,15 +54,15 @@ func (level *Level1) StartLevel() {
 	gameObjects = append(gameObjects, train)
 	gameObjects = append(gameObjects, train2)
 
-	// go func() {
-	// 	pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
-	// 	train.Drive(2000, 0.2)
-	// }()
+	go func() {
+		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
+		train.Drive(2000, 0.2)
+	}()
 
-	// go func() {
-	// 	pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
-	// 	train2.Drive(2500, 0.2)
-	// }()
+	go func() {
+		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
+		train2.Drive(2500, 0.2)
+	}()
 
 	for _, collider := range level.dynamicColliders {
 		gameObjects = append(gameObjects, collider)

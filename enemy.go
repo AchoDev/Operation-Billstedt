@@ -175,7 +175,7 @@ func (enemy *Enemy) Update() {
 	case EnemyTypeEvren:
 		speed = 5
 	case EnemyTypeEmran:
-		speed = 3.5
+		speed = 2.5
 	case EnemyTypeNick:
 		speed = 6
 	}
@@ -250,15 +250,15 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 		col,
 	)
 
-	for _, point := range enemy.currentPath {
-		drawRect(screen, Transform{
-			x:        point.x - float64(pathFindingGridSize/2),
-			y:        point.y - float64(pathFindingGridSize/2),
-			width:    float64(pathFindingGridSize),
-			height:   float64(pathFindingGridSize),
-			rotation: 0,
-		}, color.RGBA{255, 0, 0, 50})
-	}
+	// for _, point := range enemy.currentPath {
+	// 	drawRect(screen, Transform{
+	// 		x:        point.x - float64(pathFindingGridSize/2),
+	// 		y:        point.y - float64(pathFindingGridSize/2),
+	// 		width:    float64(pathFindingGridSize),
+	// 		height:   float64(pathFindingGridSize),
+	// 		rotation: 0,
+	// 	}, color.RGBA{255, 0, 0, 50})
+	// }
 
 	textX := enemy.transform.x - enemy.transform.width/2
 	textY := enemy.transform.y - enemy.transform.height
