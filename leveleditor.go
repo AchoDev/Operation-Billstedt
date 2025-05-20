@@ -18,7 +18,9 @@ var currentScale float64 = 1
 var levelEditorActivated bool = false
 var selectedTool int = 0
 var currentRotation float64 = 0
-var currentZ int = 0
+var currentZEditor int = 0
+var onionSkin bool = false
+var hideGameobjects bool = false
 
 func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if !levelEditorActivated {
@@ -33,9 +35,11 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 		rotation: 0,
 	}, color.RGBA{0, 0, 0, 200})
 
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Z layer: %.0f", float64(currentZ)), 10, 950)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Z layer: %.0f", float64(currentZEditor)), 10, 950)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentRotation)), 10, 970)
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Rotation: %.2f", float64(currentScale)), 10, 990)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Onion: %t", onionSkin), 10, 1010)
+	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Hide Gameobjects: %t", hideGameobjects), 10, 1030)
 
 	counter := 0
 	sprites := level.GetSprites()
@@ -146,6 +150,14 @@ func UpdateLevelEditor(level Level) {
 		}
 	}
 
+	if isKeyJustPressed(ebiten.KeyM) {
+		onionSkin = !onionSkin
+	}
+
+	if isKeyJustPressed(ebiten.KeyN) {
+		hideGameobjects = !hideGameobjects
+	}
+
 	if isKeyJustPressed(ebiten.KeyR) {
 		currentRotation += math.Pi / 2
 		if currentRotation >= 2*math.Pi {
@@ -178,6 +190,12 @@ func UpdateLevelEditor(level Level) {
 
 		for i := len(tiles) - 1; i >= 0; i-- {
 			tile := tiles[i]
+			
+			if tile.Z != float64(currentZEditor) {
+				continue
+			}
+
+
 			tileTr := Transform{
 				x:      tile.X * 100,
 				y:      tile.Y * 100,
@@ -203,14 +221,14 @@ func UpdateLevelEditor(level Level) {
 	}
 
 	if isKeyJustPressed(ebiten.KeyLeft) {
-		currentZ -= 1
-		if currentZ <= 0 {
-			currentZ = 0
+		currentZEditor -= 1
+		if currentZEditor <= 0 {
+			currentZEditor = 0
 		}
 	}
 
 	if isKeyJustPressed(ebiten.KeyRight) {
-		currentZ += 1
+		currentZEditor += 1
 	}
 
 	if isKeyJustPressed(ebiten.KeyO) {
@@ -234,17 +252,23 @@ func UpdateLevelEditor(level Level) {
 		}
 	}
 
+	speed := 10.0
+
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		speed = 30
+	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		camera.x -= 10
+		camera.x -= speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		camera.x += 10
+		camera.x += speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		camera.y -= 10
+		camera.y -= speed
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		camera.y += 10
+		camera.y += speed
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyQ) {
@@ -282,6 +306,7 @@ func UpdateLevelEditor(level Level) {
 					colliders = append(colliders, Tile{
 						X:      gridPosition.x,
 						Y:      gridPosition.y,
+						Z: 	float64(currentZEditor),
 						Width:  currentScale,
 						Height: currentScale,
 					})
@@ -304,6 +329,7 @@ func UpdateLevelEditor(level Level) {
 				tiles = append(tiles, Tile{
 					X:      gridPosition.x,
 					Y:      gridPosition.y,
+					Z: 	float64(currentZEditor),
 					Width:  currentScale,
 					Height: currentScale,
 					Rotation: currentRotation,

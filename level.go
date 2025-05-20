@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand/v2"
+	"sort"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -74,30 +75,61 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 	sprites := level.GetSprites()
 	gridSize := 100.0
 
+	// Create a map to group tiles by their Z order
+	tilesByZ := make(map[float64][]Tile)
 	for _, tile := range tiles {
+		tilesByZ[tile.Z] = append(tilesByZ[tile.Z], tile)
+	}
 
-		tileImage := sprites[tile.Sprite]
-		if tileImage == nil {
-			fmt.Println("Tile image not found for sprite:", tile.Sprite)
-			continue
+	// Extract Z orders and sort them
+	var zOrders []float64
+	for z := range tilesByZ {
+		zOrders = append(zOrders, z)
+	}
+	sort.Float64s(zOrders)
+
+	// Iterate through tiles in sorted Z order
+	for _, z := range zOrders {
+		for _, tile := range tilesByZ[z] {
+			tileImage := sprites[tile.Sprite]
+			if tileImage == nil {
+				fmt.Println("Tile image not found for sprite:", tile.Sprite)
+				continue
+			}
+
+			op := defaultImageOptions()
+			if levelEditorActivated && tile.Z != float64(currentZEditor) {
+				op.Alpha = 50
+
+				if !onionSkin {
+					continue
+				}
+			}
+
+			drawImageWithOptions(screen, tileImage, Transform{
+				x:        tile.X * float64(gridSize),
+				y:        tile.Y * float64(gridSize),
+				width:    tile.Width * float64(gridSize),
+				height:   tile.Height * float64(gridSize),
+				rotation: tile.Rotation,
+			}, op)
 		}
 
-		op := defaultImageOptions()
-		if levelEditorActivated && tile.Z != float64(currentZ){
-			op.Alpha = 50
+		for _, gameObject := range gameObjects {
+			fmt.Println("GameObject Z:", gameObject.GetTransform().z, z)
+			if gameObject.GetTransform().z == z {
+				gameObject.Draw(screen)
+			}
 		}
-
-		drawImageWithOptions(screen, tileImage, Transform{
-			x:        tile.X * float64(gridSize),
-			y:        tile.Y * float64(gridSize),
-			width:    tile.Width * float64(gridSize),
-			height:   tile.Height * float64(gridSize),
-			rotation: tile.Rotation,
-		}, op)
 	}
 
 	if levelEditorActivated && selectedTool == 1{
 		for _, collider := range level.GetColliders() {
+
+			if collider.Z != float64(currentZEditor){
+				continue
+			}
+
 			drawRect(screen, Transform{
 				x:      float64(collider.X) * gridSize,
 				y:      float64(collider.Y) * gridSize,

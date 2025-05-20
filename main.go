@@ -105,9 +105,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	DrawLevel(screen, currentLevel)
 
-	for _, gameObject := range gameObjects {
-		gameObject.Draw(screen)
-	}
+	// for _, gameObject := range gameObjects {
+	// 	if levelEditorActivated && hideGameobjects {
+	// 		break
+	// 	}
+	// 	gameObject.Draw(screen)
+	// }
 
 	DrawLevelEditor(screen, currentLevel)
 
@@ -136,6 +139,9 @@ func moveCamera() {
 		y: player.transform.y - camera.y,
 	}
 
+	zoomDiff := camera.zoom - 1.2
+
+	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1
 	camera.y += diff.y * 0.1
 }
