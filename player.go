@@ -160,10 +160,10 @@ func move(player *Player) {
 	player.transform.y += player.velocity.y
 		
 	if movement.x == 0 {
-		player.velocity.x /= 1.2
+		player.velocity.x /= 1.15
 	}
 	if movement.y == 0 {
-		player.velocity.y /= 1.2
+		player.velocity.y /= 1.15
 	}
 }
 
