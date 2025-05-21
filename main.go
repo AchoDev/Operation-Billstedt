@@ -14,21 +14,7 @@ import (
 var gameObjects []GameObject = []GameObject{}
 var player *Player
 
-type Camera struct {
-	x      float64
-	y      float64
-	width  float64
-	height float64
-	zoom   float64
-}
 
-var camera Camera = Camera{
-	x:      0,
-	y:      0,
-	width:  1920,
-	height: 1080,
-	zoom:   1.2,
-}
 
 type LoadedLevel struct {
 	Tiles     []Tile `json:"tiles"`

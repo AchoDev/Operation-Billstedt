@@ -71,6 +71,9 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 	transform.x -= camera.x
 	transform.y -= camera.y
 
+	transform.x -= camera.offset.x
+	transform.y -= camera.offset.y
+
 	transform.x *= camera.zoom
 	transform.y *= camera.zoom
 
