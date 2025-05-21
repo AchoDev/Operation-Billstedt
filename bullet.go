@@ -115,3 +115,7 @@ func (bullet *Bullet) Draw(screen *ebiten.Image) {
 func (bullet *Bullet) GetTransform() Transform {
 	return bullet.transform
 }
+
+func (bullet *Bullet) SetTransform(transform Transform) {
+	bullet.transform = transform
+}

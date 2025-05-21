@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -29,8 +28,6 @@ func NewHealthBar() *HealthBar {
 
 func (hb *HealthBar) Update() {
     hb.currentHealth = float64(player.health)
-
-    fmt.Println("HealthBar current health:", hb.currentHealth)
 }
 
 func (hb *HealthBar) Draw(screen *ebiten.Image) {
@@ -70,4 +67,8 @@ func (hb *HealthBar) Draw(screen *ebiten.Image) {
 
 func (hb *HealthBar) GetTransform() Transform {
     return hb.transform
+}
+
+func (hb *HealthBar) SetTransform(transform Transform) {
+    hb.transform = transform
 }

@@ -159,6 +159,10 @@ func (train *Train) GetTransform() Transform {
 	return train.transform
 }
 
+func (train *Train) SetTransform(transform Transform) {
+	train.transform = transform
+}
+
 func (train *Train) Drive(distance float64, speed float64) {
 
 	times := 3

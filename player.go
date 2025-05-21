@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 
 	"strings"
@@ -25,8 +26,8 @@ func clampVector(vector Vector2, min float64, max float64) Vector2 {
 	}
 }
 
-func CreatePlayer() Player {
-	return Player{
+func CreatePlayer() *Player {
+	p := Player{
 		transform: Transform{
 			x:      650,
 			y:      0,
@@ -35,7 +36,6 @@ func CreatePlayer() Player {
 		},
 		velocity:   Vector2{0, 0},
 		shooting:   false,
-		currentGun: &Pistol{},
 		sprites: map[string]*ebiten.Image{
 			"minigun": loadImage("assets/leo/minigun.png"),
 			"rifle":   loadImage("assets/leo/rifle.png"),
@@ -44,15 +44,29 @@ func CreatePlayer() Player {
 		},
 		health:   100,
 	}
+
+	p.guns = []GunBase{
+		*NewGun("Pistol", 100, &p, PistolShoot),
+		// *NewGun("Shotgun", 3000, &p, ShotgunShoot),
+		*NewGun("Shotgun", 1, &p, ShotgunShoot),
+		*NewGun("Rifle", 5000, &p, RifleShoot),
+		*NewGun("Minigun", 6000, &p, MinigunShoot),
+	}
+
+	p.currentGun = p.guns[0]
+
+	return &p
 }
 
 var invincible bool = false
+
 
 type Player struct {
 	transform  Transform
 	velocity   Vector2
 	shooting   bool
-	currentGun Gun
+	currentGun GunBase
+	guns       []GunBase
 	sprites    map[string]*ebiten.Image
 	health    int
 }
@@ -79,13 +93,13 @@ func (player *Player) Update() {
 	}
 
 	if ebiten.IsKeyPressed(ebiten.Key1) {
-		player.currentGun = createGun(&Pistol{}, false)
+		player.currentGun = player.guns[0]
 	} else if ebiten.IsKeyPressed(ebiten.Key2) {
-		player.currentGun = createGun(&Shotgun{}, false)
+		player.currentGun = player.guns[1]
 	} else if ebiten.IsKeyPressed(ebiten.Key3) {
-		player.currentGun = createGun(&Rifle{}, false)
+		player.currentGun = player.guns[2]
 	} else if ebiten.IsKeyPressed(ebiten.Key4) {
-		player.currentGun = createGun(&Minigun{}, false)
+		player.currentGun = player.guns[3]
 	}
 
 	if isKeyJustPressed(ebiten.Key6) {
@@ -93,11 +107,11 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.Key7) {
-		gameObjects = append(gameObjects, createEnemy(100, 100, EnemyTypeEvren))
+		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeEvren))
 	}
 
 	if isKeyJustPressed(ebiten.Key8) {
-		gameObjects = append(gameObjects, createEnemy(500, 500, EnemyTypeEmran))
+		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeEmran))
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyE) {
@@ -128,19 +142,28 @@ func move(player *Player) {
 
 	movement.normalize()
 
+	
+	// player.velocity = clampVector(player.velocity, -max_vel, max_vel)
+	
+	if math.Abs(player.velocity.x) > max_vel {
+		movement.x = 0
+	}
+	
+	if math.Abs(player.velocity.y) > max_vel {
+		movement.y = 0
+	}
+		
 	player.velocity.x -= movement.x * acceleration
 	player.velocity.y -= movement.y * acceleration
 
-	player.velocity = clampVector(player.velocity, -max_vel, max_vel)
-
 	player.transform.x += player.velocity.x
 	player.transform.y += player.velocity.y
-
+		
 	if movement.x == 0 {
-		player.velocity.x /= 1.5
+		player.velocity.x /= 1.2
 	}
 	if movement.y == 0 {
-		player.velocity.y /= 1.5
+		player.velocity.y /= 1.2
 	}
 }
 
@@ -167,6 +190,8 @@ func (player *Player) Draw(screen *ebiten.Image) {
 			tr,
 			op,
 		)
+	} else {
+		fmt.Println("Sprite not found for gun:", strings.ToLower(player.currentGun.Name()), player.sprites,)
 	}
 }
 
@@ -175,4 +200,8 @@ func (player *Player) GetTransform() Transform {
 		return Transform{}
 	}
 	return player.transform
+}
+
+func (player *Player) SetTransform(transform Transform) {
+	player.transform = transform
 }

@@ -12,6 +12,7 @@ type GameObject interface {
 	Update()
 	Draw(screen *ebiten.Image)
 	GetTransform() Transform
+	SetTransform(Transform)
 }
 
 var rectCache = make(map[string]*ebiten.Image)

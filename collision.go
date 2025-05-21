@@ -171,3 +171,7 @@ func (collider *Collider) Draw(screen *ebiten.Image) {
 func (collider *Collider) GetTransform() Transform {
 	return collider.transform
 }
+
+func (collider *Collider) SetTransform(transform Transform) {
+	collider.transform = transform
+}

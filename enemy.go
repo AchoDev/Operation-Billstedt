@@ -8,15 +8,15 @@ import (
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
-	var gun Gun
+	var gun *GunBase
 
 	switch enemyType {
 	case EnemyTypeEvren:
-		gun = &Pistol{}
+		gun = NewGun("Pistol", 100, nil, PistolShoot)
 	case EnemyTypeEmran:
-		gun = &Rifle{}
+		gun = NewGun("Rifle", 5000, nil, RifleShoot)
 	case EnemyTypeNick:
-		gun = &Shotgun{}
+		gun = NewGun("Shotgun", 3000, nil, ShotgunShoot)
 	}
 
 	enemy := Enemy{
@@ -26,9 +26,12 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 			width:  30,
 			height: 30,
 		},
-		gun:       createGun(gun, true),
+		gun:       *gun,
 		enemyType: enemyType,
 	}
+
+	enemy.gun.carrier = &enemy
+	enemy.gun.isEnemy = true
 
 	return &enemy
 }
@@ -43,7 +46,7 @@ const (
 
 type Enemy struct {
 	transform   Transform
-	gun         Gun
+	gun         GunBase
 	enemyType   EnemyType
 	currentPath []Vector2
 	currentGoal Vector2
@@ -338,4 +341,8 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
 func (enemy *Enemy) GetTransform() Transform {
 	return enemy.transform
+}
+
+func (enemy *Enemy) SetTransform(transform Transform) {
+	enemy.transform = transform
 }

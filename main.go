@@ -12,7 +12,7 @@ import (
 )
 
 var gameObjects []GameObject = []GameObject{}
-var player Player = CreatePlayer()
+var player *Player
 
 type Camera struct {
 	x      float64
@@ -75,7 +75,7 @@ func (g *Game) Update() error {
 			fmt.Println("Creating new player")
 			if findPlayer() == nil {
 				player = CreatePlayer()
-				gameObjects = append(gameObjects, &player)
+				gameObjects = append(gameObjects, player)
 			}
 		}
 
@@ -239,7 +239,8 @@ func main() {
 
 	gameObjects = append(gameObjects, NewHealthBar())
 
-	gameObjects = append(gameObjects, &player)
+	player = CreatePlayer()
+	gameObjects = append(gameObjects, player)
 
 	ebiten.SetWindowSize(1920, 1080)
 	// ebiten.SetWindowSize(2000, 1700)
