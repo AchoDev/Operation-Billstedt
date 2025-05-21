@@ -116,10 +116,10 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
         enemy.velocity.y -= push.y
     }
 
-    camera.Shake(Vector2{
-        x: push.x,
-        y: push.y,
-    }, 25.0)
+    if !gun.isEnemy {
+        camera.Shake(transform.rotation, 5.0)
+    }
+
 }
 
 func RifleShoot(transform *Transform, gun *GunBase) {

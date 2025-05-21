@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type Camera struct {
 	x      float64
 	y      float64
@@ -22,7 +24,12 @@ var camera Camera = Camera{
 	zoom:   1.2,
 }
 
-func (c *Camera) Shake(direction Vector2, intensity float64) {
+func (c *Camera) Shake(angle float64, intensity float64) {
+
+    direction := Vector2{
+        x: math.Cos(angle),
+        y: math.Sin(angle),
+    }
 
     camera.velocity.x += direction.x * intensity
     camera.velocity.y += direction.y * intensity

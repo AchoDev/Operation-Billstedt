@@ -73,6 +73,7 @@ func (g *Game) Update() error {
 		checkCollisions(&player.transform, Vector2{playerX, playerY})
 
 		moveCamera()
+		camera.Update()
 	}
 
 	UpdateLevelEditor(currentLevel)
