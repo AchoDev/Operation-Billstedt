@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -14,22 +15,15 @@ type GunBase struct {
     shootBehavior func(transform *Transform, gun *GunBase)
 }
 
-func createMuzzleFlash(x, y, rotation float64, offset Vector2) {
-    flash := &ImageDrawer{
-        transform: Transform{
-            x:      x + offset.x,
-            y:      y + offset.y,
-            rotation: rotation,
-            width:  50,
-            height: 50,
-        },
-        path: "/sprites/muzzle-flash",
-    }
+func createMuzzleFlash(gun *GunBase) {    
+    flash := NewMuzzleFlash(gun.carrier, gun.offset)
+
+    fmt.Println(gun)
 
     gameObjects = append(gameObjects, flash)
 
     go func() {
-        pausableSleep(100 * time.Millisecond)
+        pausableSleep(50 * time.Millisecond)
         removeGameObject(flash)
     }()
 }
@@ -40,7 +34,7 @@ func (g *GunBase) Shoot(transform *Transform) {
     }
     if g.shootBehavior != nil {
         g.shootBehavior(transform, g)
-        createMuzzleFlash(transform.x, transform.y, transform.rotation, g.offset)
+        createMuzzleFlash(g)
     }
     StartGunCooldown(g)
 }
@@ -82,6 +76,7 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
         cooldownTimer: -1,
         isEnemy:       fromEnemy,
         carrier:      carrier,
+        offset:         stats.offset,
         cooldown:      stats.cooldown,
         name:          stats.name,
         shootBehavior: stats.shootBehavior,
