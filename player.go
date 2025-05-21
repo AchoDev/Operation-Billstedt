@@ -46,11 +46,11 @@ func CreatePlayer() *Player {
 	}
 
 	p.guns = []GunBase{
-		*NewGun("Pistol", 100, &p, PistolShoot),
+		*NewGun(pistolStats, &p),
 		// *NewGun("Shotgun", 3000, &p, ShotgunShoot),
-		*NewGun("Shotgun", 1, &p, ShotgunShoot),
-		*NewGun("Rifle", 5000, &p, RifleShoot),
-		*NewGun("Minigun", 6000, &p, MinigunShoot),
+		*NewGun(shotgunStats, &p),
+		*NewGun(rifleStats, &p),
+		*NewGun(minigunStats, &p),
 	}
 
 	p.currentGun = p.guns[0]

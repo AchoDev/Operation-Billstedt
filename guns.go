@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -11,7 +10,28 @@ type GunBase struct {
     carrier     GameObject
     cooldown      int
     name          string
+    offset       Vector2
     shootBehavior func(transform *Transform, gun *GunBase)
+}
+
+func createMuzzleFlash(x, y, rotation float64, offset Vector2) {
+    flash := &ImageDrawer{
+        transform: Transform{
+            x:      x + offset.x,
+            y:      y + offset.y,
+            rotation: rotation,
+            width:  50,
+            height: 50,
+        },
+        path: "/sprites/muzzle-flash",
+    }
+
+    gameObjects = append(gameObjects, flash)
+
+    go func() {
+        pausableSleep(100 * time.Millisecond)
+        removeGameObject(flash)
+    }()
 }
 
 func (g *GunBase) Shoot(transform *Transform) {
@@ -20,6 +40,7 @@ func (g *GunBase) Shoot(transform *Transform) {
     }
     if g.shootBehavior != nil {
         g.shootBehavior(transform, g)
+        createMuzzleFlash(transform.x, transform.y, transform.rotation, g.offset)
     }
     StartGunCooldown(g)
 }
@@ -48,22 +69,22 @@ func (g *GunBase) Name() string {
     return g.name
 }
 
-func NewGun(name string, cooldown int, carrier GameObject,shootBehavior func(transform *Transform, gun *GunBase)) *GunBase {
+func NewGun(stats GunStats, carrier GameObject) *GunBase {
     fromEnemy := false
+
+    getCachedImage("/sprites/muzzle-flash")
 
     if _, ok := carrier.(*Enemy); ok {
         fromEnemy = true
     }
-
-    fmt.Println("Creating gun:", name, "with cooldown:", cooldown, "from enemy:", fromEnemy)
     
     return &GunBase{
         cooldownTimer: -1,
         isEnemy:       fromEnemy,
         carrier:      carrier,
-        cooldown:      cooldown,
-        name:          name,
-        shootBehavior: shootBehavior,
+        cooldown:      stats.cooldown,
+        name:          stats.name,
+        shootBehavior: stats.shootBehavior,
     }
 }
 

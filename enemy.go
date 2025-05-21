@@ -12,11 +12,11 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
 	switch enemyType {
 	case EnemyTypeEvren:
-		gun = NewGun("Pistol", 100, nil, PistolShoot)
+		gun = NewGun(pistolStats, nil)
 	case EnemyTypeEmran:
-		gun = NewGun("Rifle", 5000, nil, RifleShoot)
+		gun = NewGun(rifleStats, nil)
 	case EnemyTypeNick:
-		gun = NewGun("Shotgun", 3000, nil, ShotgunShoot)
+		gun = NewGun(shotgunStats, nil)
 	}
 
 	enemy := Enemy{
