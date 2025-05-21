@@ -27,8 +27,8 @@ var camera Camera = Camera{
 func (c *Camera) Shake(angle float64, intensity float64) {
 
     direction := Vector2{
-        x: math.Cos(angle),
-        y: math.Sin(angle),
+        x: math.Cos(angle + math.Pi),
+        y: math.Sin(angle + math.Pi),
     }
 
     camera.velocity.x += direction.x * intensity

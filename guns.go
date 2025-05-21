@@ -77,6 +77,11 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
 func PistolShoot(transform *Transform, gun *GunBase) {
     bullet := CreateBullet(transform, gun)
     gameObjects = append(gameObjects, bullet)
+
+    pushBack(gun.carrier, 2.0)
+    if !gun.isEnemy {
+        camera.Shake(transform.rotation, 2.0)
+    }
 }
 
 func ShotgunShoot(transform *Transform, gun *GunBase) {
@@ -86,22 +91,8 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
         bullet.angle = transform.rotation + angleOffset
         gameObjects = append(gameObjects, bullet)
     }
-
-
-    pushbackForce := 20.0
-    push := Vector2{
-        x: pushbackForce * math.Cos(transform.rotation),
-        y: pushbackForce * math.Sin(transform.rotation),
-    }
     
-    if player, ok := gun.carrier.(*Player); ok {
-        player.velocity.x -= push.x
-        player.velocity.y -= push.y
-    }
-    if enemy, ok := gun.carrier.(*Enemy); ok {
-        enemy.velocity.x -= push.x
-        enemy.velocity.y -= push.y
-    }
+    pushBack(gun.carrier, 20.0)
 
     if !gun.isEnemy {
         camera.Shake(transform.rotation, 5.0)
@@ -114,6 +105,13 @@ func RifleShoot(transform *Transform, gun *GunBase) {
         for i := 0; i < 5; i++ {
             bullet := CreateBullet(transform, gun)
             gameObjects = append(gameObjects, bullet)
+
+            if !gun.isEnemy {
+                camera.Shake(transform.rotation, 2.5)
+            }
+
+            pushBack(gun.carrier, 2.0)
+
             pausableSleep(100 * time.Millisecond)
             createMuzzleFlash(gun)
         }
@@ -125,7 +123,15 @@ func MinigunShoot(transform *Transform, gun *GunBase) {
         for i := 0; i < 20; i++ {
             bullet := CreateBullet(transform, gun)
             gameObjects = append(gameObjects, bullet)
+
+            pushBack(gun.carrier, 3.0)
+
             pausableSleep(50 * time.Millisecond)
+
+            if !gun.isEnemy {
+                camera.Shake(transform.rotation, 5.0)
+            }
+
             createMuzzleFlash(gun)
         }
     }()
@@ -143,5 +149,16 @@ func StartGunCooldown(gun *GunBase) {
 
         gun.SetCooldownTimer(-1)
     }()
+}
+
+func pushBack(target GameObject, amount float64) {
+    if player, ok := target.(*Player); ok {
+        player.velocity.x -= amount * math.Cos(player.transform.rotation)
+        player.velocity.y -= amount * math.Sin(player.transform.rotation)
+    }
+    if enemy, ok := target.(*Enemy); ok {
+        enemy.velocity.x -= amount * math.Cos(enemy.transform.rotation)
+        enemy.velocity.y -= amount * math.Sin(enemy.transform.rotation)
+    }
 }
 
