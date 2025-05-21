@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math"
+	"math/rand/v2"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -11,6 +13,7 @@ type MuzzleFlash struct {
 	transform Transform
     path     string
 	target GameObject
+	spawnTime time.Time
 	offset Vector2
 }
 
@@ -28,18 +31,19 @@ func (flash *MuzzleFlash) MoveToTarget() {
 	newPos.x += rotatedX
 	newPos.y += rotatedY
 
-
-	fmt.Println(rotatedX, rotatedY, flash.offset)
-
 	flash.transform = newPos
-	flash.transform.rotation = newPos.rotation
+	flash.transform.rotation = newPos.rotation + math.Pi/2
 }
 
 func NewMuzzleFlash(target GameObject, offset Vector2) *MuzzleFlash {
+
+	randomNum := rand.IntN(4)
+
 	flash := MuzzleFlash{
-		path: "/sprites/muzzle-flash",
+		path: "/sprites/muzzle-flash/" + fmt.Sprint(randomNum + 1),
 		target: target,
 		offset: offset,
+		spawnTime: time.Now(),
 	}
 
 	flash.MoveToTarget()
@@ -49,23 +53,10 @@ func NewMuzzleFlash(target GameObject, offset Vector2) *MuzzleFlash {
 
 func (flash *MuzzleFlash) Update() {
 	flash.MoveToTarget()
-
-
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		flash.offset.y += 1
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		flash.offset.y -= 1
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		flash.offset.x += 1
-	}
-
-	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		flash.offset.x -= 1
-	}
+	
+	if time.Since(flash.spawnTime) > 40*time.Millisecond {
+		removeGameObject(flash)
+	}	
 }
 
 func (flash *MuzzleFlash) Draw(screen *ebiten.Image) {

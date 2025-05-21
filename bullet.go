@@ -103,6 +103,26 @@ func (bullet *Bullet) Update() {
 	}
 }
 
+func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
+	bullet := Bullet{
+		transform: Transform{
+			x:      transform.x,
+			y:      transform.y,
+			width:  25,
+			height: 10,
+		},
+		angle:     transform.rotation,
+		speed:     15,
+		fromEnemy: gun.isEnemy,
+	}
+
+	bullet.transform.x += gun.offset.x
+	bullet.transform.y += gun.offset.y
+	bullet.transform.RotateAround(transform.rotation, transform.GetPosition())
+
+	return &bullet
+}
+
 func (bullet *Bullet) Draw(screen *ebiten.Image) {
 	bullet.transform.rotation = bullet.angle
 	drawRect(

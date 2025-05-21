@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -18,14 +17,7 @@ type GunBase struct {
 func createMuzzleFlash(gun *GunBase) {    
     flash := NewMuzzleFlash(gun.carrier, gun.offset)
 
-    fmt.Println(gun)
-
     gameObjects = append(gameObjects, flash)
-
-    go func() {
-        pausableSleep(50 * time.Millisecond)
-        removeGameObject(flash)
-    }()
 }
 
 func (g *GunBase) Shoot(transform *Transform) {
@@ -66,8 +58,6 @@ func (g *GunBase) Name() string {
 func NewGun(stats GunStats, carrier GameObject) *GunBase {
     fromEnemy := false
 
-    getCachedImage("/sprites/muzzle-flash")
-
     if _, ok := carrier.(*Enemy); ok {
         fromEnemy = true
     }
@@ -85,35 +75,16 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
 
 // Example shoot behaviors
 func PistolShoot(transform *Transform, gun *GunBase) {
-    bullet := Bullet{
-        transform: Transform{
-            x:      transform.x,
-            y:      transform.y,
-            width:  25,
-            height: 10,
-        },
-        angle:     transform.rotation,
-        speed:     10,
-        fromEnemy: gun.isEnemy,
-    }
-    gameObjects = append(gameObjects, &bullet)
+    bullet := CreateBullet(transform, gun)
+    gameObjects = append(gameObjects, bullet)
 }
 
 func ShotgunShoot(transform *Transform, gun *GunBase) {
     for i := -2; i <= 2; i++ {
         angleOffset := float64(i) * 0.2
-        bullet := Bullet{
-            transform: Transform{
-                x:      transform.x,
-                y:      transform.y,
-                width:  25,
-                height: 10,
-            },
-            angle:     transform.rotation + angleOffset,
-            speed:     10,
-            fromEnemy: gun.isEnemy,
-        }
-        gameObjects = append(gameObjects, &bullet)
+        bullet := CreateBullet(transform, gun)
+        bullet.angle = transform.rotation + angleOffset
+        gameObjects = append(gameObjects, bullet)
     }
 
 
@@ -141,19 +112,10 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
 func RifleShoot(transform *Transform, gun *GunBase) {
     go func() {
         for i := 0; i < 5; i++ {
-            bullet := Bullet{
-                transform: Transform{
-                    x:      transform.x,
-                    y:      transform.y,
-                    width:  25,
-                    height: 10,
-                },
-                angle:     transform.rotation,
-                speed:     10,
-                fromEnemy: gun.isEnemy,
-            }
-            gameObjects = append(gameObjects, &bullet)
+            bullet := CreateBullet(transform, gun)
+            gameObjects = append(gameObjects, bullet)
             pausableSleep(100 * time.Millisecond)
+            createMuzzleFlash(gun)
         }
     }()
 }
@@ -161,19 +123,10 @@ func RifleShoot(transform *Transform, gun *GunBase) {
 func MinigunShoot(transform *Transform, gun *GunBase) {
     go func() {
         for i := 0; i < 20; i++ {
-            bullet := Bullet{
-                transform: Transform{
-                    x:      transform.x,
-                    y:      transform.y,
-                    width:  25,
-                    height: 10,
-                },
-                angle:     transform.rotation,
-                speed:     15,
-                fromEnemy: gun.isEnemy,
-            }
-            gameObjects = append(gameObjects, &bullet)
+            bullet := CreateBullet(transform, gun)
+            gameObjects = append(gameObjects, bullet)
             pausableSleep(50 * time.Millisecond)
+            createMuzzleFlash(gun)
         }
     }()
 }
