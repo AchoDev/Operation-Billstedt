@@ -72,7 +72,6 @@ func (g *Game) Update() error {
 		currentLevel.UpdateLevel()
 		checkCollisions(&player.transform, Vector2{playerX, playerY})
 
-		moveCamera()
 		camera.Update()
 	}
 
@@ -120,20 +119,8 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 	return 1920, 1080
 }
 
-func moveCamera() {
-	diff := Vector2{
-		x: 750 - camera.x,
-		y: player.transform.y - camera.y,
-	}
 
-	zoomDiff := camera.zoom - 1.2
-
-	camera.zoom -= zoomDiff * 0.1
-	camera.x += diff.x * 0.1
-	camera.y += diff.y * 0.1
-}
-
-func checkCollisions(tr *Transform, startPosition Vector2) {
+func checkCollisions(tr *Transform, startPosition Vector2) (bool, bool) {
 
 	xCenterCircle := Circle{
 		Center: Vector2{tr.x, startPosition.y},
@@ -144,6 +131,9 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 		Center: Vector2{startPosition.x, tr.y},
 		Radius: tr.width / 2,
 	}
+
+	xCollided := false
+	yCollided := false
 
 	for _, gameObj := range gameObjects {
 
@@ -163,10 +153,12 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 
 			if CircleRotatedRectColliding(xCenterCircle, rect) {
 				tr.x = startPosition.x
+				xCollided = true
 			}
 
 			if CircleRotatedRectColliding(yCenterCircle, rect) {
 				tr.y = startPosition.y
+				yCollided = true
 			}
 		}
 	}
@@ -183,12 +175,17 @@ func checkCollisions(tr *Transform, startPosition Vector2) {
 
 		if CircleRotatedRectColliding(xCenterCircle, rect) {
 			tr.x = startPosition.x
+			xCollided = true
+				
 		}
 
 		if CircleRotatedRectColliding(yCenterCircle, rect) {
 			tr.y = startPosition.y
+			yCollided = true
 		}
 	}
+
+	return xCollided, yCollided
 }
 
 func createRectFromTransform(transform Transform) Rect {

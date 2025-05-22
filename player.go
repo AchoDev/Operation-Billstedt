@@ -121,6 +121,23 @@ func (player *Player) Update() {
 	if ebiten.IsKeyPressed(ebiten.KeyQ) {
 		camera.zoom -= 0.01
 	}
+
+
+	// if ebiten.IsKeyPressed(ebiten.KeyRight) {
+	// 	casingPoint.y += 1
+	// }
+	
+	// if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+	// 	casingPoint.y -= 1
+	// }
+	// if ebiten.IsKeyPressed(ebiten.KeyUp) {
+	// 	casingPoint.x -= 1
+	// }
+	// if ebiten.IsKeyPressed(ebiten.KeyDown) {
+	// 	casingPoint.x += 1
+	// }
+
+	// fmt.Println("Casing Point:", casingPoint.x, casingPoint.y)
 }
 
 func move(player *Player) {

@@ -45,4 +45,29 @@ func (c *Camera) Update() {
 
     c.velocity.x *= 0.9
     c.velocity.y *= 0.9
+
+
+    target := Vector2{
+        x: 750,
+        y: player.transform.y,
+    }
+
+    direction := Vector2{
+        x: math.Cos(player.transform.rotation),
+        y: math.Sin(player.transform.rotation),
+    }
+
+    target.x += direction.x * 100
+    target.y += direction.y * 100
+
+    diff := Vector2{
+		x: target.x - camera.x,
+		y: target.y - camera.y,
+	}
+
+	zoomDiff := camera.zoom - 1.2
+
+	camera.zoom -= zoomDiff * 0.1
+	camera.x += diff.x * 0.1
+	camera.y += diff.y * 0.1
 }

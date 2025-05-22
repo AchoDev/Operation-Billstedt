@@ -12,6 +12,8 @@ type GunBase struct {
     name          string
     offset       Vector2
     spread      float64
+    hasCasing bool
+    casingPoint Vector2
     shootBehavior func(transform *Transform, gun *GunBase)
 }
 
@@ -71,6 +73,8 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
         cooldown:      stats.cooldown,
         name:          stats.name,
         spread:       stats.spread,
+        hasCasing: stats.hasCasing,
+        casingPoint: stats.casingPoint,
         shootBehavior: stats.shootBehavior,
     }
 }
