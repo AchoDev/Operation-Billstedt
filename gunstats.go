@@ -15,7 +15,7 @@ var pistolStats = GunStats{
         x: 97,
         y: 7,
     },
-    spread: 0.05,
+    spread: 0.01,
     shootBehavior: PistolShoot,
 }
 
@@ -27,7 +27,7 @@ var shotgunStats = GunStats{
         x: 78,
         y: 19,
     },
-    spread: 0.5,
+    spread: 0.05,
     shootBehavior: ShotgunShoot,
 }
 
@@ -39,7 +39,7 @@ var rifleStats = GunStats{
         x: 94,
         y: 17,
     },
-    spread: 0.1,
+    spread: 0.025,
     shootBehavior: RifleShoot,
 }
 
@@ -50,6 +50,6 @@ var minigunStats = GunStats{
         x: 101,
         y: 20,
     },
-    spread: 0.2,
+    spread: 0.05,
     shootBehavior: MinigunShoot,
 }

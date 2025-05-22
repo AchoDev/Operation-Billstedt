@@ -16,8 +16,10 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 		gun.cooldown = 750
 	case EnemyTypeEmran:
 		gun = NewGun(rifleStats, nil)
+		gun.cooldown = 2000
 	case EnemyTypeNick:
 		gun = NewGun(shotgunStats, nil)
+		gun.cooldown = 2500
 	}
 
 	enemy := Enemy{

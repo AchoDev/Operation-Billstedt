@@ -89,9 +89,13 @@ func PistolShoot(transform *Transform, gun *GunBase) {
 
 func ShotgunShoot(transform *Transform, gun *GunBase) {
     for i := -2; i <= 2; i++ {
-        angleOffset := float64(i) * 0.2
-        bullet := CreateBullet(transform, gun)
-        bullet.angle = transform.rotation + angleOffset
+        angleOffset := float64(i) * 0.1
+        tr := Transform{
+            x:      transform.x,
+            y:      transform.y,
+            rotation: transform.rotation + angleOffset, 
+        }
+        bullet := CreateBullet(&tr, gun)
         gameObjects = append(gameObjects, bullet)
     }
     
