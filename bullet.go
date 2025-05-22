@@ -1,7 +1,6 @@
 package main
 
 import (
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -124,12 +123,13 @@ func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
 }
 
 func (bullet *Bullet) Draw(screen *ebiten.Image) {
-	bullet.transform.rotation = bullet.angle
-	drawRect(
-		screen,
-		bullet.transform,
-		color.RGBA{255, 238, 66, 255},
-	)
+	bullet.transform.rotation = bullet.angle + math.Pi/2
+	sprite := getCachedImage("sprites/bullet")
+	op := defaultImageOptions()
+	op.OriginalImageSize = true
+	op.Scale = 0.04
+
+	drawImageWithOptions(screen, sprite, bullet.transform, op)
 }
 
 func (bullet *Bullet) GetTransform() Transform {
