@@ -13,6 +13,7 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 	switch enemyType {
 	case EnemyTypeEvren:
 		gun = NewGun(pistolStats, nil)
+		gun.cooldown = 750
 	case EnemyTypeEmran:
 		gun = NewGun(rifleStats, nil)
 	case EnemyTypeNick:
@@ -51,20 +52,20 @@ type Enemy struct {
 	currentPath []Vector2
 	currentGoal Vector2
 	velocity    Vector2
-	pathChan <-chan []Vector2
+	pathChan    <-chan []Vector2
 }
 
 var pathFindingGridSize = 20
 
 func runPathfindingAlgorithmAsync(start, end Transform, colliders []*Collider, gridSize int, worldSize Vector2) <-chan []Vector2 {
-    resultChan := make(chan []Vector2, 1)
+	resultChan := make(chan []Vector2, 1)
 
-    go func() {
-        result := runPathfindingAlgorithm(start, end, colliders, gridSize, worldSize)
-        resultChan <- result
-    }()
+	go func() {
+		result := runPathfindingAlgorithm(start, end, colliders, gridSize, worldSize)
+		resultChan <- result
+	}()
 
-    return resultChan
+	return resultChan
 }
 
 func (enemy *Enemy) Update() {
@@ -86,7 +87,7 @@ func (enemy *Enemy) Update() {
 		if enemy == e {
 			continue
 		}
-		
+
 		collider := &Collider{
 			transform: Transform{
 				x:      e.transform.x,
@@ -104,7 +105,7 @@ func (enemy *Enemy) Update() {
 			continue
 		}
 
-		predictionSteps := 10       
+		predictionSteps := 10
 		stepSize := 50.0
 		colliderWidth := 10.0
 		colliderHeight := 10.0
@@ -132,14 +133,13 @@ func (enemy *Enemy) Update() {
 
 	path := enemy.currentPath
 
-	if (enemy.currentGoal.x != player.transform.x || enemy.currentGoal.y != player.transform.y) && enemy.pathChan == nil  {
+	if (enemy.currentGoal.x != player.transform.x || enemy.currentGoal.y != player.transform.y) && enemy.pathChan == nil {
 		enemy.currentGoal = Vector2{
 			x: player.transform.x,
 			y: player.transform.y,
 		}
 		enemy.pathChan = runPathfindingAlgorithmAsync(enemy.transform, player.transform, colliders, pathFindingGridSize, Vector2{14000, 14000})
 	}
-
 
 	select {
 	case newPath := <-enemy.pathChan:
@@ -150,7 +150,7 @@ func (enemy *Enemy) Update() {
 		}
 
 		path = enemy.currentPath
-		
+
 	default:
 	}
 
