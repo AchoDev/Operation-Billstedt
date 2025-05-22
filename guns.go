@@ -103,6 +103,7 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
         addGameObject(bullet)
     }
     
+    PlaySound("shotgun")
     pushBack(gun.carrier, 20.0)
 
     if !gun.isEnemy {
