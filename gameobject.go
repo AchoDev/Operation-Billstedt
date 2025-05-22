@@ -19,7 +19,7 @@ var rectCache = make(map[string]*ebiten.Image)
 var imageCache = make(map[string]*ebiten.Image)
 
 func getCachedRect(width, height int, color color.Color) *ebiten.Image {
-    key := fmt.Sprintf("%dx%d-%v", width, height, color)
+	key := fmt.Sprintf("%dx%d-%v", width, height, color)
 	if rect, ok := rectCache[key]; ok {
 		return rect
 	}
@@ -58,13 +58,11 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 		transform.height = float64(image.Bounds().Dy())
 	}
 
-
-
-	if transform.x+(transform.width * options.Scale)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width * options.Scale)/2 > camera.x+camera.width/camera.zoom/2 {
+	if transform.x+(transform.width*options.Scale)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width*options.Scale)/2 > camera.x+camera.width/camera.zoom/2 {
 		return
 	}
 
-	if transform.y+(transform.height * options.Scale)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height * options.Scale)/2 > camera.y+camera.height/camera.zoom/2 {
+	if transform.y+(transform.height*options.Scale)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height*options.Scale)/2 > camera.y+camera.height/camera.zoom/2 {
 		return
 	}
 
@@ -105,12 +103,13 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	if options.FlipY {
 		op.GeoM.Scale(1, -1)
 	}
-	op.GeoM.Rotate(transform.rotation)
 
 	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
-	op.GeoM.Scale(options.Scale, options.Scale)              // Scale the sprite
+	op.GeoM.Scale(options.Scale, options.Scale) // Scale the sprite
+	op.GeoM.Rotate(transform.rotation)
 	op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
 	op.ColorScale.ScaleAlpha(float32(options.Alpha) / 255.0) // Set the alpha value
+	op.Filter = ebiten.FilterLinear
 	screen.DrawImage(image, op)
 }
 
@@ -119,8 +118,8 @@ type ImageOptions struct {
 	Alpha             float64
 	Scale             float64
 	OriginalImageSize bool
-	FlipX 		  bool
-	FlipY bool
+	FlipX             bool
+	FlipY             bool
 }
 
 func defaultImageOptions() ImageOptions {
@@ -129,7 +128,7 @@ func defaultImageOptions() ImageOptions {
 		Alpha:             255,
 		Scale:             1,
 		OriginalImageSize: false,
-		FlipX: false,
-		FlipY: false,
+		FlipX:             false,
+		FlipY:             false,
 	}
 }
