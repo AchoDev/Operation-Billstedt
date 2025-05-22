@@ -1,197 +1,143 @@
 package main
 
 import (
+	"math"
 	"time"
 )
-
-type Gun interface {
-    Name() string
-    Shoot(transform *Transform)
-    GetCooldown() int
-    GetCooldownTimer() float64
-    SetCooldownTimer(timer float64)
-    IsEnemy() bool
-    SetIsEnemy(isEnemy bool)
-}
-
-type Pistol struct {
+type GunBase struct {
     cooldownTimer float64
-    isEnemy bool
+    isEnemy       bool
+    carrier     GameObject
+    cooldown      int
+    name          string
+    offset       Vector2
+    shootBehavior func(transform *Transform, gun *GunBase)
 }
 
-func createGun(gun Gun, isEnemy bool) Gun {
-    gun.SetCooldownTimer(-1)
-    gun.SetIsEnemy(isEnemy)
-    return gun
+func createMuzzleFlash(gun *GunBase) {    
+    flash := NewMuzzleFlash(gun.carrier, gun.offset)
+
+    gameObjects = append(gameObjects, flash)
 }
 
-func (g *Pistol) Shoot(transform *Transform) {
-
+func (g *GunBase) Shoot(transform *Transform) {
     if g.cooldownTimer != -1 {
         return
     }
-
-    // Create a bullet
-    bullet := Bullet{
-        transform: Transform{
-            x: transform.x,
-            y: transform.y,
-            width: 25,
-            height: 10,
-        },
-        angle: transform.rotation, // Set the angle based on the player's rotation
-        speed: 10,
-        fromEnemy: g.isEnemy,
+    if g.shootBehavior != nil {
+        g.shootBehavior(transform, g)
+        createMuzzleFlash(g)
     }
-
     StartGunCooldown(g)
-
-    // Update the bullet's position
-    gameObjects = append(gameObjects, &bullet)
 }
 
-func (g *Pistol) GetCooldown() int {
-    return 500 // Cooldown in milliseconds
+func (g *GunBase) GetCooldown() int {
+    return g.cooldown
 }
 
-func (g *Pistol) GetCooldownTimer() float64 {
+func (g *GunBase) GetCooldownTimer() float64 {
     return g.cooldownTimer
 }
 
-func (g *Pistol) SetCooldownTimer(timer float64) {
+func (g *GunBase) SetCooldownTimer(timer float64) {
     g.cooldownTimer = timer
 }
 
-func (g *Pistol) IsEnemy() bool {
+func (g *GunBase) IsEnemy() bool {
     return g.isEnemy
 }
 
-func (g *Pistol) SetIsEnemy(isEnemy bool) {
+func (g *GunBase) SetIsEnemy(isEnemy bool) {
     g.isEnemy = isEnemy
 }
 
-func (g *Pistol) Name() string {
-    return "Pistol"
+func (g *GunBase) Name() string {
+    return g.name
 }
 
+func NewGun(stats GunStats, carrier GameObject) *GunBase {
+    fromEnemy := false
 
-type Shotgun struct {
-    cooldownTimer float64
-    isEnemy bool
-}
-
-func (g *Shotgun) Shoot(transform *Transform) {
-
-    if g.cooldownTimer != -1 {
-        return
+    if _, ok := carrier.(*Enemy); ok {
+        fromEnemy = true
     }
+    
+    return &GunBase{
+        cooldownTimer: -1,
+        isEnemy:       fromEnemy,
+        carrier:      carrier,
+        offset:         stats.offset,
+        cooldown:      stats.cooldown,
+        name:          stats.name,
+        shootBehavior: stats.shootBehavior,
+    }
+}
 
-    // Create multiple bullets for the shotgun
+// Example shoot behaviors
+func PistolShoot(transform *Transform, gun *GunBase) {
+    bullet := CreateBullet(transform, gun)
+    gameObjects = append(gameObjects, bullet)
+
+    pushBack(gun.carrier, 2.0)
+    if !gun.isEnemy {
+        camera.Shake(transform.rotation, 2.0)
+    }
+}
+
+func ShotgunShoot(transform *Transform, gun *GunBase) {
     for i := -2; i <= 2; i++ {
-        angleOffset := float64(i) * 0.2 // Adjust the spread of the shotgun
-        bullet := Bullet{
-            transform: Transform{
-                x: transform.x,
-                y: transform.y,
-                width: 25,
-                height: 10,
-            },
-            angle: transform.rotation + angleOffset, // Set the angle based on the player's rotation
-            speed: 10,
-            fromEnemy: g.isEnemy,
-        }
+        angleOffset := float64(i) * 0.2
+        bullet := CreateBullet(transform, gun)
+        bullet.angle = transform.rotation + angleOffset
+        gameObjects = append(gameObjects, bullet)
+    }
+    
+    pushBack(gun.carrier, 20.0)
 
-        // Update the bullet's position
-        gameObjects = append(gameObjects, &bullet)
+    if !gun.isEnemy {
+        camera.Shake(transform.rotation, 5.0)
     }
 
-    StartGunCooldown(g)
 }
 
-func (g *Shotgun) GetCooldown() int {
-    return 5000 // Cooldown in milliseconds
-}
-
-func (g *Shotgun) GetCooldownTimer() float64 {
-    return g.cooldownTimer
-}
-
-func (g *Shotgun) SetCooldownTimer(timer float64) {
-    g.cooldownTimer = timer
-}
-
-func (g *Shotgun) IsEnemy() bool {
-    return g.isEnemy
-}
-
-func (g *Shotgun) SetIsEnemy(isEnemy bool) {
-    g.isEnemy = isEnemy
-}
-
-func (g *Shotgun) Name() string {
-    return "Shotgun"
-}
-
-
-type Rifle struct {
-    cooldownTimer float64
-    isEnemy bool
-}
-
-func (g *Rifle) Shoot(transform *Transform) {
-
-    if g.cooldownTimer != -1 {
-        return
-    }
-
-    go func () {
+func RifleShoot(transform *Transform, gun *GunBase) {
+    go func() {
         for i := 0; i < 5; i++ {
-            // Create a bullet
-            bullet := Bullet{
-                transform: Transform{
-                    x: transform.x,
-                    y: transform.y,
-                    width: 25,
-                    height: 10,
-                },
-                angle: transform.rotation, // Set the angle based on the player's rotation
-                speed: 10,
-                fromEnemy: g.isEnemy,
+            bullet := CreateBullet(transform, gun)
+            gameObjects = append(gameObjects, bullet)
+
+            if !gun.isEnemy {
+                camera.Shake(transform.rotation, 2.5)
             }
-            gameObjects = append(gameObjects, &bullet)
-            
-            pausableSleep(100 * time.Millisecond) // Sleep for 100 milliseconds
+
+            pushBack(gun.carrier, 2.0)
+
+            pausableSleep(100 * time.Millisecond)
+            createMuzzleFlash(gun)
         }
     }()
-
-    StartGunCooldown(g)
 }
 
-func (g *Rifle) GetCooldown() int {
-    return 1000 // Cooldown in milliseconds
+func MinigunShoot(transform *Transform, gun *GunBase) {
+    go func() {
+        for i := 0; i < 20; i++ {
+            bullet := CreateBullet(transform, gun)
+            gameObjects = append(gameObjects, bullet)
+
+            pushBack(gun.carrier, 3.0)
+
+            pausableSleep(50 * time.Millisecond)
+
+            if !gun.isEnemy {
+                camera.Shake(transform.rotation, 5.0)
+            }
+
+            createMuzzleFlash(gun)
+        }
+    }()
 }
 
-func (g *Rifle) GetCooldownTimer() float64 {
-    return g.cooldownTimer
-}
-
-func (g *Rifle) SetCooldownTimer(timer float64) {
-    g.cooldownTimer = timer
-}
-
-func (g *Rifle) IsEnemy() bool {
-    return g.isEnemy
-}
-
-func (g *Rifle) SetIsEnemy(isEnemy bool) {
-    g.isEnemy = isEnemy
-}
-
-func (g *Rifle) Name() string {
-    return "Rifle"
-}
-
-func StartGunCooldown(gun Gun) {
+func StartGunCooldown(gun *GunBase) {
     go func() {
         gun.SetCooldownTimer(float64(gun.GetCooldown()))
         start := time.Now()
@@ -205,60 +151,14 @@ func StartGunCooldown(gun Gun) {
     }()
 }
 
-
-type Minigun struct {
-    cooldownTimer float64
-    isEnemy       bool
-}
-
-func (g *Minigun) Shoot(transform *Transform) {
-
-    if g.cooldownTimer != -1 {
-        return
+func pushBack(target GameObject, amount float64) {
+    if player, ok := target.(*Player); ok {
+        player.velocity.x -= amount * math.Cos(player.transform.rotation)
+        player.velocity.y -= amount * math.Sin(player.transform.rotation)
     }
-
-    go func() {
-        for i := 0; i < 20; i++ { // Fire 20 bullets in rapid succession
-            bullet := Bullet{
-                transform: Transform{
-                    x:      transform.x,
-                    y:      transform.y,
-                    width:  25,
-                    height: 10,
-                },
-                angle:     transform.rotation, // Set the angle based on the player's rotation
-                speed:     15,                // Faster bullet speed
-                fromEnemy: g.isEnemy,
-            }
-            gameObjects = append(gameObjects, &bullet)
-
-            pausableSleep(50 * time.Millisecond) // Sleep for 50 milliseconds between bullets
-        }
-    }()
-
-    StartGunCooldown(g)
+    if enemy, ok := target.(*Enemy); ok {
+        enemy.velocity.x -= amount * math.Cos(enemy.transform.rotation)
+        enemy.velocity.y -= amount * math.Sin(enemy.transform.rotation)
+    }
 }
 
-func (g *Minigun) GetCooldown() int {
-    return 3000 // Cooldown in milliseconds
-}
-
-func (g *Minigun) GetCooldownTimer() float64 {
-    return g.cooldownTimer
-}
-
-func (g *Minigun) SetCooldownTimer(timer float64) {
-    g.cooldownTimer = timer
-}
-
-func (g *Minigun) IsEnemy() bool {
-    return g.isEnemy
-}
-
-func (g *Minigun) SetIsEnemy(isEnemy bool) {
-    g.isEnemy = isEnemy
-}
-
-func (g *Minigun) Name() string {
-    return "Minigun"
-}

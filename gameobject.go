@@ -5,15 +5,18 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type GameObject interface {
 	Update()
 	Draw(screen *ebiten.Image)
 	GetTransform() Transform
+	SetTransform(Transform)
 }
 
 var rectCache = make(map[string]*ebiten.Image)
+var imageCache = make(map[string]*ebiten.Image)
 
 func getCachedRect(width, height int, color color.Color) *ebiten.Image {
     key := fmt.Sprintf("%dx%d-%v", width, height, color)
@@ -25,6 +28,19 @@ func getCachedRect(width, height int, color color.Color) *ebiten.Image {
 	rect.Fill(color)
 	rectCache[key] = rect
 	return rect
+}
+
+func getCachedImage(path string) *ebiten.Image {
+	if image, ok := imageCache[path]; ok {
+		return image
+	}
+
+	image, _, err := ebitenutil.NewImageFromFile("assets/" + path + ".png")
+	if err != nil {
+		panic(err)
+	}
+	imageCache[path] = image
+	return image
 }
 
 func drawRect(screen *ebiten.Image, transform Transform, color color.Color) {
@@ -42,16 +58,21 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 		transform.height = float64(image.Bounds().Dy())
 	}
 
-	if transform.x+transform.width/2 < camera.x-camera.width/camera.zoom/2 || transform.x-transform.width/2 > camera.x+camera.width/camera.zoom/2 {
+
+
+	if transform.x+(transform.width * options.Scale)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width * options.Scale)/2 > camera.x+camera.width/camera.zoom/2 {
 		return
 	}
 
-	if transform.y+transform.height/2 < camera.y-camera.height/camera.zoom/2 || transform.y-transform.height/2 > camera.y+camera.height/camera.zoom/2 {
+	if transform.y+(transform.height * options.Scale)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height * options.Scale)/2 > camera.y+camera.height/camera.zoom/2 {
 		return
 	}
 
 	transform.x -= camera.x
 	transform.y -= camera.y
+
+	transform.x -= camera.offset.x
+	transform.y -= camera.offset.y
 
 	transform.x *= camera.zoom
 	transform.y *= camera.zoom

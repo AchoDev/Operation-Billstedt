@@ -1,37 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
-	var gun Gun
+	var gun *GunBase
 
 	switch enemyType {
 	case EnemyTypeEvren:
-		gun = &Pistol{}
+		gun = NewGun(pistolStats, nil)
 	case EnemyTypeEmran:
-		gun = &Shotgun{}
+		gun = NewGun(rifleStats, nil)
 	case EnemyTypeNick:
-		gun = &Rifle{}
+		gun = NewGun(shotgunStats, nil)
 	}
 
 	enemy := Enemy{
 		transform: Transform{
 			x:      float64(x),
 			y:      float64(y),
-			width:  50,
-			height: 50,
+			width:  30,
+			height: 30,
 		},
-		gun:       createGun(gun, true),
+		gun:       *gun,
 		enemyType: enemyType,
 	}
+
+	enemy.gun.carrier = &enemy
+	enemy.gun.isEnemy = true
 
 	return &enemy
 }
@@ -46,7 +46,7 @@ const (
 
 type Enemy struct {
 	transform   Transform
-	gun         Gun
+	gun         GunBase
 	enemyType   EnemyType
 	currentPath []Vector2
 	currentGoal Vector2
@@ -82,10 +82,57 @@ func (enemy *Enemy) Update() {
 		colliders = append(colliders, collider)
 	}
 
-	var path []Vector2
+	for _, e := range getGameobjectsOfType[*Enemy]() {
+		if enemy == e {
+			continue
+		}
+		
+		collider := &Collider{
+			transform: Transform{
+				x:      e.transform.x,
+				y:      e.transform.y,
+				width:  e.transform.width,
+				height: e.transform.height,
+			},
+		}
+
+		colliders = append(colliders, collider)
+	}
+
+	for _, bullet := range getGameobjectsOfType[*Bullet]() {
+		if bullet.fromEnemy {
+			continue
+		}
+
+		predictionSteps := 10       
+		stepSize := 50.0
+		colliderWidth := 10.0
+		colliderHeight := 10.0
+
+		// Predict the bullet's trajectory
+		for i := 1; i <= predictionSteps; i++ {
+			angle := bullet.angle
+			predictedX := bullet.transform.x + math.Cos(angle)*bullet.speed*stepSize*float64(i)
+			predictedY := bullet.transform.y + math.Sin(angle)*bullet.speed*stepSize*float64(i)
+
+			// Create a small collider at the predicted position
+			collider := &Collider{
+				transform: Transform{
+					x:      predictedX,
+					y:      predictedY,
+					width:  colliderWidth,
+					height: colliderHeight,
+				},
+			}
+
+			// Add the collider to the list
+			colliders = append(colliders, collider)
+		}
+	}
+
+	path := enemy.currentPath
 
 	if (enemy.currentGoal.x != player.transform.x || enemy.currentGoal.y != player.transform.y) && enemy.pathChan == nil  {
-		path = enemy.currentPath
 		enemy.currentGoal = Vector2{
 			x: player.transform.x,
 			y: player.transform.y,
@@ -95,19 +142,16 @@ func (enemy *Enemy) Update() {
 
 
 	select {
-	case path := <-enemy.pathChan:
+	case newPath := <-enemy.pathChan:
 		enemy.pathChan = nil
-		enemy.currentPath = path
-		if len(path) != 0 {
-			enemy.currentPath = path[1:]
+		enemy.currentPath = newPath
+		if len(newPath) != 0 {
+			enemy.currentPath = enemy.currentPath[1:]
 		}
+
+		path = enemy.currentPath
 		
 	default:
-	}
-
-	enemy.currentGoal = Vector2{
-		x: player.transform.x,
-		y: player.transform.y,
 	}
 
 	var target Vector2
@@ -127,20 +171,18 @@ func (enemy *Enemy) Update() {
 			path = enemy.currentPath
 		}
 
-		// forwardVec := Vector2{
-		// 	x: path[0].x - enemy.transform.x,
-		// 	y: path[0].y - enemy.transform.y,
-		// }
-		// dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
+		forwardVec := Vector2{
+			x: path[0].x - enemy.transform.x,
+			y: path[0].y - enemy.transform.y,
+		}
+		dotProduct := forwardVec.x*enemy.velocity.x + forwardVec.y*enemy.velocity.y
 
-		// if dotProduct < 0 && len(enemy.currentPath) > 1 {
-		// 	enemy.currentPath = enemy.currentPath[1:]
-		// 	path = enemy.currentPath
-		// }
+		if dotProduct < 0 && len(enemy.currentPath) > 1 {
+			enemy.currentPath = enemy.currentPath[1:]
+			path = enemy.currentPath
+		}
 
 		target = path[0]
-		target.x += float64(pathFindingGridSize / 2)
-		target.y += float64(pathFindingGridSize / 2)
 	} else {
 		target = Vector2{
 			x: player.transform.x,
@@ -179,11 +221,11 @@ func (enemy *Enemy) Update() {
 
 	switch enemy.enemyType {
 	case EnemyTypeEvren:
-		speed = 3.5
+		speed = 5
 	case EnemyTypeEmran:
-		speed = 2
+		speed = 2.5
 	case EnemyTypeNick:
-		speed = 10
+		speed = 6
 	}
 
 	enemy.velocity.x += direction.x
@@ -227,9 +269,9 @@ func (enemy *Enemy) Update() {
 	case EnemyTypeEvren:
 		attackDistance = 500
 	case EnemyTypeEmran:
-		attackDistance = 200
+		attackDistance = 600
 	case EnemyTypeNick:
-		attackDistance = 750
+		attackDistance = 200
 	}
 
 	if distance < attackDistance {
@@ -239,40 +281,68 @@ func (enemy *Enemy) Update() {
 }
 func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
-	var col color.RGBA
+	// var col color.RGBA
+
+	// switch enemy.enemyType {
+	// case EnemyTypeEvren:
+	// 	col = color.RGBA{0, 255, 0, 255}
+	// case EnemyTypeEmran:
+	// 	col = color.RGBA{255, 0, 255, 255}
+	// case EnemyTypeNick:
+	// 	col = color.RGBA{0, 0, 255, 255}
+	// }
+
+	// drawRect(
+	// 	screen,
+	// 	enemy.transform,
+	// 	col,
+	// )
+
+	var image *ebiten.Image
 
 	switch enemy.enemyType {
 	case EnemyTypeEvren:
-		col = color.RGBA{0, 255, 0, 255}
+		image = getCachedImage("enemies/evren")
 	case EnemyTypeEmran:
-		col = color.RGBA{255, 0, 255, 255}
+		image = getCachedImage("enemies/emran")
 	case EnemyTypeNick:
-		col = color.RGBA{0, 0, 255, 255}
+		image = getCachedImage("enemies/nick")
 	}
 
-	drawRect(
+	offset := Vector2{
+		-110,
+		500,
+	}
+
+	op := defaultImageOptions()
+	op.Anchor = offset
+	op.Scale = 4
+
+	tr := enemy.GetTransform()
+	tr.rotation += math.Pi / 2
+
+	drawImageWithOptions(
 		screen,
-		enemy.transform,
-		col,
+		image,
+		tr,
+		op,
 	)
 
-	for _, point := range enemy.currentPath {
-		drawRect(screen, Transform{
-			x:        point.x - float64(pathFindingGridSize/2),
-			y:        point.y - float64(pathFindingGridSize/2),
-			width:    float64(pathFindingGridSize),
-			height:   float64(pathFindingGridSize),
-			rotation: 0,
-		}, color.RGBA{255, 0, 0, 50})
-	}
-
-	textX := enemy.transform.x - enemy.transform.width/2
-	textY := enemy.transform.y - enemy.transform.height
-
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.gun.GetCooldownTimer()), int(textX), int(textY))
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("%.2f", enemy.transform.rotation), int(textX), int(textY-20))
+	// for _, point := range enemy.currentPath {
+	// 	drawRect(screen, Transform{
+	// 		x:        point.x - float64(pathFindingGridSize/2),
+	// 		y:        point.y - float64(pathFindingGridSize/2),
+	// 		width:    float64(pathFindingGridSize),
+	// 		height:   float64(pathFindingGridSize),
+	// 		rotation: 0,
+	// 	}, color.RGBA{255, 0, 0, 50})
+	// }
 }
 
 func (enemy *Enemy) GetTransform() Transform {
 	return enemy.transform
+}
+
+func (enemy *Enemy) SetTransform(transform Transform) {
+	enemy.transform = transform
 }

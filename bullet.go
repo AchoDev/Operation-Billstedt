@@ -23,7 +23,7 @@ func (bullet *Bullet) Update() {
 		var target GameObject
 
 		if bullet.fromEnemy {
-			if player, ok := gameObject.(*Player); ok {
+			if player, ok := gameObject.(*Player); ok && !invincible {
 				target = player
 			} else {
 				continue
@@ -53,8 +53,15 @@ func (bullet *Bullet) Update() {
 				Angle:  tr.rotation,
 			},
 		) {
-			// Remove the gameObject from the list
-			gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+			if player, ok := target.(*Player); ok {
+				player.health -= 10
+				if player.health <= 0 {
+					// Remove the gameObject from the list
+					gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+				}
+			} else {
+				gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+			}
 
 			// Remove the bullet from the list
 			for j := 0; j < len(gameObjects); j++ {
@@ -96,6 +103,26 @@ func (bullet *Bullet) Update() {
 	}
 }
 
+func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
+	bullet := Bullet{
+		transform: Transform{
+			x:      transform.x,
+			y:      transform.y,
+			width:  25,
+			height: 10,
+		},
+		angle:     transform.rotation,
+		speed:     15,
+		fromEnemy: gun.isEnemy,
+	}
+
+	bullet.transform.x += gun.offset.x
+	bullet.transform.y += gun.offset.y
+	bullet.transform.RotateAround(transform.rotation, transform.GetPosition())
+
+	return &bullet
+}
+
 func (bullet *Bullet) Draw(screen *ebiten.Image) {
 	bullet.transform.rotation = bullet.angle
 	drawRect(
@@ -107,4 +134,8 @@ func (bullet *Bullet) Draw(screen *ebiten.Image) {
 
 func (bullet *Bullet) GetTransform() Transform {
 	return bullet.transform
+}
+
+func (bullet *Bullet) SetTransform(transform Transform) {
+	bullet.transform = transform
 }

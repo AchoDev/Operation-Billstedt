@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
-	"math/rand/v2"
-	"time"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -41,28 +40,28 @@ type Level1 struct {
 func (level *Level1) StartLevel() {
 	train := CreateTrain(Transform{
 		x:      240,
-		y:      -1000,
+		y:      -3000,
 		width:  100,
 		height: 100,
 	}, 1)
 
 	train2 := CreateTrain(Transform{
 		x: 1250,
-		y: 1500,
+		y: 3000,
 	}, -1)
 
 	gameObjects = append(gameObjects, train)
 	gameObjects = append(gameObjects, train2)
 
-	go func() {
-		pausableSleep(time.Second * time.Duration(rand.IntN(5)))
-		train.Drive(2000, 0.2)
-	}()
+	// go func() {
+	// 	pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
+	// 	train.Drive(4000, 0.2)
+	// }()
 
-	go func() {
-		pausableSleep(time.Second * time.Duration(rand.IntN(5)))
-		train2.Drive(2000, 0.2)
-	}()
+	// go func() {
+	// 	pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
+	// 	train2.Drive(4000, 0.2)
+	// }()
 
 	for _, collider := range level.dynamicColliders {
 		gameObjects = append(gameObjects, collider)
@@ -74,30 +73,76 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 	sprites := level.GetSprites()
 	gridSize := 100.0
 
+
+
+	// Create a map to group tiles by their Z order
+	tilesByZ := make(map[float64][]Tile)
 	for _, tile := range tiles {
+		tilesByZ[tile.Z] = append(tilesByZ[tile.Z], tile)
+	}
 
-		tileImage := sprites[tile.Sprite]
-		if tileImage == nil {
-			fmt.Println("Tile image not found for sprite:", tile.Sprite)
-			continue
+	// Extract Z orders and sort them
+	var zOrders []float64
+	for z := range tilesByZ {
+		zOrders = append(zOrders, z)
+	}
+	sort.Float64s(zOrders)
+
+	highestZ := zOrders[len(zOrders)-1]
+
+	// Iterate through tiles in sorted Z order
+	for _, z := range zOrders {
+		for _, tile := range tilesByZ[z] {
+			tileImage := sprites[tile.Sprite]
+			if tileImage == nil {
+				fmt.Println("Tile image not found for sprite:", tile.Sprite)
+				continue
+			}
+
+			op := defaultImageOptions()
+			if levelEditorActivated && tile.Z != float64(currentZEditor) {
+				op.Alpha = 50
+
+				if !onionSkin {
+					continue
+				}
+			}
+
+			drawImageWithOptions(screen, tileImage, Transform{
+				x:        tile.X * float64(gridSize),
+				y:        tile.Y * float64(gridSize),
+				width:    tile.Width * float64(gridSize),
+				height:   tile.Height * float64(gridSize),
+				rotation: tile.Rotation,
+			}, op)
 		}
 
-		op := defaultImageOptions()
-		if levelEditorActivated && tile.Z != float64(currentZ){
-			op.Alpha = 50
-		}
+		for _, gameObject := range gameObjects {
+			
+			if levelEditorActivated && hideGameobjects {
+				continue
+			}
 
-		drawImageWithOptions(screen, tileImage, Transform{
-			x:        tile.X * float64(gridSize),
-			y:        tile.Y * float64(gridSize),
-			width:    tile.Width * float64(gridSize),
-			height:   tile.Height * float64(gridSize),
-			rotation: tile.Rotation,
-		}, op)
+			if gameObject.GetTransform().z == z {
+				gameObject.Draw(screen)
+			}
+		}
+	}
+
+	// Draw game objects with a higher Z level than the highest tile Z
+	for _, gameObject := range gameObjects {
+		if gameObject.GetTransform().z > highestZ {
+			gameObject.Draw(screen)
+		}
 	}
 
 	if levelEditorActivated && selectedTool == 1{
 		for _, collider := range level.GetColliders() {
+
+			if collider.Z != float64(currentZEditor){
+				continue
+			}
+
 			drawRect(screen, Transform{
 				x:      float64(collider.X) * gridSize,
 				y:      float64(collider.Y) * gridSize,

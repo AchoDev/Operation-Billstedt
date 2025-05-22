@@ -6,30 +6,15 @@ import (
 	"image/color"
 	"log"
 	"os"
-	"runtime/pprof"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var gameObjects []GameObject = []GameObject{}
-var player Player = CreatePlayer()
+var player *Player
 
-type Camera struct {
-	x      float64
-	y      float64
-	width  float64
-	height float64
-	zoom   float64
-}
 
-var camera Camera = Camera{
-	x:      0,
-	y:      0,
-	width:  1920,
-	height: 1080,
-	zoom:   1.6,
-}
 
 type LoadedLevel struct {
 	Tiles     []Tile `json:"tiles"`
@@ -76,13 +61,19 @@ func (g *Game) Update() error {
 			fmt.Println("Creating new player")
 			if findPlayer() == nil {
 				player = CreatePlayer()
-				gameObjects = append(gameObjects, &player)
+				gameObjects = append(gameObjects, player)
 			}
 		}
+
+		if isKeyJustPressed(ebiten.KeyK) {
+			invincible = !invincible
+		}
+
 		currentLevel.UpdateLevel()
 		checkCollisions(&player.transform, Vector2{playerX, playerY})
 
 		moveCamera()
+		camera.Update()
 	}
 
 	UpdateLevelEditor(currentLevel)
@@ -93,30 +84,34 @@ func (g *Game) Update() error {
 	return nil
 }
 
-var debugRect *ebiten.Image = ebiten.NewImage(200, 100)
+var debugRect *ebiten.Image = ebiten.NewImage(220, 200)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.Black)
 
 	DrawLevel(screen, currentLevel)
 
-	for _, gameObject := range gameObjects {
-		gameObject.Draw(screen)
-	}
+	// for _, gameObject := range gameObjects {
+	// 	if levelEditorActivated && hideGameobjects {
+	// 		break
+	// 	}
+	// 	gameObject.Draw(screen)
+	// }
 
 	DrawLevelEditor(screen, currentLevel)
 
 	// rect := ebiten.NewImage(200, 100)
 	rect := debugRect
 	rect.Fill(color.Black)
-	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Playtest 1", 0, 0)
+	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Prev. Version 2", 0, 0)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("%.2f", ebiten.ActualFPS()), 0, 20)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Current gun: %s", player.currentGun.Name()), 0, 40)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Cooldown: %.2f", player.currentGun.GetCooldownTimer()), 0, 60)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera pos: %.2f %.2f", camera.x, camera.y), 0, 80)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Camera Zoom: %.2f", camera.zoom), 0, 100)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 120)
-	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %.2f %.2f", player.transform.x, player.transform.y), 0, 140)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %d", len(getGameobjectsOfType[*Enemy]())), 0, 140)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Invincibility: %t", invincible), 0, 160)
 
 	screen.DrawImage(rect, nil)
 }
@@ -127,10 +122,13 @@ func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight 
 
 func moveCamera() {
 	diff := Vector2{
-		x: 650 - camera.x,
+		x: 750 - camera.x,
 		y: player.transform.y - camera.y,
 	}
 
+	zoomDiff := camera.zoom - 1.2
+
+	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1
 	camera.y += diff.y * 0.1
 }
@@ -225,18 +223,11 @@ func getGameobjectsOfType[T GameObject]() []T {
 
 func main() {
 
-	cpuProfile, err := os.Create("cpu.prof")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cpuProfile.Close()
 
-	if err := pprof.StartCPUProfile(cpuProfile); err != nil {
-		log.Fatal(err)
-	}
-	defer pprof.StopCPUProfile()
+	gameObjects = append(gameObjects, NewHealthBar())
 
-	gameObjects = append(gameObjects, &player)
+	player = CreatePlayer()
+	gameObjects = append(gameObjects, player)
 
 	ebiten.SetWindowSize(1920, 1080)
 	// ebiten.SetWindowSize(2000, 1700)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"container/heap"
-	"fmt"
 	"math"
 )
 
@@ -83,7 +82,6 @@ func AStar(start, goal Point, grid [][]int) []Point {
 
     for pq.Len() > 0 {
         if iterationCount > maxIterations {
-            fmt.Println("A* exceeded max iterations, pathfinding failed.")
             return nil
         }
         iterationCount++
@@ -140,6 +138,37 @@ func isInsideCollider(position Vector2, colliders []*Collider) bool {
     return false
 }
 
+func moveOutOfCollider(position Point, grid [][]int) Point {
+
+    gridWidth := len(grid)
+    gridHeight := len(grid[0])
+
+    if grid[position.X][position.Y] > 0 {
+        directions := []Point{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}}
+        for _, d := range directions {
+            adjustedPoint := Point{position.X + d.X, position.Y + d.Y}
+            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
+            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
+            grid[adjustedPoint.X][adjustedPoint.Y] != 1 {
+                position = adjustedPoint
+            break
+            }
+        }
+
+        for _, d := range directions {
+            adjustedPoint := Point{position.X + d.X, position.Y + d.Y}
+            if adjustedPoint.X >= 0 && adjustedPoint.X < gridWidth &&
+            adjustedPoint.Y >= 0 && adjustedPoint.Y < gridHeight &&
+            grid[adjustedPoint.X][adjustedPoint.Y] == 0 {
+                position = adjustedPoint
+            break
+            }
+        }
+    }
+
+    return position
+}
+
 // runPathfindingAlgorithm initializes the grid, marks colliders, and runs A*
 func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSize int, worldSize Vector2) []Vector2 {
     minWorldX, minWorldY := -14000.0, -14000.0
@@ -182,14 +211,19 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
         }
     }
 
-    startPoint := Point{
-        X: int((start.x - minWorldX) / float64(gridSize)),
-        Y: int((start.y - minWorldY) / float64(gridSize)),
-    }
+    // Check if the target grid position is inside a collider
     endPoint := Point{
         X: int((end.x - minWorldX) / float64(gridSize)),
         Y: int((end.y - minWorldY) / float64(gridSize)),
     }
+    // Check if the start grid position is inside a collider
+    startPoint := Point{
+        X: int((start.x - minWorldX) / float64(gridSize)),
+        Y: int((start.y - minWorldY) / float64(gridSize)),
+    }
+
+    startPoint = moveOutOfCollider(startPoint, grid)
+    endPoint = moveOutOfCollider(endPoint, grid)
 
     path := AStar(startPoint, endPoint, grid)
 
@@ -199,10 +233,6 @@ func runPathfindingAlgorithm(start, end Transform, colliders []*Collider, gridSi
             x: float64(point.X)*float64(gridSize) + minWorldX,
             y: float64(point.Y)*float64(gridSize) + minWorldY,
         })
-    }
-
-    if len(path) == 0 {
-        fmt.Println("pathfinding returns no path")
     }
 
     return vectorPath
