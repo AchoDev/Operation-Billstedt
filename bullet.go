@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -114,6 +115,8 @@ func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
 		speed:     15,
 		fromEnemy: gun.isEnemy,
 	}
+
+	bullet.angle += float64(rand.IntN(10) - 5) * gun.spread
 
 	bullet.transform.x += gun.offset.x
 	bullet.transform.y += gun.offset.y

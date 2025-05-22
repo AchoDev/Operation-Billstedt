@@ -11,6 +11,7 @@ type GunBase struct {
     cooldown      int
     name          string
     offset       Vector2
+    spread      float64
     shootBehavior func(transform *Transform, gun *GunBase)
 }
 
@@ -69,9 +70,11 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
         offset:         stats.offset,
         cooldown:      stats.cooldown,
         name:          stats.name,
+        spread:       stats.spread,
         shootBehavior: stats.shootBehavior,
     }
 }
+
 
 // Example shoot behaviors
 func PistolShoot(transform *Transform, gun *GunBase) {
