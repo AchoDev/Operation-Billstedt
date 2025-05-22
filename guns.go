@@ -20,7 +20,7 @@ type GunBase struct {
 func createMuzzleFlash(gun *GunBase) {    
     flash := NewMuzzleFlash(gun.carrier, gun.offset)
 
-    gameObjects = append(gameObjects, flash)
+    addGameObject(flash)
 }
 
 func (g *GunBase) Shoot(transform *Transform) {
@@ -83,7 +83,7 @@ func NewGun(stats GunStats, carrier GameObject) *GunBase {
 // Example shoot behaviors
 func PistolShoot(transform *Transform, gun *GunBase) {
     bullet := CreateBullet(transform, gun)
-    gameObjects = append(gameObjects, bullet)
+    addGameObject(bullet)
 
     pushBack(gun.carrier, 2.0)
     if !gun.isEnemy {
@@ -100,7 +100,7 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
             rotation: transform.rotation + angleOffset, 
         }
         bullet := CreateBullet(&tr, gun)
-        gameObjects = append(gameObjects, bullet)
+        addGameObject(bullet)
     }
     
     pushBack(gun.carrier, 20.0)
@@ -115,7 +115,7 @@ func RifleShoot(transform *Transform, gun *GunBase) {
     go func() {
         for i := 0; i < 5; i++ {
             bullet := CreateBullet(transform, gun)
-            gameObjects = append(gameObjects, bullet)
+            addGameObject(bullet)
 
             if !gun.isEnemy {
                 camera.Shake(transform.rotation, 2.5)
@@ -133,7 +133,7 @@ func MinigunShoot(transform *Transform, gun *GunBase) {
     go func() {
         for i := 0; i < 20; i++ {
             bullet := CreateBullet(transform, gun)
-            gameObjects = append(gameObjects, bullet)
+            addGameObject(bullet)
 
             pushBack(gun.carrier, 3.0)
 

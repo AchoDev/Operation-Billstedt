@@ -216,7 +216,7 @@ func (train *Train) Drive(distance float64, speed float64) {
 				int(spawnPoint.y),
 				enemyType,
 			)
-			gameObjects = append(gameObjects, enemy)
+			addGameObject(enemy)
 		}
 
 		for i := 0; i < .75*60; i++ {

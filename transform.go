@@ -33,3 +33,12 @@ func (t *Transform) RotateAround(angle float64, pivot Vector2) {
     t.x = pivot.x + rotatedX
     t.y = pivot.y + rotatedY
 }
+
+func (t *Transform) GetRect() Rect {
+    return Rect{
+        Center: Vector2{t.x, t.y},
+        Width:  t.width,
+        Height: t.height,
+        Angle:  t.rotation,
+    }
+}

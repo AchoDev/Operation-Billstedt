@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"math"
+	"time"
 
 	"strings"
 
@@ -43,6 +45,7 @@ func CreatePlayer() *Player {
 			"shotgun": loadImage("assets/leo/shotgun.png"),
 		},
 		health:   100,
+		drag: 1.15,
 	}
 
 	p.guns = []GunBase{
@@ -64,11 +67,13 @@ var invincible bool = false
 type Player struct {
 	transform  Transform
 	velocity   Vector2
+	drag float64
 	shooting   bool
 	currentGun GunBase
 	guns       []GunBase
 	sprites    map[string]*ebiten.Image
 	health    int
+	dashing bool
 }
 
 func (player *Player) Update() {
@@ -103,23 +108,78 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.Key6) {
-		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeNick))
+		addGameObject(createEnemy(500, 100, EnemyTypeNick))
 	}
 
 	if isKeyJustPressed(ebiten.Key7) {
-		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeEvren))
+		addGameObject(createEnemy(500, 100, EnemyTypeEvren))
 	}
 
 	if isKeyJustPressed(ebiten.Key8) {
-		gameObjects = append(gameObjects, createEnemy(500, 100, EnemyTypeEmran))
+		addGameObject(createEnemy(500, 100, EnemyTypeEmran))
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeyE) {
-		camera.zoom += 0.01
-	}
+	if isKeyJustPressed(ebiten.KeyE) {
+		player.dashing = true
 
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		camera.zoom -= 0.01
+		direction := Vector2{}
+
+		if ebiten.IsKeyPressed(ebiten.KeyA) {
+			direction.x = -1
+		} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+			direction.x = 1
+		}
+		if ebiten.IsKeyPressed(ebiten.KeyW) {
+			direction.y = -1
+		} else if ebiten.IsKeyPressed(ebiten.KeyS) {
+			direction.y = 1
+		}
+
+		player.velocity.x = direction.x * 30
+		player.velocity.y = direction.y * 30
+
+		angle := math.Atan2(direction.y, direction.x)
+
+		camera.Shake(angle, 5.0)
+
+		player.drag = 1
+
+		go func () {
+			for i := 0; i < 12; i++ {
+				spriteRender := SpriteRenderer{
+					transform: player.transform,
+					sprite: player.GetSprite(),
+				}
+				spriteRender.options = defaultImageOptions()
+				spriteRender.options.Alpha = 0.75
+				spriteRender.options.ColorScale = color.RGBA{255, 255, 255, 100}
+				spriteRender.options.ScaleColor = true
+				spriteRender.options.Scale = 4
+
+				spriteRender.transform.rotation += math.Pi / 2
+
+				addGameObject(&spriteRender)
+
+				go func() {
+					steps := 60.0
+					duration := 0.2
+					for j := 0; j < int(steps); j++ {
+						spriteRender.options.Alpha -= 0.75 / steps
+						pausableSleep(time.Second / time.Duration(steps / duration))
+					}
+
+					removeGameObject(&spriteRender)
+				}()
+
+				pausableSleep(25 * time.Millisecond)
+			}
+		}()
+			
+		go func() {
+			pausableSleep(250 * time.Millisecond)
+			player.dashing = false
+			player.drag = 1.15
+		}()
 	}
 
 
@@ -177,15 +237,25 @@ func move(player *Player) {
 	player.transform.y += player.velocity.y
 		
 	if movement.x == 0 {
-		player.velocity.x /= 1.15
+		player.velocity.x /= player.drag
 	}
 	if movement.y == 0 {
-		player.velocity.y /= 1.15
+		player.velocity.y /= player.drag
 	}
 }
 
-func (player *Player) Draw(screen *ebiten.Image) {
+func (player *Player) GetSprite() *ebiten.Image {
 	sprite := player.sprites[strings.ToLower(player.currentGun.Name())]
+
+	if sprite != nil {
+		return sprite
+	}
+
+	return nil
+}
+
+func (player *Player) Draw(screen *ebiten.Image) {
+	sprite := player.GetSprite()
 
 	if sprite != nil {
 
@@ -200,6 +270,11 @@ func (player *Player) Draw(screen *ebiten.Image) {
 
 		tr := player.GetTransform()
 		tr.rotation += math.Pi / 2
+
+		if player.dashing {
+			op.ColorScale = color.RGBA{255, 255, 255, 255}
+			op.ScaleColor = true
+		}
 
 		drawImageWithOptions(
 			screen,

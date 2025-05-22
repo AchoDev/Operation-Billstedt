@@ -61,7 +61,7 @@ func (g *Game) Update() error {
 			fmt.Println("Creating new player")
 			if findPlayer() == nil {
 				player = CreatePlayer()
-				gameObjects = append(gameObjects, player)
+				addGameObject(player)
 			}
 		}
 
@@ -199,14 +199,6 @@ func createRectFromTransform(transform Transform) Rect {
 	}
 }
 
-func removeGameObject(target GameObject) {
-	for i, gameObj := range gameObjects {
-		if gameObj == target {
-			gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
-		}
-	}
-}
-
 func getGameobjectsOfType[T GameObject]() []T {
 	var list []T
 	for _, gameObj := range gameObjects {
@@ -221,10 +213,10 @@ func getGameobjectsOfType[T GameObject]() []T {
 func main() {
 
 
-	gameObjects = append(gameObjects, NewHealthBar())
+	addGameObject(NewHealthBar())
 
 	player = CreatePlayer()
-	gameObjects = append(gameObjects, player)
+	addGameObject(player)
 
 	ebiten.SetWindowSize(1920, 1080)
 	// ebiten.SetWindowSize(2000, 1700)

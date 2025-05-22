@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -15,8 +16,28 @@ type GameObject interface {
 	SetTransform(Transform)
 }
 
+var gameObjectsMutex = &sync.Mutex{}
 var rectCache = make(map[string]*ebiten.Image)
 var imageCache = make(map[string]*ebiten.Image)
+
+func removeGameObject(obj GameObject) {
+    gameObjectsMutex.Lock()
+    defer gameObjectsMutex.Unlock()
+
+    for i, gameObject := range gameObjects {
+        if gameObject == obj {
+            gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+            return
+        }
+    }
+}
+
+func addGameObject(obj GameObject) {
+    gameObjectsMutex.Lock()
+    defer gameObjectsMutex.Unlock()
+
+    gameObjects = append(gameObjects, obj)
+}
 
 func getCachedRect(width, height int, color color.Color) *ebiten.Image {
 	key := fmt.Sprintf("%dx%d-%v", width, height, color)
@@ -104,12 +125,19 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 		op.GeoM.Scale(1, -1)
 	}
 
+	if options.ScaleColor {
+		op.ColorScale.SetR(float32(options.ColorScale.R))
+		op.ColorScale.SetG(float32(options.ColorScale.G))
+		op.ColorScale.SetB(float32(options.ColorScale.B))
+	}
+
 	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
 	op.GeoM.Scale(options.Scale, options.Scale) // Scale the sprite
 	op.GeoM.Rotate(transform.rotation)
 	op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
 	op.ColorScale.ScaleAlpha(float32(options.Alpha) / 255.0) // Set the alpha value
 	op.Filter = ebiten.FilterLinear
+
 	screen.DrawImage(image, op)
 }
 
@@ -120,6 +148,8 @@ type ImageOptions struct {
 	OriginalImageSize bool
 	FlipX             bool
 	FlipY             bool
+	ScaleColor bool
+	ColorScale        color.RGBA
 }
 
 func defaultImageOptions() ImageOptions {
@@ -130,5 +160,6 @@ func defaultImageOptions() ImageOptions {
 		OriginalImageSize: false,
 		FlipX:             false,
 		FlipY:             false,
+		ColorScale:        color.RGBA{255, 255, 255, 255},
 	}
 }

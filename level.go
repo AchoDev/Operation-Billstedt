@@ -52,8 +52,8 @@ func (level *Level1) StartLevel() {
 		y: 3000,
 	}, -1)
 
-	gameObjects = append(gameObjects, train)
-	gameObjects = append(gameObjects, train2)
+	addGameObject(train)
+	addGameObject(train2)
 
 	go func() {
 		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
@@ -66,7 +66,7 @@ func (level *Level1) StartLevel() {
 	}()
 
 	for _, collider := range level.dynamicColliders {
-		gameObjects = append(gameObjects, collider)
+		addGameObject(collider)
 	}
 }
 

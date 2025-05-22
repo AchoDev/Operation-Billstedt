@@ -55,20 +55,20 @@ func (bullet *Bullet) Update() {
 				Angle:  tr.rotation,
 			},
 		) {
-			if player, ok := target.(*Player); ok {
+			if player, ok := target.(*Player); ok && !player.dashing{
 				player.health -= 10
 				if player.health <= 0 {
 					// Remove the gameObject from the list
-					gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+					removeGameObject(player)
 				}
 			} else {
-				gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+				removeGameObject(target)
 			}
 
 			// Remove the bullet from the list
 			for j := 0; j < len(gameObjects); j++ {
 				if gameObjects[j] == bullet {
-					gameObjects = append(gameObjects[:j], gameObjects[j+1:]...)
+					removeGameObject(bullet)
 					break
 				}
 			}
@@ -96,7 +96,7 @@ func (bullet *Bullet) Update() {
 		) {
 			for i := 0; i < len(gameObjects); i++ {
 				if gameObjects[i] == bullet {
-					gameObjects = append(gameObjects[:i], gameObjects[i+1:]...)
+					removeGameObject(bullet)
 					break
 				}
 			}
@@ -143,7 +143,7 @@ func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
 		}
 
 		casing := CreateCasing(&tr, gun.casingPoint, speed)
-		gameObjects = append(gameObjects, casing)
+		addGameObject(casing)
 	}
 
 	return &bullet
