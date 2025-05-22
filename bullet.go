@@ -23,6 +23,8 @@ func (bullet *Bullet) Update() {
 		gameObject := gameObjects[i]
 		var target GameObject
 
+		hitboxMultiplier := 1.0
+
 		if bullet.fromEnemy {
 			if player, ok := gameObject.(*Player); ok && !invincible {
 				target = player
@@ -30,13 +32,12 @@ func (bullet *Bullet) Update() {
 				continue
 			}
 		} else {
-
 			if enemy, ok := gameObject.(*Enemy); ok {
 				target = enemy
+				hitboxMultiplier = 3
 			} else {
 				continue
 			}
-
 		}
 
 		tr := target.GetTransform()
@@ -49,8 +50,8 @@ func (bullet *Bullet) Update() {
 			},
 			Rect{
 				Center: Vector2{tr.x, tr.y},
-				Width:  tr.width,
-				Height: tr.height,
+				Width:  tr.width * hitboxMultiplier,
+				Height: tr.height * hitboxMultiplier,
 				Angle:  tr.rotation,
 			},
 		) {

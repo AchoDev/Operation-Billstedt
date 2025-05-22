@@ -323,6 +323,7 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	tr := enemy.GetTransform()
 	tr.rotation += math.Pi / 2
 
+	
 	drawImageWithOptions(
 		screen,
 		image,
