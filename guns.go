@@ -86,6 +86,7 @@ func PistolShoot(transform *Transform, gun *GunBase) {
     addGameObject(bullet)
 
     pushBack(gun.carrier, 2.0)
+    PlaySound("pistol")
     if !gun.isEnemy {
         camera.Shake(transform.rotation, 5.0)
     }
@@ -124,6 +125,7 @@ func RifleShoot(transform *Transform, gun *GunBase) {
             }
 
             pushBack(gun.carrier, 2.0)
+            PlaySound("rifle")
 
             pausableSleep(100 * time.Millisecond)
             createMuzzleFlash(gun)
@@ -133,6 +135,7 @@ func RifleShoot(transform *Transform, gun *GunBase) {
 
 func MinigunShoot(transform *Transform, gun *GunBase) {
     go func() {
+        PlaySound("minigun")
         for i := 0; i < 20; i++ {
             bullet := CreateBullet(transform, gun)
             addGameObject(bullet)
@@ -147,6 +150,7 @@ func MinigunShoot(transform *Transform, gun *GunBase) {
 
             createMuzzleFlash(gun)
         }
+        StopSound("minigun")
     }()
 }
 

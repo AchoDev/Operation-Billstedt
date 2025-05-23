@@ -14,6 +14,7 @@ import (
 var (
     audioContext *audio.Context
     soundCache   = make(map[string][]byte) // Cache for decoded sound data
+    playerCache = make(map[string]*audio.Player)
     cacheMutex   sync.Mutex                // Mutex to protect the cache
 )
 
@@ -81,6 +82,25 @@ func PlaySound(filePath string) {
         log.Fatalf("Failed to create audio player: %v", err)
     }
 
+    cacheMutex.Lock()
+    playerCache[filePath] = player
+    cacheMutex.Unlock()
+
     // Play the sound
     player.Play()
+}
+
+func StopSound(filePath string) {
+    filePath = "assets/sounds/" + filePath + ".mp3"
+
+    cacheMutex.Lock()
+    player, exists := playerCache[filePath]
+    cacheMutex.Unlock()
+
+    if exists {
+        player.Pause() // Stop the sound by pausing the player
+        cacheMutex.Lock()
+        delete(playerCache, filePath) // Remove the player from the cache
+        cacheMutex.Unlock()
+    }
 }

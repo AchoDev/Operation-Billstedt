@@ -126,7 +126,12 @@ func (player *Player) Update() {
 }
 
 func dash() {
+	if player.dashing {
+		return
+	}
 	player.dashing = true
+
+	camera.MotionBlur(500)
 
 	direction := Vector2{}
 
