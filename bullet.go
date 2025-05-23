@@ -74,6 +74,37 @@ func (bullet *Bullet) Update() {
 					removeGameObject(player)
 				}
 			} else {
+
+				enemy, ok := target.(*Enemy)
+
+				if !ok {
+					continue
+				}
+
+				name := ""
+
+				switch enemy.enemyType {
+				case EnemyTypeNick:
+					name = "nick"
+				case EnemyTypeEvren:
+					name = "evren"
+				case EnemyTypeEmran:
+					name = "emran"
+				default:
+					name = "NO NAME GIVEN FOR CORPSE"
+				}
+
+				corpse := NewCorpse(
+					Vector2{
+						target.GetTransform().x,
+						target.GetTransform().y,
+					},
+					bullet.angle,
+					name,
+				)
+
+				addGameObject(corpse)
+
 				removeGameObject(target)
 			}
 
@@ -247,6 +278,7 @@ func CreateCasing(transform *Transform, offset, currentSpeed Vector2) *Casing {
 		transform: Transform{
 			x:      transform.x + offset.x,
 			y:      transform.y + offset.y,
+			z: 0.5,
 			width:  25,
 			height: 10,
 		},
