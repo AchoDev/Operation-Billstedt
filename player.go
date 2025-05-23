@@ -11,23 +11,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func clamp(num float64, min float64, max float64) float64 {
-	if num < min {
-		return min
-	} else if num > max {
-		return max
-	}
-
-	return num
-}
-
-func clampVector(vector Vector2, min float64, max float64) Vector2 {
-	return Vector2{
-		x: clamp(vector.x, min, max),
-		y: clamp(vector.y, min, max),
-	}
-}
-
 func CreatePlayer() *Player {
 	p := Player{
 		transform: Transform{

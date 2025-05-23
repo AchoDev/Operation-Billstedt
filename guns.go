@@ -87,7 +87,7 @@ func PistolShoot(transform *Transform, gun *GunBase) {
 
     pushBack(gun.carrier, 2.0)
     if !gun.isEnemy {
-        camera.Shake(transform.rotation, 2.0)
+        camera.Shake(transform.rotation, 5.0)
     }
 }
 
@@ -107,7 +107,8 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
     pushBack(gun.carrier, 20.0)
 
     if !gun.isEnemy {
-        camera.Shake(transform.rotation, 5.0)
+        camera.Shake(transform.rotation, 10.0)
+        // camera.MotionBlur(400)
     }
 
 }
@@ -119,7 +120,7 @@ func RifleShoot(transform *Transform, gun *GunBase) {
             addGameObject(bullet)
 
             if !gun.isEnemy {
-                camera.Shake(transform.rotation, 2.5)
+                camera.Shake(transform.rotation, 5.0)
             }
 
             pushBack(gun.carrier, 2.0)
@@ -141,7 +142,7 @@ func MinigunShoot(transform *Transform, gun *GunBase) {
             pausableSleep(50 * time.Millisecond)
 
             if !gun.isEnemy {
-                camera.Shake(transform.rotation, 5.0)
+                camera.Shake(transform.rotation, 7.5)
             }
 
             createMuzzleFlash(gun)

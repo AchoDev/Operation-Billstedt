@@ -86,7 +86,10 @@ func (g *Game) Update() error {
 var debugRect *ebiten.Image = ebiten.NewImage(220, 200)
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.Black)
+
+	
+
+	// screen.Fill(color.Black)
 
 	DrawLevel(screen, currentLevel)
 
@@ -98,8 +101,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// }
 
 	DrawLevelEditor(screen, currentLevel)
+	DrawDebugInformation(screen)
+	ApplyMotionBlur(screen)
+}
 
-	// rect := ebiten.NewImage(200, 100)
+func DrawDebugInformation(screen *ebiten.Image) {
 	rect := debugRect
 	rect.Fill(color.Black)
 	ebitenutil.DebugPrintAt(rect, "Operation Billstedt Prev. Version 2", 0, 0)
@@ -111,9 +117,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Player pos: %.2f %.2f", player.transform.x, player.transform.y), 0, 120)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Remaining Enemies: %d", len(getGameobjectsOfType[*Enemy]())), 0, 140)
 	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Invincibility: %t", invincible), 0, 160)
+	ebitenutil.DebugPrintAt(rect, fmt.Sprintf("Motionblur: %t", blurMotion), 0, 180)
 
 	screen.DrawImage(rect, nil)
 }
+
 
 func (g *Game) Layout(outsideWidth, insideWidth int) (screenWidth, screenHeight int) {
 	return 1920, 1080
@@ -212,6 +220,7 @@ func getGameobjectsOfType[T GameObject]() []T {
 
 func main() {
 
+	InitMotionBlur(1920, 1080)
 
 	addGameObject(NewHealthBar())
 
@@ -219,8 +228,6 @@ func main() {
 	addGameObject(player)
 
 	ebiten.SetWindowSize(1920, 1080)
-	// ebiten.SetWindowSize(2000, 1700)
-	// ebiten.SetWindowSize(2000 / 2, 1700 / 2)
 	ebiten.SetWindowTitle("Operation Billstedt")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 

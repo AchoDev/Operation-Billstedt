@@ -1,6 +1,11 @@
 package main
 
-import "math"
+import (
+	"math"
+	"time"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Camera struct {
 	x      float64
@@ -23,6 +28,20 @@ var camera Camera = Camera{
 	height: 1080,
 	zoom:   1.2,
 }
+
+const (
+    maxBlurFrames = 5
+    scaleFactor   = 0.5
+)
+
+
+var (
+    blurFrames []*ebiten.Image
+    blurIndex  int
+    w, h       int
+    blurMotion bool
+    blurAlpha  float64
+)
 
 func (c *Camera) Shake(angle float64, intensity float64) {
 
@@ -57,8 +76,8 @@ func (c *Camera) Update() {
         y: math.Sin(player.transform.rotation),
     }
 
-    target.x += direction.x * 100
-    target.y += direction.y * 100
+    target.x += direction.x * 150
+    target.y += direction.y * 150
 
     diff := Vector2{
 		x: target.x - camera.x,
@@ -70,4 +89,60 @@ func (c *Camera) Update() {
 	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1
 	camera.y += diff.y * 0.1
+}
+
+func ApplyMotionBlur(screen *ebiten.Image) {
+    if !blurMotion {
+        return
+    }
+
+    for i := 0; i < maxBlurFrames; i++ {
+        idx := (blurIndex + i) % maxBlurFrames
+        weight := float32(i+1) / float32(maxBlurFrames+1)
+        alpha := weight * float32(blurAlpha)
+
+        op := &ebiten.DrawImageOptions{}
+        op.GeoM.Scale(1.0/scaleFactor, 1.0/scaleFactor)
+        op.ColorScale.ScaleAlpha(alpha)
+        screen.DrawImage(blurFrames[idx], op)
+    }
+
+    curr := blurFrames[blurIndex]
+    curr.Clear()
+    op := &ebiten.DrawImageOptions{}
+    op.GeoM.Scale(scaleFactor, scaleFactor)
+    curr.DrawImage(screen, op)
+
+    blurIndex = (blurIndex + 1) % maxBlurFrames
+
+
+}
+func InitMotionBlur(screenW, screenH int) {
+    w = int(float64(screenW))
+    h = int(float64(screenH))
+    blurFrames = make([]*ebiten.Image, maxBlurFrames)
+    for i := range blurFrames {
+        blurFrames[i] = ebiten.NewImage(w, h)
+    }
+}
+
+var lastMotionBlur time.Time
+
+func (*Camera) MotionBlur(duration float64) {
+    lastMotionBlur = time.Now()
+    start := lastMotionBlur
+    blurAlpha = 0.2
+    blurMotion = true
+
+    go func() {
+        pausableSleep(time.Duration(duration) * time.Millisecond)
+        if lastMotionBlur.Equal(start) {
+            for blurAlpha > 0 {
+                blurAlpha -= 0.01 // Decrease alpha gradually
+                pausableSleep(16 * time.Millisecond) // Approx. 60 FPS
+            }
+            
+            blurMotion = false
+        }
+    }()
 }
