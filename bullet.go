@@ -55,6 +55,18 @@ func (bullet *Bullet) Update() {
 				Angle:  tr.rotation,
 			},
 		) {
+
+			for j := 0; j < rand.IntN(3) + 1; j++ {
+				stain := NewBloodstain(
+					Vector2{
+						target.GetTransform().x,
+						target.GetTransform().y,
+					},
+					bullet.angle,
+				)
+				addGameObject(stain)
+			}
+
 			if player, ok := target.(*Player); ok && !player.dashing{
 				player.health -= 10
 				if player.health <= 0 {

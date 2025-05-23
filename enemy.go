@@ -26,6 +26,7 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 		transform: Transform{
 			x:      float64(x),
 			y:      float64(y),
+			z: 0.5,
 			width:  30,
 			height: 30,
 		},

@@ -78,63 +78,57 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 
 
 	// Create a map to group tiles by their Z order
-	tilesByZ := make(map[float64][]Tile)
+    itemsByZ := make(map[float64][]interface{})
 	for _, tile := range tiles {
-		tilesByZ[tile.Z] = append(tilesByZ[tile.Z], tile)
+		itemsByZ[tile.Z] = append(itemsByZ[tile.Z], tile)
 	}
+	for _, gameObject := range gameObjects {
+        z := gameObject.GetTransform().z
+        itemsByZ[z] = append(itemsByZ[z], gameObject)
+    }
 
 	// Extract Z orders and sort them
 	var zOrders []float64
-	for z := range tilesByZ {
+	for z := range itemsByZ {
 		zOrders = append(zOrders, z)
 	}
 	sort.Float64s(zOrders)
 
-	highestZ := zOrders[len(zOrders)-1]
-
 	// Iterate through tiles in sorted Z order
 	for _, z := range zOrders {
-		for _, tile := range tilesByZ[z] {
-			tileImage := sprites[tile.Sprite]
-			if tileImage == nil {
-				fmt.Println("Tile image not found for sprite:", tile.Sprite)
-				continue
-			}
+		for _, item := range itemsByZ[z] {
 
-			op := defaultImageOptions()
-			if levelEditorActivated && tile.Z != float64(currentZEditor) {
-				op.Alpha = 50
-
-				if !onionSkin {
+			switch v := item.(type) {
+			case Tile:
+				tileImage := sprites[v.Sprite]
+				if tileImage == nil {
+					fmt.Println("Tile image not found for sprite:", v.Sprite)
 					continue
 				}
+	
+				op := defaultImageOptions()
+				if levelEditorActivated && v.Z != float64(currentZEditor) {
+					op.Alpha = 50
+	
+					if !onionSkin {
+						continue
+					}
+				}
+	
+				drawImageWithOptions(screen, tileImage, Transform{
+					x:        v.X * float64(gridSize),
+					y:        v.Y * float64(gridSize),
+					width:    v.Width * float64(gridSize),
+					height:   v.Height * float64(gridSize),
+					rotation: v.Rotation,
+				}, op)
+			case GameObject:
+				if levelEditorActivated && hideGameobjects {
+					continue
+				}
+				v.Draw(screen)
 			}
 
-			drawImageWithOptions(screen, tileImage, Transform{
-				x:        tile.X * float64(gridSize),
-				y:        tile.Y * float64(gridSize),
-				width:    tile.Width * float64(gridSize),
-				height:   tile.Height * float64(gridSize),
-				rotation: tile.Rotation,
-			}, op)
-		}
-
-		for _, gameObject := range gameObjects {
-			
-			if levelEditorActivated && hideGameobjects {
-				continue
-			}
-
-			if gameObject.GetTransform().z == z {
-				gameObject.Draw(screen)
-			}
-		}
-	}
-
-	// Draw game objects with a higher Z level than the highest tile Z
-	for _, gameObject := range gameObjects {
-		if gameObject.GetTransform().z > highestZ {
-			gameObject.Draw(screen)
 		}
 	}
 

@@ -16,6 +16,7 @@ func CreatePlayer() *Player {
 		transform: Transform{
 			x:      650,
 			y:      0,
+			z: 0.5,
 			width:  30,
 			height: 30,
 		},

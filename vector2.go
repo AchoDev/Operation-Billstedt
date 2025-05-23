@@ -21,3 +21,8 @@ func (vec *Vector2) normalize() {
         vec.y /= len
     }   
 }
+
+func (vec *Vector2) Multiply(number float64) {
+    vec.x *= number
+    vec.y *= number
+}
