@@ -174,6 +174,7 @@ type Casing struct {
 	velocity Vector2
 	spawnHeight float64
 	spawnTime time.Time
+	alpha float64
 }
 
 func (casing *Casing) Update() {
@@ -209,8 +210,14 @@ func (casing *Casing) Update() {
 		casing.angularVelocity *= 0.3
 	}
 
-	if time.Since(casing.spawnTime) > 1*time.Second {
-		removeGameObject(casing)
+	if time.Since(casing.spawnTime) > 4*time.Second {
+		if casing.alpha > 0 {
+			casing.alpha -= 0.05
+		} else {
+
+			removeGameObject(casing)
+		}
+		
 	}
 }
 
@@ -238,6 +245,7 @@ func CreateCasing(transform *Transform, offset, currentSpeed Vector2) *Casing {
 			y: yVel,
 		},
 		spawnHeight: 10,
+		alpha: 1,
 	}
 
 	casing.transform.RotateAround(transform.rotation, transform.GetPosition())
@@ -250,6 +258,7 @@ func (casing *Casing) Draw(screen *ebiten.Image) {
 	op := defaultImageOptions()
 	op.OriginalImageSize = true
 	op.Scale = 0.04
+	op.Alpha = casing.alpha * 255
 
 	drawImageWithOptions(screen, sprite, casing.transform, op)
 }
