@@ -104,66 +104,7 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.KeyE) {
-		player.dashing = true
-
-		direction := Vector2{}
-
-		if ebiten.IsKeyPressed(ebiten.KeyA) {
-			direction.x = -1
-		} else if ebiten.IsKeyPressed(ebiten.KeyD) {
-			direction.x = 1
-		}
-		if ebiten.IsKeyPressed(ebiten.KeyW) {
-			direction.y = -1
-		} else if ebiten.IsKeyPressed(ebiten.KeyS) {
-			direction.y = 1
-		}
-
-		player.velocity.x = direction.x * 30
-		player.velocity.y = direction.y * 30
-
-		angle := math.Atan2(direction.y, direction.x)
-
-		camera.Shake(angle, 5.0)
-
-		player.drag = 1
-
-		go func () {
-			for i := 0; i < 12; i++ {
-				spriteRender := SpriteRenderer{
-					transform: player.transform,
-					sprite: player.GetSprite(),
-				}
-				spriteRender.options = defaultImageOptions()
-				spriteRender.options.Alpha = 0.75
-				spriteRender.options.ColorScale = color.RGBA{255, 255, 255, 100}
-				spriteRender.options.ScaleColor = true
-				spriteRender.options.Scale = 4
-
-				spriteRender.transform.rotation += math.Pi / 2
-
-				addGameObject(&spriteRender)
-
-				go func() {
-					steps := 60.0
-					duration := 0.2
-					for j := 0; j < int(steps); j++ {
-						spriteRender.options.Alpha -= 0.75 / steps
-						pausableSleep(time.Second / time.Duration(steps / duration))
-					}
-
-					removeGameObject(&spriteRender)
-				}()
-
-				pausableSleep(25 * time.Millisecond)
-			}
-		}()
-			
-		go func() {
-			pausableSleep(250 * time.Millisecond)
-			player.dashing = false
-			player.drag = 1.15
-		}()
+		dash()
 	}
 
 
@@ -182,6 +123,71 @@ func (player *Player) Update() {
 	// }
 
 	// fmt.Println("Casing Point:", casingPoint.x, casingPoint.y)
+}
+
+func dash() {
+	player.dashing = true
+
+	direction := Vector2{}
+
+	if ebiten.IsKeyPressed(ebiten.KeyA) {
+		direction.x = -1
+	} else if ebiten.IsKeyPressed(ebiten.KeyD) {
+		direction.x = 1
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		direction.y = -1
+	} else if ebiten.IsKeyPressed(ebiten.KeyS) {
+		direction.y = 1
+	}
+
+	direction.normalize()	
+
+	player.velocity.x = direction.x * 30
+	player.velocity.y = direction.y * 30
+
+	angle := math.Atan2(direction.y, direction.x)
+
+	camera.Shake(angle, 5.0)
+
+	player.drag = 1
+
+	go func () {
+		for i := 0; i < 12; i++ {
+			spriteRender := SpriteRenderer{
+				transform: player.transform,
+				sprite: player.GetSprite(),
+			}
+			spriteRender.options = defaultImageOptions()
+			spriteRender.options.Alpha = 0.75
+			spriteRender.options.ColorScale = color.RGBA{255, 255, 255, 100}
+			spriteRender.options.ScaleColor = true
+			spriteRender.options.Scale = 4
+
+			spriteRender.transform.rotation += math.Pi / 2
+
+			addGameObject(&spriteRender)
+
+			go func() {
+				steps := 60.0
+				duration := 0.2
+				for j := 0; j < int(steps); j++ {
+					spriteRender.options.Alpha -= 0.75 / steps
+					pausableSleep(time.Second / time.Duration(steps / duration))
+				}
+
+				removeGameObject(&spriteRender)
+			}()
+
+			pausableSleep(25 * time.Millisecond)
+		}
+	}()
+		
+	go func() {
+		pausableSleep(250 * time.Millisecond)
+		player.dashing = false
+		player.drag = 1.15
+	}()
 }
 
 func move(player *Player) {
