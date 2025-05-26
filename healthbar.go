@@ -21,8 +21,8 @@ func NewHealthBar() *HealthBar {
             width: 300,
             height: 30,
         },
-        maxHealth: 100,
-        currentHealth: 100,
+        maxHealth: 300,
+        currentHealth: 300,
     }
 }
 

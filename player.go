@@ -28,7 +28,7 @@ func CreatePlayer() *Player {
 			"pistol":  loadImage("assets/leo/pistol.png"),
 			"shotgun": loadImage("assets/leo/shotgun.png"),
 		},
-		health:   100,
+		health:   300,
 		drag: 1.15,
 	}
 
@@ -292,4 +292,18 @@ func (player *Player) GetTransform() Transform {
 
 func (player *Player) SetTransform(transform Transform) {
 	player.transform = transform
+}
+
+func (player *Player) TakeDamage(damage int, direction float64) {
+	if invincible {
+		return
+	}
+
+	player.health -= damage
+	PlaySound("hit")
+	camera.Shake(direction, 10.0)
+
+	if player.health <= 0 {
+		removeGameObject(player)
+	}
 }

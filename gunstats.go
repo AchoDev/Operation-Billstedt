@@ -22,7 +22,7 @@ var pistolStats = GunStats{
         y: 7,
     },
     spread: 0.01,
-    damage: 10,
+    damage: 35,
     hasCasing:     true,
     casingPoint: Vector2{77, 18},
     shootBehavior: PistolShoot,
@@ -67,7 +67,7 @@ var minigunStats = GunStats{
     },
     spread: 0.05,
     hasCasing: true,
-    damage: 5,
+    damage: 15,
     casingPoint: Vector2{0, 27},
     shootBehavior: MinigunShoot,
 }
