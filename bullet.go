@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"math/rand/v2"
 	"time"
@@ -13,7 +14,7 @@ type Bullet struct {
 	angle     float64
 	speed     float64
 	fromEnemy bool
-	gun 	 *GunBase
+	gun 	 *GunStats
 }
 
 func (bullet *Bullet) Update() {
@@ -69,6 +70,7 @@ func (bullet *Bullet) Update() {
 			}
 
 			if damageTaker, ok := target.(LivingThing); ok {
+				fmt.Println(bullet.gun)
 				damageTaker.TakeDamage(bullet.gun.damage, bullet.angle)
 			}
 
@@ -112,7 +114,7 @@ func (bullet *Bullet) Update() {
 	}
 }
 
-func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
+func CreateBullet(transform *Transform, gun *GunStats) *Bullet {
 	bullet := Bullet{
 		transform: Transform{
 			x:      transform.x,

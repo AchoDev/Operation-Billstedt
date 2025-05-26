@@ -32,7 +32,7 @@ func CreatePlayer() *Player {
 		drag: 1.15,
 	}
 
-	p.guns = []GunBase{
+	p.guns = []GunStats{
 		*NewGun(pistolStats, &p),
 		// *NewGun("Shotgun", 3000, &p, ShotgunShoot),
 		*NewGun(shotgunStats, &p),
@@ -53,8 +53,8 @@ type Player struct {
 	velocity   Vector2
 	drag float64
 	shooting   bool
-	currentGun GunBase
-	guns       []GunBase
+	currentGun GunStats
+	guns       []GunStats
 	sprites    map[string]*ebiten.Image
 	health    int
 	dashing bool

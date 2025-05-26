@@ -22,54 +22,47 @@ func (g *GunStats) Shoot(transform *Transform) {
     StartGunCooldown(g)
 }
 
-func (g *GunBase) GetCooldown() int {
+func (g *GunStats) GetCooldown() int {
     return g.cooldown
 }
 
-func (g *GunBase) GetCooldownTimer() float64 {
+func (g *GunStats) GetCooldownTimer() float64 {
     return g.cooldownTimer
 }
 
-func (g *GunBase) SetCooldownTimer(timer float64) {
+func (g *GunStats) SetCooldownTimer(timer float64) {
     g.cooldownTimer = timer
 }
 
-func (g *GunBase) IsEnemy() bool {
+func (g *GunStats) IsEnemy() bool {
     return g.isEnemy
 }
 
-func (g *GunBase) SetIsEnemy(isEnemy bool) {
+func (g *GunStats) SetIsEnemy(isEnemy bool) {
     g.isEnemy = isEnemy
 }
 
-func (g *GunBase) Name() string {
+func (g *GunStats) Name() string {
     return g.name
 }
 
-func NewGun(stats GunStats, carrier GameObject) *GunBase {
+func NewGun(stats GunStats, carrier GameObject) *GunStats {
     fromEnemy := false
 
     if _, ok := carrier.(*Enemy); ok {
         fromEnemy = true
     }
     
-    return &GunBase{
-        cooldownTimer: -1,
-        isEnemy:       fromEnemy,
-        carrier:      carrier,
-        offset:         stats.offset,
-        cooldown:      stats.cooldown,
-        name:          stats.name,
-        spread:       stats.spread,
-        hasCasing: stats.hasCasing,
-        casingPoint: stats.casingPoint,
-        shootBehavior: stats.shootBehavior,
-    }
+    stats.cooldownTimer = -1
+    stats.isEnemy = fromEnemy
+    stats.carrier = carrier
+
+    return &stats
 }
 
 
 // Example shoot behaviors
-func PistolShoot(transform *Transform, gun *GunBase) {
+func PistolShoot(transform *Transform, gun *GunStats) {
     bullet := CreateBullet(transform, gun)
     addGameObject(bullet)
 
@@ -80,7 +73,7 @@ func PistolShoot(transform *Transform, gun *GunBase) {
     }
 }
 
-func ShotgunShoot(transform *Transform, gun *GunBase) {
+func ShotgunShoot(transform *Transform, gun *GunStats) {
     for i := -2; i <= 2; i++ {
         angleOffset := float64(i) * 0.1
         tr := Transform{
@@ -102,7 +95,7 @@ func ShotgunShoot(transform *Transform, gun *GunBase) {
 
 }
 
-func RifleShoot(transform *Transform, gun *GunBase) {
+func RifleShoot(transform *Transform, gun *GunStats) {
     go func() {
         for i := 0; i < 5; i++ {
             bullet := CreateBullet(transform, gun)
@@ -121,7 +114,7 @@ func RifleShoot(transform *Transform, gun *GunBase) {
     }()
 }
 
-func MinigunShoot(transform *Transform, gun *GunBase) {
+func MinigunShoot(transform *Transform, gun *GunStats) {
     go func() {
         PlaySound("minigun")
         for i := 0; i < 20; i++ {
@@ -142,7 +135,7 @@ func MinigunShoot(transform *Transform, gun *GunBase) {
     }()
 }
 
-func StartGunCooldown(gun *GunBase) {
+func StartGunCooldown(gun *GunStats) {
     go func() {
         gun.SetCooldownTimer(float64(gun.GetCooldown()))
         start := time.Now()

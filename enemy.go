@@ -11,7 +11,7 @@ import (
 
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
-	var gun *GunBase
+	var gun *GunStats
 	health := 100
 
 	switch enemyType {
@@ -59,7 +59,7 @@ const (
 
 type Enemy struct {
 	transform   Transform
-	gun         GunBase
+	gun         GunStats
 	enemyType   EnemyType
 	currentPath []Vector2
 	currentGoal Vector2
