@@ -4,26 +4,14 @@ import (
 	"math"
 	"time"
 )
-type GunBase struct {
-    cooldownTimer float64
-    isEnemy       bool
-    carrier     GameObject
-    cooldown      int
-    name          string
-    offset       Vector2
-    spread      float64
-    hasCasing bool
-    casingPoint Vector2
-    shootBehavior func(transform *Transform, gun *GunBase)
-}
 
-func createMuzzleFlash(gun *GunBase) {    
+func createMuzzleFlash(gun *GunStats) {    
     flash := NewMuzzleFlash(gun.carrier, gun.offset)
 
     addGameObject(flash)
 }
 
-func (g *GunBase) Shoot(transform *Transform) {
+func (g *GunStats) Shoot(transform *Transform) {
     if g.cooldownTimer != -1 {
         return
     }

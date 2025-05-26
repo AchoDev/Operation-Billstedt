@@ -13,6 +13,7 @@ type Bullet struct {
 	angle     float64
 	speed     float64
 	fromEnemy bool
+	gun 	 *GunBase
 }
 
 func (bullet *Bullet) Update() {
@@ -67,45 +68,8 @@ func (bullet *Bullet) Update() {
 				addGameObject(stain)
 			}
 
-			if player, ok := target.(*Player); ok && !player.dashing{
-				player.health -= 10
-				if player.health <= 0 {
-					// Remove the gameObject from the list
-					removeGameObject(player)
-				}
-			} else {
-
-				enemy, ok := target.(*Enemy)
-
-				if !ok {
-					continue
-				}
-
-				name := ""
-
-				switch enemy.enemyType {
-				case EnemyTypeNick:
-					name = "nick"
-				case EnemyTypeEvren:
-					name = "evren"
-				case EnemyTypeEmran:
-					name = "emran"
-				default:
-					name = "NO NAME GIVEN FOR CORPSE"
-				}
-
-				corpse := NewCorpse(
-					Vector2{
-						target.GetTransform().x,
-						target.GetTransform().y,
-					},
-					bullet.angle,
-					name,
-				)
-
-				addGameObject(corpse)
-
-				removeGameObject(target)
+			if damageTaker, ok := target.(LivingThing); ok {
+				damageTaker.TakeDamage(bullet.gun.damage, bullet.angle)
 			}
 
 			// Remove the bullet from the list
@@ -153,11 +117,13 @@ func CreateBullet(transform *Transform, gun *GunBase) *Bullet {
 		transform: Transform{
 			x:      transform.x,
 			y:      transform.y,
+			z: 0.5,
 			width:  25,
 			height: 10,
 		},
 		angle:     transform.rotation,
 		speed:     15,
+		gun: 		gun,
 		fromEnemy: gun.isEnemy,
 	}
 

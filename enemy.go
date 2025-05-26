@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"image/color"
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -9,17 +12,21 @@ import (
 func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 
 	var gun *GunBase
+	health := 100
 
 	switch enemyType {
 	case EnemyTypeEvren:
 		gun = NewGun(pistolStats, nil)
 		gun.cooldown = 750
+		health = 75
 	case EnemyTypeEmran:
 		gun = NewGun(rifleStats, nil)
 		gun.cooldown = 2000
+		health = 150
 	case EnemyTypeNick:
 		gun = NewGun(shotgunStats, nil)
 		gun.cooldown = 2500
+		health = 50
 	}
 
 	enemy := Enemy{
@@ -30,8 +37,10 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 			width:  30,
 			height: 30,
 		},
+		health: health,
 		gun:       *gun,
 		enemyType: enemyType,
+		
 	}
 
 	enemy.gun.carrier = &enemy
@@ -55,6 +64,8 @@ type Enemy struct {
 	currentPath []Vector2
 	currentGoal Vector2
 	velocity    Vector2
+	health    int
+	currentRed float64
 	pathChan    <-chan []Vector2
 }
 
@@ -325,12 +336,26 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	tr.rotation += math.Pi / 2
 
 	
+	
 	drawImageWithOptions(
 		screen,
 		image,
 		tr,
 		op,
 	)
+
+	if enemy.currentRed > 0 {
+		op.ColorScale = color.RGBA{255, 0, 0, 255}
+		op.ScaleColor = true
+		op.Alpha = enemy.currentRed * 255
+
+		drawImageWithOptions(
+			screen,
+			image,
+			tr,
+			op,
+		)
+	}
 
 	// for _, point := range enemy.currentPath {
 	// 	drawRect(screen, Transform{
@@ -341,6 +366,63 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	// 		rotation: 0,
 	// 	}, color.RGBA{255, 0, 0, 50})
 	// }
+}
+
+func (enemy *Enemy) TakeDamage(damage int, direction float64) {
+	pushBack(enemy, 10.0)
+
+	fmt.Println("Enemy took damage:", damage, "Health left:", enemy.health)
+
+	enemy.health -= damage
+
+	if enemy.health <= 0 {
+		name := ""
+
+		switch enemy.enemyType {
+		case EnemyTypeNick:
+			name = "nick"
+		case EnemyTypeEvren:
+			name = "evren"
+		case EnemyTypeEmran:
+			name = "emran"
+		default:
+			name = "NO NAME GIVEN FOR CORPSE"
+		}
+
+		enemy.health -= 10
+
+		corpse := NewCorpse(
+			Vector2{
+				enemy.transform.x,
+				enemy.transform.y,
+			},
+			direction,
+			name,
+		)
+
+		addGameObject(corpse)
+		removeGameObject(enemy)
+		return
+	}
+
+
+	if enemy.currentRed != 0 {
+		enemy.currentRed = 1
+		return
+	}
+
+
+	go func() {
+		enemy.currentRed = 1
+
+		for enemy.currentRed > 0 {
+			enemy.currentRed -= 0.05
+			if enemy.currentRed < 0 {
+				enemy.currentRed = 0
+			}
+			pausableSleep(16 * time.Millisecond)
+		}
+	}()
 }
 
 func (enemy *Enemy) GetTransform() Transform {

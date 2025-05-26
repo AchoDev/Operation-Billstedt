@@ -6,8 +6,12 @@ type GunStats struct {
     offset       Vector2
     spread       float64
     hasCasing bool
+    damage      int
     casingPoint Vector2
-    shootBehavior func(transform *Transform, gun *GunBase)
+    cooldownTimer float64
+    isEnemy       bool
+    carrier     GameObject
+    shootBehavior func(transform *Transform, gun *GunStats)
 }
 
 var pistolStats = GunStats{
@@ -18,6 +22,7 @@ var pistolStats = GunStats{
         y: 7,
     },
     spread: 0.01,
+    damage: 10,
     hasCasing:     true,
     casingPoint: Vector2{77, 18},
     shootBehavior: PistolShoot,
@@ -32,6 +37,7 @@ var shotgunStats = GunStats{
         y: 19,
     },
     spread: 0.05,
+    damage: 50,
     hasCasing: false,
     shootBehavior: ShotgunShoot,
 }
@@ -45,6 +51,7 @@ var rifleStats = GunStats{
         y: 17,
     },
     hasCasing: true,
+    damage: 20,
     casingPoint: Vector2{30, 19},
     spread: 0.025,
     shootBehavior: RifleShoot,
@@ -60,6 +67,7 @@ var minigunStats = GunStats{
     },
     spread: 0.05,
     hasCasing: true,
+    damage: 5,
     casingPoint: Vector2{0, 27},
     shootBehavior: MinigunShoot,
 }

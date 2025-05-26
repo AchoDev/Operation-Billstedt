@@ -129,6 +129,7 @@ func dash() {
 	if player.dashing {
 		return
 	}
+	PlaySound("dash")
 	player.dashing = true
 
 	camera.MotionBlur(500)
