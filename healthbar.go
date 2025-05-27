@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -10,6 +11,7 @@ type HealthBar struct {
     transform Transform
     maxHealth float64
     currentHealth float64
+    bloodOverlayPulse float64
 }
 
 func NewHealthBar() *HealthBar {
@@ -28,6 +30,7 @@ func NewHealthBar() *HealthBar {
 
 func (hb *HealthBar) Update() {
     hb.currentHealth = float64(player.health)
+    hb.bloodOverlayPulse += 0.02
 }
 
 func (hb *HealthBar) Draw(screen *ebiten.Image) {
@@ -37,9 +40,7 @@ func (hb *HealthBar) Draw(screen *ebiten.Image) {
 
     drawAbsoluteRect(screen, hb.transform, bgColor)
 
-    // Calculate the width of the foreground bar based on current health
-    healthPercentage := hb.currentHealth / hb.maxHealth
-    foregroundWidth := hb.transform.width * healthPercentage
+    foregroundWidth := hb.transform.width
 
     // Ensure the foreground width is not negative
     if hb.currentHealth <= 0 {
@@ -59,10 +60,29 @@ func (hb *HealthBar) Draw(screen *ebiten.Image) {
 
         op := defaultImageOptions()
         op.Anchor.x = -foregroundTransform.width / 2
+        op.Scale.x = hb.currentHealth / hb.maxHealth
         foreground := getCachedRect(int(foregroundTransform.width), int(foregroundTransform.height), fgColor)
 
         drawAbsoluteImageWithOptions(screen, foreground, foregroundTransform, op)
     }
+
+    hb.DrawBloodOverlay(screen)
+}
+
+func (hb *HealthBar) DrawBloodOverlay(screen *ebiten.Image) {
+    op := defaultImageOptions()
+    op.OriginalImageSize = true
+    op.Alignment = AlignCenter
+    op.Alpha = (hb.maxHealth - hb.currentHealth) / hb.maxHealth
+    op.Alpha *= 255
+
+    op.Alpha -= math.Max(math.Sin(hb.bloodOverlayPulse) * 50, 0)
+
+    drawAbsoluteImageWithOptions(screen, getCachedImage("sprites/blood/overlay"), Transform{
+        // width: 1920,
+        // height: 1080,
+        z: 1000,
+    }, op)
 }
 
 func (hb *HealthBar) GetTransform() Transform {

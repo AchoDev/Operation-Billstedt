@@ -26,3 +26,8 @@ func (vec *Vector2) Multiply(number float64) {
     vec.x *= number
     vec.y *= number
 }
+
+func (vec *Vector2) Set(number float64) {
+    vec.x = number
+    vec.y = number
+}

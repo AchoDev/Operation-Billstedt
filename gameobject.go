@@ -16,6 +16,17 @@ type GameObject interface {
 	SetTransform(Transform)
 }
 
+type Alignment int
+
+const (
+	AlignNone Alignment = iota
+	AlignCenter
+	AlignLeft
+	AlignRight
+	AlignTop
+	AlignBottom
+)
+
 var gameObjectsMutex = &sync.Mutex{}
 var rectCache = make(map[string]*ebiten.Image)
 var imageCache = make(map[string]*ebiten.Image)
@@ -40,6 +51,7 @@ func addGameObject(obj GameObject) {
 }
 
 func getCachedRect(width, height int, color color.Color) *ebiten.Image {
+
 	key := fmt.Sprintf("%dx%d-%v", width, height, color)
 	if rect, ok := rectCache[key]; ok {
 		return rect
@@ -79,11 +91,11 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 		transform.height = float64(image.Bounds().Dy())
 	}
 
-	if transform.x+(transform.width*options.Scale)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width*options.Scale)/2 > camera.x+camera.width/camera.zoom/2 {
+	if transform.x+(transform.width*options.Scale.x)/2 < camera.x-camera.width/camera.zoom/2 || transform.x-(transform.width*options.Scale.x)/2 > camera.x+camera.width/camera.zoom/2 {
 		return
 	}
 
-	if transform.y+(transform.height*options.Scale)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height*options.Scale)/2 > camera.y+camera.height/camera.zoom/2 {
+	if transform.y+(transform.height*options.Scale.y)/2 < camera.y-camera.height/camera.zoom/2 || transform.y-(transform.height*options.Scale.y)/2 > camera.y+camera.height/camera.zoom/2 {
 		return
 	}
 
@@ -131,10 +143,19 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 		op.ColorScale.SetB(float32(options.ColorScale.B))
 	}
 
-	op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
-	op.GeoM.Scale(options.Scale, options.Scale) // Scale the sprite
+	if !options.OriginalImageSize {
+		op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
+	}
+	op.GeoM.Scale(options.Scale.x, options.Scale.y) // Scale the sprite
 	op.GeoM.Rotate(transform.rotation)
-	op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
+
+	switch options.Alignment {
+	case AlignNone:
+		op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
+	case AlignCenter:
+		op.GeoM.Translate(camera.width / 2, camera.height / 2)
+	}
+
 	op.ColorScale.ScaleAlpha(float32(options.Alpha) / 255.0) // Set the alpha value
 	op.Filter = ebiten.FilterLinear
 
@@ -144,22 +165,24 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 type ImageOptions struct {
 	Anchor            Vector2
 	Alpha             float64
-	Scale             float64
+	Scale             Vector2
 	OriginalImageSize bool
 	FlipX             bool
 	FlipY             bool
 	ScaleColor bool
 	ColorScale        color.RGBA
+	Alignment Alignment
 }
 
 func defaultImageOptions() ImageOptions {
 	return ImageOptions{
 		Anchor:            Vector2{0, 0},
 		Alpha:             255,
-		Scale:             1,
+		Scale:             Vector2{1, 1},
 		OriginalImageSize: false,
 		FlipX:             false,
 		FlipY:             false,
 		ColorScale:        color.RGBA{255, 255, 255, 255},
+		Alignment: AlignNone,
 	}
 }

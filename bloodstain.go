@@ -101,10 +101,10 @@ func (b *Bloodstain) Draw(screen *ebiten.Image) {
     s := b.sprite
     op := defaultImageOptions()
     op.OriginalImageSize = true
-    op.Scale = b.scale
+    op.Scale.Set(b.scale)
 
     if b.currentHeight > 0 {
-        op.Scale = b.scale * 0.5
+        op.Scale.Set(b.scale * 0.5)
         s = getCachedImage("sprites/blood/ball")
     }
 

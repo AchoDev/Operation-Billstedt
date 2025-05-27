@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/rand/v2"
 	"time"
@@ -70,7 +69,6 @@ func (bullet *Bullet) Update() {
 			}
 
 			if damageTaker, ok := target.(LivingThing); ok {
-				fmt.Println(bullet.gun)
 				damageTaker.TakeDamage(bullet.gun.damage, bullet.angle)
 			}
 
@@ -105,6 +103,8 @@ func (bullet *Bullet) Update() {
 		) {
 			for i := 0; i < len(gameObjects); i++ {
 				if gameObjects[i] == bullet {
+					particle := NewHitParticle(bullet.transform.GetPosition(), bullet.angle)
+					addGameObject(particle)
 					removeGameObject(bullet)
 					break
 				}
@@ -165,8 +165,7 @@ func (bullet *Bullet) Draw(screen *ebiten.Image) {
 	sprite := getCachedImage("sprites/bullet")
 	op := defaultImageOptions()
 	op.OriginalImageSize = true
-	op.Scale = 0.04
-
+	op.Scale.Set(0.04)
 	drawImageWithOptions(screen, sprite, bullet.transform, op)
 }
 
@@ -269,7 +268,7 @@ func (casing *Casing) Draw(screen *ebiten.Image) {
 	sprite := getCachedImage("sprites/casing")
 	op := defaultImageOptions()
 	op.OriginalImageSize = true
-	op.Scale = 0.04
+	op.Scale.Set(0.04)
 	op.Alpha = casing.alpha * 255
 
 	drawImageWithOptions(screen, sprite, casing.transform, op)

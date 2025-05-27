@@ -13,7 +13,7 @@ import (
 
 var gameObjects []GameObject = []GameObject{}
 var player *Player
-
+var globalTimeScale = 1.0
 
 
 type LoadedLevel struct {
@@ -269,4 +269,12 @@ func loadJson[T any](path string, target *T) T {
 	}
 	fmt.Println("Loaded JSON file:", path)
 	return *target
+}
+
+func GetDeltaTime() float64 {
+	delta := ebiten.DeltaTime() * globalTimeScale
+	if delta < 0.001 {
+		return 0.001
+	}
+	return delta
 }

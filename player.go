@@ -168,7 +168,7 @@ func dash() {
 			spriteRender.options.Alpha = 0.75
 			spriteRender.options.ColorScale = color.RGBA{255, 255, 255, 100}
 			spriteRender.options.ScaleColor = true
-			spriteRender.options.Scale = 4
+			spriteRender.options.Scale.Set(4)
 
 			spriteRender.transform.rotation += math.Pi / 2
 
@@ -262,7 +262,7 @@ func (player *Player) Draw(screen *ebiten.Image) {
 
 		op := defaultImageOptions()
 		op.Anchor = offset
-		op.Scale = 4
+		op.Scale.Set(4)
 
 		tr := player.GetTransform()
 		tr.rotation += math.Pi / 2

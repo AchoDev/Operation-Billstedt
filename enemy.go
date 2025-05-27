@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"time"
@@ -330,7 +329,7 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
 	op := defaultImageOptions()
 	op.Anchor = offset
-	op.Scale = 4
+	op.Scale.Set(4)
 
 	tr := enemy.GetTransform()
 	tr.rotation += math.Pi / 2
@@ -370,8 +369,6 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 
 func (enemy *Enemy) TakeDamage(damage int, direction float64) {
 	pushBack(enemy, 10.0)
-
-	fmt.Println("Enemy took damage:", damage, "Health left:", enemy.health)
 
 	enemy.health -= damage
 
