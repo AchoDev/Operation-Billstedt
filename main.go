@@ -243,6 +243,7 @@ func main() {
 	InitMotionBlur(1920, 1080)
 
 	addGameObject(NewHealthBar())
+	addGameObject(NewUI())
 
 	player = CreatePlayer()
 	addGameObject(player)
