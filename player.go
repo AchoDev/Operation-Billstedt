@@ -61,6 +61,11 @@ type Player struct {
 }
 
 func (player *Player) Update() {
+
+	if killscreen {
+		return
+	}
+
 	move(player)
 
 	mousePos := getMousePosition()
@@ -81,14 +86,18 @@ func (player *Player) Update() {
 		player.shooting = false
 	}
 
-	if ebiten.IsKeyPressed(ebiten.Key1) {
+	if isKeyJustPressed(ebiten.Key1) {
 		player.currentGun = player.guns[0]
-	} else if ebiten.IsKeyPressed(ebiten.Key2) {
+		PlaySound("equip-pistol")
+	} else if isKeyJustPressed(ebiten.Key2) {
 		player.currentGun = player.guns[1]
-	} else if ebiten.IsKeyPressed(ebiten.Key3) {
+		PlaySound("equip-shotgun")
+	} else if isKeyJustPressed(ebiten.Key3) {
+		PlaySound("equip-rifle")
 		player.currentGun = player.guns[2]
-	} else if ebiten.IsKeyPressed(ebiten.Key4) {
+	} else if isKeyJustPressed(ebiten.Key4) {
 		player.currentGun = player.guns[3]
+		PlaySound("equip-minigun")
 	}
 
 	if isKeyJustPressed(ebiten.Key6) {
@@ -263,6 +272,7 @@ func (player *Player) Draw(screen *ebiten.Image) {
 		op := defaultImageOptions()
 		op.Anchor = offset
 		op.Scale.Set(4)
+		op.KillScreenBlack = true
 
 		tr := player.GetTransform()
 		tr.rotation += math.Pi / 2
@@ -304,6 +314,8 @@ func (player *Player) TakeDamage(damage int, direction float64) {
 	camera.Shake(direction, 10.0)
 
 	if player.health <= 0 {
-		removeGameObject(player)
+		// removeGameObject(player)
+		PlaySound("oof")
+		killscreen = true
 	}
 }

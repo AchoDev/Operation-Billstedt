@@ -17,8 +17,13 @@ type Bullet struct {
 }
 
 func (bullet *Bullet) Update() {
-	bullet.transform.x += bullet.speed * math.Cos(bullet.angle)
-	bullet.transform.y += bullet.speed * math.Sin(bullet.angle)
+
+	if killscreen {
+		return
+	}
+
+	bullet.transform.x += bullet.speed * math.Cos(bullet.angle) * globalTimeScale
+	bullet.transform.y += bullet.speed * math.Sin(bullet.angle) * globalTimeScale
 
 	for i := 0; i < len(gameObjects); i++ {
 		gameObject := gameObjects[i]
@@ -166,6 +171,7 @@ func (bullet *Bullet) Draw(screen *ebiten.Image) {
 	op := defaultImageOptions()
 	op.OriginalImageSize = true
 	op.Scale.Set(0.04)
+	op.KillScreenBlack = true
 	drawImageWithOptions(screen, sprite, bullet.transform, op)
 }
 
@@ -192,15 +198,15 @@ func (casing *Casing) Update() {
 	
 	startPos := casing.transform.GetPosition()
 
-	casing.transform.y += casing.velocity.y
-	casing.transform.x += casing.velocity.x
+	casing.transform.y += casing.velocity.y * globalTimeScale
+	casing.transform.x += casing.velocity.x * globalTimeScale
 
-	casing.spawnHeight -= 1
+	casing.spawnHeight -= 1 * globalTimeScale
 
 	if casing.spawnHeight < 0 {
-		casing.velocity.y *= 0.9
-		casing.velocity.x *= 0.9
-		casing.angularVelocity *= 0.9
+		casing.velocity.y *= 0.9 * globalTimeScale
+		casing.velocity.x *= 0.9 * globalTimeScale
+		casing.angularVelocity *= 0.9 * globalTimeScale
 	}
 
 	xCollided, yCollided := checkCollisions(&casing.transform, startPos)

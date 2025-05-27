@@ -82,6 +82,11 @@ func runPathfindingAlgorithmAsync(start, end Transform, colliders []*Collider, g
 }
 
 func (enemy *Enemy) Update() {
+
+	if killscreen {
+		return
+	}
+
 	colliders := getGameobjectsOfType[*Collider]()
 
 	for _, col := range currentLevel.GetColliders() {
@@ -259,12 +264,12 @@ func (enemy *Enemy) Update() {
 	startY := enemy.transform.y
 
 	// Apply velocity to position
-	enemy.transform.x += enemy.velocity.x
-	enemy.transform.y += enemy.velocity.y
+	enemy.transform.x += enemy.velocity.x * globalTimeScale
+	enemy.transform.y += enemy.velocity.y * globalTimeScale
 
 	// Optional: friction (if you want smoothing, otherwise remove these lines)
-	enemy.velocity.x *= 0.8
-	enemy.velocity.y *= 0.8
+	enemy.velocity.x *= 0.8 * globalTimeScale
+	enemy.velocity.y *= 0.8 * globalTimeScale
 
 	distance := math.Sqrt(
 		math.Pow(enemy.transform.x-player.transform.x, 2) +
@@ -330,6 +335,7 @@ func (enemy *Enemy) Draw(screen *ebiten.Image) {
 	op := defaultImageOptions()
 	op.Anchor = offset
 	op.Scale.Set(4)
+	op.KillScreenBlack = true
 
 	tr := enemy.GetTransform()
 	tr.rotation += math.Pi / 2

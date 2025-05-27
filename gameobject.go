@@ -3,10 +3,15 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"log"
+	"os"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 type GameObject interface {
@@ -143,6 +148,14 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 		op.ColorScale.SetB(float32(options.ColorScale.B))
 	}
 
+	if killscreen && !options.KillScreenExclusion {
+		if options.KillScreenBlack {
+			op.ColorScale.Scale(0, 0, 0, 1)
+		} else {
+			op.ColorScale.Scale(255, 255, 255, 1)
+		}
+	}
+
 	if !options.OriginalImageSize {
 		op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
 	}
@@ -171,6 +184,8 @@ type ImageOptions struct {
 	FlipY             bool
 	ScaleColor bool
 	ColorScale        color.RGBA
+	KillScreenBlack bool
+	KillScreenExclusion bool
 	Alignment Alignment
 }
 
@@ -184,5 +199,39 @@ func defaultImageOptions() ImageOptions {
 		FlipY:             false,
 		ColorScale:        color.RGBA{255, 255, 255, 255},
 		Alignment: AlignNone,
+		KillScreenBlack: false,
+		KillScreenExclusion: false,
 	}
+}
+
+var customFont text.Face
+
+func loadFont() {
+    // Load the font file
+    fontBytes, err := os.ReadFile("assets/font.ttf")
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Parse the font
+    parsedFont, err := opentype.Parse(fontBytes)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Create a font face with a specific size
+    const fontSize = 24
+	fontFace, err := opentype.NewFace(parsedFont, &opentype.FaceOptions{
+		Size:    fontSize,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	customFont = text.NewGoXFace(fontFace)
+    if err != nil {
+        log.Fatal(err)
+    }
 }

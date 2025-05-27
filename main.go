@@ -14,6 +14,7 @@ import (
 var gameObjects []GameObject = []GameObject{}
 var player *Player
 var globalTimeScale = 1.0
+var killscreen bool = false
 
 
 type LoadedLevel struct {
@@ -52,16 +53,30 @@ func (g *Game) Update() error {
 	playerX := player.transform.x
 	playerY := player.transform.y
 
-	if !levelEditorActivated {
+	if !isPaused {
 		for _, gameObject := range gameObjects {
 			gameObject.Update()
 		}
 
-		if isKeyJustPressed(ebiten.Key9) {
-			fmt.Println("Creating new player")
-			if findPlayer() == nil {
+		if isKeyJustPressed(ebiten.KeyR) {
+			if killscreen {
+				killscreen = false
+				removeGameObject(player)
 				player = CreatePlayer()
 				addGameObject(player)
+
+
+				for _, enemy := range getGameobjectsOfType[*Enemy]() {
+					removeGameObject(enemy)
+				}
+
+				for _, bullet := range getGameobjectsOfType[*Bullet]() {
+					removeGameObject(bullet)
+				}
+
+				for _, stain := range getGameobjectsOfType[*Bloodstain]() {
+					removeGameObject(stain)
+				}
 			}
 		}
 
@@ -103,6 +118,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	DrawLevelEditor(screen, currentLevel)
 	DrawDebugInformation(screen)
 	ApplyMotionBlur(screen)
+
+	if killscreen {
+		DrawKillScreen(screen)
+	}
 }
 
 func DrawDebugInformation(screen *ebiten.Image) {
@@ -220,6 +239,7 @@ func getGameobjectsOfType[T GameObject]() []T {
 
 func main() {
 
+	loadFont()
 	InitMotionBlur(1920, 1080)
 
 	addGameObject(NewHealthBar())
@@ -271,10 +291,13 @@ func loadJson[T any](path string, target *T) T {
 	return *target
 }
 
-func GetDeltaTime() float64 {
-	delta := ebiten.DeltaTime() * globalTimeScale
-	if delta < 0.001 {
-		return 0.001
-	}
-	return delta
+func DrawKillScreen(screen *ebiten.Image) {
+
+	op := defaultImageOptions()
+	op.Alignment = AlignCenter
+	op.OriginalImageSize = true
+	op.Scale.Set(0.3)
+	op.KillScreenExclusion = true
+
+	drawAbsoluteImageWithOptions(screen, getCachedImage("sprites/dead"), Transform{}, op)
 }

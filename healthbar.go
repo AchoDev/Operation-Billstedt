@@ -34,6 +34,7 @@ func (hb *HealthBar) Update() {
 }
 
 func (hb *HealthBar) Draw(screen *ebiten.Image) {
+
     // Draw the background bar
     bgColor := color.White
     fgColor := color.RGBA{255, 0, 0, 200} // Red foreground
@@ -59,6 +60,7 @@ func (hb *HealthBar) Draw(screen *ebiten.Image) {
         foregroundTransform.x -= hb.transform.width/2 - border
 
         op := defaultImageOptions()
+        op.KillScreenExclusion = true
         op.Anchor.x = -foregroundTransform.width / 2
         op.Scale.x = hb.currentHealth / hb.maxHealth
         foreground := getCachedRect(int(foregroundTransform.width), int(foregroundTransform.height), fgColor)
@@ -75,6 +77,7 @@ func (hb *HealthBar) DrawBloodOverlay(screen *ebiten.Image) {
     op.Alignment = AlignCenter
     op.Alpha = (hb.maxHealth - hb.currentHealth) / hb.maxHealth
     op.Alpha *= 255
+    op.KillScreenExclusion = true
 
     op.Alpha -= math.Max(math.Sin(hb.bloodOverlayPulse) * 50, 0)
 
