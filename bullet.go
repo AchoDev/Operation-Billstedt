@@ -241,11 +241,8 @@ func CreateCasing(transform *Transform, offset, currentSpeed Vector2) *Casing {
 
 	xVel, yVel := currentSpeed.x, currentSpeed.y
 
-	xVel += -math.Sin(transform.rotation) * 2
-	yVel += math.Cos(transform.rotation) * 2
-
-	xVel += float64(rand.IntN(10) - 5) * 0.5
-	yVel += float64(-rand.IntN(10) - 5) * 0.5
+	xVel += -math.Sin(transform.rotation) * rand.Float64() * 10
+	yVel += math.Cos(transform.rotation) * rand.Float64() * 10
 
 	casing := Casing{
 		transform: Transform{

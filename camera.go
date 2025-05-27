@@ -84,7 +84,7 @@ func (c *Camera) Update() {
 		y: target.y - camera.y,
 	}
 
-	zoomDiff := camera.zoom - 1.2
+	zoomDiff := camera.zoom - 1.1
 
 	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1

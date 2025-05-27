@@ -61,7 +61,7 @@ func (level *Level1) StartLevel() {
 	}()
 
 	go func() {
-		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
+		pausableSleep(time.Second * time.Duration(20 + rand.IntN(5)))
 		train2.Drive(4000, 0.2)
 	}()
 
@@ -74,8 +74,6 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 	tiles := level.GetTiles()
 	sprites := level.GetSprites()
 	gridSize := 100.0
-
-
 
 	// Create a map to group tiles by their Z order
     itemsByZ := make(map[float64][]interface{})

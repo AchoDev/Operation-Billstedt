@@ -16,7 +16,7 @@ func CreatePlayer() *Player {
 		transform: Transform{
 			x:      650,
 			y:      0,
-			z: 0.5,
+			z: 0.6,
 			width:  30,
 			height: 30,
 		},
@@ -28,7 +28,7 @@ func CreatePlayer() *Player {
 			"pistol":  loadImage("assets/leo/pistol.png"),
 			"shotgun": loadImage("assets/leo/shotgun.png"),
 		},
-		health:   300,
+		health:   600,
 		drag: 1.15,
 	}
 
