@@ -152,7 +152,9 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 		if options.KillScreenBlack {
 			op.ColorScale.Scale(0, 0, 0, 1)
 		} else {
-			op.ColorScale.Scale(255, 255, 255, 1)
+			op.ColorScale.SetR(255)
+			op.ColorScale.SetG(255)
+			op.ColorScale.SetB(255)
 		}
 	}
 
