@@ -16,15 +16,18 @@ func createEnemy(x, y int, enemyType EnemyType) *Enemy {
 	switch enemyType {
 	case EnemyTypeEvren:
 		gun = NewGun(pistolStats, nil)
-		gun.cooldown = 750
+		gun.cooldown = 1
+		gun.maxAmmo = 1
+		gun.currentAmmo = 1
 		health = 75
 	case EnemyTypeEmran:
 		gun = NewGun(rifleStats, nil)
-		gun.cooldown = 2000
+		gun.cooldown = 10
 		health = 150
 	case EnemyTypeNick:
 		gun = NewGun(shotgunStats, nil)
-		gun.cooldown = 2500
+		gun.cooldown = 5
+		gun.firingRate = 10
 		health = 50
 	}
 
