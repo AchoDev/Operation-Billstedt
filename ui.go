@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
 type UI struct {
@@ -17,6 +20,9 @@ func NewUI() *UI {
     }
 }
 
+var skew Vector2 = Vector2{0.11, 0.12}
+
+
 func (ui *UI) Draw(screen *ebiten.Image) {
 
     bg := getCachedImage("ui/gunbackground")
@@ -31,8 +37,8 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 
     op.OriginalImageSize = true
     
-    op.Scale.Set2(0.20, 0.20)
-    op.Skew.Set2(0.11, 0.12)
+    op.Scale.Set(0.2)
+    op.Skew.SetVector(skew)
 
     drawAbsoluteImageWithOptions(
         screen,
@@ -45,14 +51,13 @@ func (ui *UI) Draw(screen *ebiten.Image) {
     shotgun := getCachedImage("ui/shotgun")
     rifle := getCachedImage("ui/rifle")
 
-    x := 500.0
+    x := 50.0
+    y := -40.0
     for _, gun := range []*ebiten.Image{pistol, shotgun, rifle} {
-        op := defaultImageOptions()
-        op.AlignItems = AlignEnd
-        op.JustifyContent = AlignStart
-        op.Margin = Vector2{0, -150}
-        op.OriginalImageSize = true
-        op.Scale.Set(0.2)
+        op.Margin.y = y
+        op.Margin.x = x + ui.velocity.x * 0.3
+        op.Margin.y += ui.velocity.y * 0.3
+        op.Scale.Set(0.06)
         drawAbsoluteImageWithOptions(
             screen,
             gun,
@@ -61,8 +66,18 @@ func (ui *UI) Draw(screen *ebiten.Image) {
             },
             op,
         )
-        x += 400
+        x += 120
+        y += 15
     }
+
+    textOp := &text.DrawOptions{}
+    textOp.GeoM.Translate(100, 600)
+    text.Draw(
+        screen, 
+        fmt.Sprintf("%d", player.currentGun.currentAmmo),
+        customFont,
+        textOp,
+    )
 
     bigGun := pistol
     switch player.currentGun.name {
@@ -76,17 +91,19 @@ func (ui *UI) Draw(screen *ebiten.Image) {
         bigGun = rifle
     }
 
-    bOp := defaultImageOptions()
-    bOp.OriginalImageSize = true
-    bOp.Scale.Set(0.6)
+    op.Scale.Set(0.13)
+    op.Margin.Set2(30, -100)
+    op.Margin.x += ui.velocity.x * 0.5
+    op.Margin.y += ui.velocity.y * 0.5
+
     drawAbsoluteImageWithOptions(
         screen,
         bigGun,
         Transform{
-            x: 1000,
-            y: 500,
+            x: 500,
+            y: 100,
         },
-        bOp,
+        op,
     )
 
     

@@ -114,8 +114,7 @@ func drawImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform T
 	transform.x += camera.width / 2
 	transform.y += camera.height / 2
 
-	transform.width *= camera.zoom
-	transform.height *= camera.zoom
+	options.Scale.Multiply(camera.zoom)
 
 	drawAbsoluteImageWithOptions(screen, image, transform, options)
 }
@@ -131,6 +130,11 @@ func drawAbsoluteImage(screen *ebiten.Image, image *ebiten.Image, transform Tran
 
 func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
 	
+	if options.OriginalImageSize {
+		transform.width = float64(image.Bounds().Dx())
+		transform.height = float64(image.Bounds().Dy())
+	}
+
 	currentSize := transform.GetSize()
 	
 	op := &ebiten.DrawImageOptions{}
@@ -159,14 +163,12 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 		}
 	}
 
-	if !options.OriginalImageSize {
-		scaleX := transform.width / float64(image.Bounds().Dx())
-		scaleY := transform.height / float64(image.Bounds().Dy())
-		currentSize.Set2(scaleX, scaleY)
-		op.GeoM.Scale(scaleX, scaleY)
-	} else {
-		currentSize.Set2(float64(image.Bounds().Dx()), float64(image.Bounds().Dy()))
-	}
+
+	scaleX := transform.width / float64(image.Bounds().Dx())
+	scaleY := transform.height / float64(image.Bounds().Dy())
+	currentSize.Multiply2(scaleX, scaleY)
+	op.GeoM.Scale(scaleX, scaleY)
+
 	op.GeoM.SetElement(0, 1, options.Skew.x) // Apply skew in x direction
 	op.GeoM.SetElement(1, 0, options.Skew.y) // Apply skew in y direction
 	currentSize.Multiply2(options.Scale.x, options.Scale.y)

@@ -77,8 +77,7 @@ func (player *Player) Update() {
 
 	player.transform.rotation = angle
 
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && !player.shooting {
-		player.shooting = true
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		player.currentGun.Shoot(&player.transform)
 	}
 

@@ -70,7 +70,7 @@ func (train *Train) Draw(screen *ebiten.Image) {
 
 	op := defaultImageOptions()
 	op.OriginalImageSize = true
-	op.Scale.Set(0.25)
+	op.Scale.Set(0.45)
 
 	if train.direction == -1 {
 		op.FlipY = true

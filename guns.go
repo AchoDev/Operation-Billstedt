@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -12,14 +13,28 @@ func createMuzzleFlash(gun *GunStats) {
 }
 
 func (g *GunStats) Shoot(transform *Transform) {
+
+    fmt.Println(g.cooldownTimer)
+
     if g.cooldownTimer != -1 {
         return
     }
+
+    if g.firintCooldown != -1 {
+        return
+    }
+
     if g.shootBehavior != nil {
         g.shootBehavior(transform, g)
         createMuzzleFlash(g)
+        g.currentAmmo -= 1
+        WaitForNextShot(g)
     }
-    StartGunCooldown(g)
+    
+
+    if g.currentAmmo == 0 {
+        StartGunCooldown(g)
+    }
 }
 
 func (g *GunStats) GetCooldown() int {
@@ -54,8 +69,10 @@ func NewGun(stats GunStats, carrier GameObject) *GunStats {
     }
     
     stats.cooldownTimer = -1
+    stats.firintCooldown = -1
     stats.isEnemy = fromEnemy
     stats.carrier = carrier
+    stats.currentAmmo = stats.maxAmmo
 
     return &stats
 }
@@ -97,42 +114,38 @@ func ShotgunShoot(transform *Transform, gun *GunStats) {
 
 func RifleShoot(transform *Transform, gun *GunStats) {
     go func() {
-        for i := 0; i < 5; i++ {
-            bullet := CreateBullet(transform, gun)
-            addGameObject(bullet)
+        bullet := CreateBullet(transform, gun)
+        addGameObject(bullet)
 
-            if !gun.isEnemy {
-                camera.Shake(transform.rotation, 5.0)
-            }
-
-            pushBack(gun.carrier, 2.0)
-            PlaySound("rifle")
-
-            pausableSleep(100 * time.Millisecond)
-            createMuzzleFlash(gun)
+        if !gun.isEnemy {
+            camera.Shake(transform.rotation, 5.0)
         }
+
+        pushBack(gun.carrier, 2.0)
+        PlaySound("rifle")
+
+
+        createMuzzleFlash(gun)        
     }()
 }
 
 func MinigunShoot(transform *Transform, gun *GunStats) {
-    go func() {
-        PlaySound("minigun")
-        for i := 0; i < 20; i++ {
-            bullet := CreateBullet(transform, gun)
-            addGameObject(bullet)
+    PlaySound("minigun")
 
-            pushBack(gun.carrier, 3.0)
+    bullet := CreateBullet(transform, gun)
+    addGameObject(bullet)
 
-            pausableSleep(50 * time.Millisecond)
+    pushBack(gun.carrier, 3.0)
 
-            if !gun.isEnemy {
-                camera.Shake(transform.rotation, 7.5)
-            }
+    pausableSleep(50 * time.Millisecond)
 
-            createMuzzleFlash(gun)
-        }
-        StopSound("minigun")
-    }()
+    if !gun.isEnemy {
+        camera.Shake(transform.rotation, 7.5)
+    }
+
+    createMuzzleFlash(gun)
+        
+    StopSound("minigun")
 }
 
 func StartGunCooldown(gun *GunStats) {
@@ -146,6 +159,22 @@ func StartGunCooldown(gun *GunStats) {
         }
 
         gun.SetCooldownTimer(-1)
+    }()
+}
+
+func WaitForNextShot(gun *GunStats) {
+    go func() {
+        gun.firintCooldown = 1 / float64(gun.firingRate)
+
+        start := time.Now()
+
+        for gun.firintCooldown > 0 {
+            pausableSleep(1 * time.Millisecond)
+            gun.firintCooldown -= float64(time.Since(start).Milliseconds()) / 1000.0
+        }
+
+        gun.firintCooldown = -1
+        gun.currentAmmo = gun.maxAmmo
     }()
 }
 
