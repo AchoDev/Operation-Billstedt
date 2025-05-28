@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image/color"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -47,36 +49,83 @@ func (ui *UI) Draw(screen *ebiten.Image) {
         op,
     )
 
-    pistol := getCachedImage("ui/pistol")
-    shotgun := getCachedImage("ui/shotgun")
-    rifle := getCachedImage("ui/rifle")
+    pistol := &player.guns[0]
+    shotgun := &player.guns[1]
+    rifle := &player.guns[2]
 
     x := 50.0
     y := -40.0
-    for _, gun := range []*ebiten.Image{pistol, shotgun, rifle} {
+    for _, gun := range []*GunStats{pistol, shotgun, rifle} {
         op.Margin.y = y
         op.Margin.x = x + ui.velocity.x * 0.3
         op.Margin.y += ui.velocity.y * 0.3
         op.Scale.Set(0.06)
+        sprite := getCachedImage("ui/" + strings.ToLower(gun.name))
         drawAbsoluteImageWithOptions(
             screen,
-            gun,
+            sprite,
             Transform{
                 x: x,
             },
             op,
         )
+
+        if gun.cooldownTimer != -1 {
+            rect := getCachedRect(2000, 2000, color.Black)
+            op.Anchor.y = 200
+            op.Alpha = 100
+            percentage := float64(gun.cooldownTimer) / float64(gun.cooldown)
+            op.Scale.y *= percentage
+            op.Skew.Multiply(percentage)
+            drawAbsoluteImageWithOptions(
+                screen,
+                rect,
+                Transform{
+                    x: x,
+                },
+                op,
+            )
+
+            op.Skew.SetVector(skew)
+            op.Anchor.y = 0
+            op.Alpha = 255
+        }
+
         x += 120
         y += 15
     }
 
     textOp := &text.DrawOptions{}
-    textOp.GeoM.Translate(100, 600)
+    textOp.GeoM.Translate(350, 800)
+    textOp.ColorScale.Scale(0, 0, 0, 255)
+    textOp.GeoM.Translate(ui.velocity.x * 0.4, ui.velocity.y * 0.4)
     text.Draw(
         screen, 
         fmt.Sprintf("%d", player.currentGun.currentAmmo),
         customFont,
         textOp,
+    )
+
+    textOp.GeoM.Translate(1, 1)
+    textOp.ColorScale.SetR(255)
+    textOp.ColorScale.SetG(255)
+    textOp.ColorScale.SetB(255)
+    text.Draw(
+        screen, 
+        fmt.Sprintf("%d", player.currentGun.currentAmmo),
+        customFont,
+        textOp,
+    )
+
+    op.Scale.Set(0.2)
+    op.Margin.Set2(350, -100)
+    op.Margin.x += ui.velocity.x * 0.4
+    op.Margin.y += ui.velocity.y * 0.4
+    drawAbsoluteImageWithOptions(
+        screen,
+        getCachedImage("sprites/bullet"),
+        Transform{},
+        op,
     )
 
     bigGun := pistol
@@ -98,7 +147,7 @@ func (ui *UI) Draw(screen *ebiten.Image) {
 
     drawAbsoluteImageWithOptions(
         screen,
-        bigGun,
+        getCachedImage("ui/" + strings.ToLower(bigGun.name)),
         Transform{
             x: 500,
             y: 100,

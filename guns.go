@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"time"
 )
@@ -13,8 +12,6 @@ func createMuzzleFlash(gun *GunStats) {
 }
 
 func (g *GunStats) Shoot(transform *Transform) {
-
-    fmt.Println(g.locked)
 
     if g.cooldownTimer != -1 || g.currentAmmo <= 0 || g.locked {
         return
@@ -169,7 +166,6 @@ func WaitForNextShot(gun *GunStats) {
             for gun.firintCooldown > 0 {
                 pausableSleep(1 * time.Millisecond)
                 gun.firintCooldown -= (1 / 1000.0) 
-                fmt.Println("Firing Cooldown:", gun.firintCooldown)
             }
         }
 
