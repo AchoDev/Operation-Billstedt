@@ -11,7 +11,21 @@ func NewUI() *UI {
 }
 
 func (ui *UI) Draw(screen *ebiten.Image) {
-    
+
+    op := defaultImageOptions()
+    op.AlignItems = AlignEnd
+    op.JustifyContent = AlignStart
+    op.Margin = Vector2{30, -30}
+    op.OriginalImageSize = true
+    op.Scale.Set(0.1)
+    // op.Skew.x = 0.1
+
+    drawAbsoluteImageWithOptions(
+        screen,
+        getCachedImage("ui/gunbackground"),
+        ui.transform,
+        op,
+    )
 }
 
 func (ui *UI) Update() {

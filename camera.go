@@ -76,15 +76,15 @@ func (c *Camera) Update() {
         y: math.Sin(player.transform.rotation),
     }
 
-    target.x += direction.x * 150
-    target.y += direction.y * 150
+    target.x += direction.x * 200
+    target.y += direction.y * 200
 
     diff := Vector2{
 		x: target.x - camera.x,
 		y: target.y - camera.y,
 	}
 
-	zoomDiff := camera.zoom - 1.1
+	zoomDiff := camera.zoom - 1
 
 	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1

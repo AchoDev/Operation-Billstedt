@@ -295,7 +295,8 @@ func loadJson[T any](path string, target *T) T {
 func DrawKillScreen(screen *ebiten.Image) {
 
 	op := defaultImageOptions()
-	op.Alignment = AlignCenter
+	op.JustifyContent = AlignCenter
+	op.AlignItems = AlignCenter
 	op.OriginalImageSize = true
 	op.Scale.Set(0.3)
 	op.KillScreenExclusion = true

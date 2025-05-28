@@ -18,6 +18,10 @@ func (t *Transform) GetPosition() Vector2 {
     return Vector2{t.x, t.y}
 }
 
+func (t *Transform) GetSize() Vector2 {
+    return Vector2{t.width, t.height}
+}
+
 func (t *Transform) RotateAround(angle float64, pivot Vector2) {
 
     offset := Vector2{

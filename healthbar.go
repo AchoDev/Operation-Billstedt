@@ -74,7 +74,8 @@ func (hb *HealthBar) Draw(screen *ebiten.Image) {
 func (hb *HealthBar) DrawBloodOverlay(screen *ebiten.Image) {
     op := defaultImageOptions()
     op.OriginalImageSize = true
-    op.Alignment = AlignCenter
+    op.JustifyContent = AlignCenter
+    op.AlignItems = AlignCenter
     op.Alpha = (hb.maxHealth - hb.currentHealth) / hb.maxHealth
     op.Alpha *= 255
     op.KillScreenExclusion = true

@@ -26,10 +26,8 @@ type Alignment int
 const (
 	AlignNone Alignment = iota
 	AlignCenter
-	AlignLeft
-	AlignRight
-	AlignTop
-	AlignBottom
+	AlignStart
+	AlignEnd
 )
 
 var gameObjectsMutex = &sync.Mutex{}
@@ -132,6 +130,9 @@ func drawAbsoluteImage(screen *ebiten.Image, image *ebiten.Image, transform Tran
 }
 
 func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, transform Transform, options ImageOptions) {
+	
+	currentSize := transform.GetSize()
+	
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(image.Bounds().Dx())/2, -float64(image.Bounds().Dy())/2) // Center the sprite
 	op.GeoM.Translate(-options.Anchor.x, -options.Anchor.y)                             // Center the sprite
@@ -159,17 +160,47 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	}
 
 	if !options.OriginalImageSize {
-		op.GeoM.Scale(transform.width/float64(image.Bounds().Dx()), transform.height/float64(image.Bounds().Dy()))
+		scaleX := transform.width / float64(image.Bounds().Dx())
+		scaleY := transform.height / float64(image.Bounds().Dy())
+		currentSize.Set2(scaleX, scaleY)
+		op.GeoM.Scale(scaleX, scaleY)
+	} else {
+		currentSize.Set2(float64(image.Bounds().Dx()), float64(image.Bounds().Dy()))
 	}
+	op.GeoM.SetElement(0, 1, options.Skew.x) // Apply skew in x direction
+	op.GeoM.SetElement(1, 0, options.Skew.y) // Apply skew in y direction
+	currentSize.Multiply2(options.Scale.x, options.Scale.y)
 	op.GeoM.Scale(options.Scale.x, options.Scale.y) // Scale the sprite
 	op.GeoM.Rotate(transform.rotation)
 
-	switch options.Alignment {
+	switch options.JustifyContent {
 	case AlignNone:
-		op.GeoM.Translate(transform.x, transform.y)              // Offset the sprite position
+		op.GeoM.Translate(transform.x, 0)             // Offset the sprite position
 	case AlignCenter:
-		op.GeoM.Translate(camera.width / 2, camera.height / 2)
+		op.GeoM.Translate(camera.width / 2, 0)
+	case AlignStart:
+		op.GeoM.Translate(0, 0)
+		op.GeoM.Translate(currentSize.x / 2, 0)
+	case AlignEnd:
+		op.GeoM.Translate(camera.width, 0)
+		op.GeoM.Translate(-currentSize.x / 2, 0)
 	}
+
+	switch options.AlignItems {
+	case AlignNone:
+		op.GeoM.Translate(0, transform.y) // Offset the sprite position
+	case AlignCenter:
+		op.GeoM.Translate(0, camera.height/2)
+	case AlignStart:
+		op.GeoM.Translate(0, 0)
+		op.GeoM.Translate(0, currentSize.y/2) // Center the sprite vertically
+	case AlignEnd:
+		op.GeoM.Translate(0, camera.height)
+		op.GeoM.Translate(0, -currentSize.y/2) // Center the sprite vertically
+		fmt.Println(currentSize, options.Scale, image.Bounds().Dx(), image.Bounds().Dy())
+	}
+
+	op.GeoM.Translate(options.Margin.x, options.Margin.y) // Apply margin
 
 	op.ColorScale.ScaleAlpha(float32(options.Alpha) / 255.0) // Set the alpha value
 	op.Filter = ebiten.FilterLinear
@@ -188,7 +219,10 @@ type ImageOptions struct {
 	ColorScale        color.RGBA
 	KillScreenBlack bool
 	KillScreenExclusion bool
-	Alignment Alignment
+	JustifyContent Alignment
+	AlignItems Alignment
+	Margin Vector2
+	Skew Vector2 // Skew is not used in this example, but can be implemented if needed
 }
 
 func defaultImageOptions() ImageOptions {
@@ -200,7 +234,9 @@ func defaultImageOptions() ImageOptions {
 		FlipX:             false,
 		FlipY:             false,
 		ColorScale:        color.RGBA{255, 255, 255, 255},
-		Alignment: AlignNone,
+		JustifyContent: AlignNone,
+		AlignItems: AlignNone,
+		Margin: 		  Vector2{0, 0},
 		KillScreenBlack: false,
 		KillScreenExclusion: false,
 	}
