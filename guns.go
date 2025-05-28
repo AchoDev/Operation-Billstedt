@@ -14,9 +14,9 @@ func createMuzzleFlash(gun *GunStats) {
 
 func (g *GunStats) Shoot(transform *Transform) {
 
-    fmt.Println(g.cooldownTimer)
+    fmt.Println(g.locked)
 
-    if g.cooldownTimer != -1 {
+    if g.cooldownTimer != -1 || g.currentAmmo <= 0 || g.locked {
         return
     }
 
@@ -31,8 +31,7 @@ func (g *GunStats) Shoot(transform *Transform) {
         WaitForNextShot(g)
     }
     
-
-    if g.currentAmmo == 0 {
+    if g.currentAmmo <= 0 {
         StartGunCooldown(g)
     }
 }
@@ -125,19 +124,18 @@ func RifleShoot(transform *Transform, gun *GunStats) {
         PlaySound("rifle")
 
 
-        createMuzzleFlash(gun)        
+        createMuzzleFlash(gun)
+
     }()
 }
-
+    
 func MinigunShoot(transform *Transform, gun *GunStats) {
     PlaySound("minigun")
-
+    
     bullet := CreateBullet(transform, gun)
     addGameObject(bullet)
-
+    
     pushBack(gun.carrier, 3.0)
-
-    pausableSleep(50 * time.Millisecond)
 
     if !gun.isEnemy {
         camera.Shake(transform.rotation, 7.5)
@@ -150,31 +148,33 @@ func MinigunShoot(transform *Transform, gun *GunStats) {
 
 func StartGunCooldown(gun *GunStats) {
     go func() {
-        gun.SetCooldownTimer(float64(gun.GetCooldown()))
+        gun.cooldownTimer = float64(gun.cooldown)
         start := time.Now()
         
-        for gun.GetCooldownTimer() > 0 {
+        for gun.cooldownTimer > 0 {
             pausableSleep(1 * time.Millisecond)
-            gun.SetCooldownTimer(float64(gun.GetCooldown()) - float64(time.Since(start).Milliseconds()))
+            gun.cooldownTimer = float64(gun.cooldown) - float64(time.Since(start).Milliseconds()) / 1000.0
         }
-
-        gun.SetCooldownTimer(-1)
+        gun.cooldownTimer = -1
+        gun.currentAmmo = gun.maxAmmo
     }()
 }
 
 func WaitForNextShot(gun *GunStats) {
     go func() {
-        gun.firintCooldown = 1 / float64(gun.firingRate)
 
-        start := time.Now()
-
-        for gun.firintCooldown > 0 {
-            pausableSleep(1 * time.Millisecond)
-            gun.firintCooldown -= float64(time.Since(start).Milliseconds()) / 1000.0
+        if gun.firingRate != 0 {
+            gun.firintCooldown = 1 / float64(gun.firingRate)
+    
+            for gun.firintCooldown > 0 {
+                pausableSleep(1 * time.Millisecond)
+                gun.firintCooldown -= (1 / 1000.0) 
+                fmt.Println("Firing Cooldown:", gun.firintCooldown)
+            }
         }
 
+
         gun.firintCooldown = -1
-        gun.currentAmmo = gun.maxAmmo
     }()
 }
 

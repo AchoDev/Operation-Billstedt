@@ -40,7 +40,7 @@ func CreatePlayer() *Player {
 		*NewGun(minigunStats, &p),
 	}
 
-	p.currentGun = p.guns[0]
+	p.currentGun = &p.guns[0]
 
 	return &p
 }
@@ -53,7 +53,7 @@ type Player struct {
 	velocity   Vector2
 	drag float64
 	shooting   bool
-	currentGun GunStats
+	currentGun *GunStats
 	guns       []GunStats
 	sprites    map[string]*ebiten.Image
 	health    int
@@ -86,16 +86,16 @@ func (player *Player) Update() {
 	}
 
 	if isKeyJustPressed(ebiten.Key1) {
-		player.currentGun = player.guns[0]
+		player.currentGun = &player.guns[0]
 		PlaySound("equip-pistol")
 	} else if isKeyJustPressed(ebiten.Key2) {
-		player.currentGun = player.guns[1]
+		player.currentGun = &player.guns[1]
 		PlaySound("equip-shotgun")
 	} else if isKeyJustPressed(ebiten.Key3) {
 		PlaySound("equip-rifle")
-		player.currentGun = player.guns[2]
+		player.currentGun = &player.guns[2]
 	} else if isKeyJustPressed(ebiten.Key4) {
-		player.currentGun = player.guns[3]
+		player.currentGun = &player.guns[3]
 		PlaySound("equip-minigun")
 	}
 
@@ -131,6 +131,20 @@ func (player *Player) Update() {
 	// }
 
 	// fmt.Println("Casing Point:", casingPoint.x, casingPoint.y)
+
+	for i := range player.guns {
+		if &player.guns[i] != player.currentGun {
+			player.guns[i].locked = true
+		}
+	}
+	if isMouseButtonJustPressed(ebiten.MouseButtonLeft) && player.currentGun.shootingType != FullAutomatic {
+		player.currentGun.locked = true
+	}
+
+
+	if !ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		player.currentGun.locked = false
+	}
 }
 
 func dash() {

@@ -1,5 +1,12 @@
 package main
 
+type shootingType int
+
+const (
+    HalfAutomatic shootingType = iota
+    FullAutomatic
+)
+
 type GunStats struct {
     name          string
     cooldown      int
@@ -14,6 +21,9 @@ type GunStats struct {
     maxAmmo   int
     currentAmmo int
 
+    locked bool
+    shootingType shootingType
+
     firingRate int
     firintCooldown float64
 
@@ -22,7 +32,7 @@ type GunStats struct {
 
 var pistolStats = GunStats{
     name:     "Pistol",
-    cooldown: 100,
+    cooldown: 5,
     offset:   Vector2{
         x: 97,
         y: 7,
@@ -31,6 +41,9 @@ var pistolStats = GunStats{
     damage: 35,
     hasCasing:     true,
     maxAmmo: 12,
+
+    shootingType: HalfAutomatic,
+
     casingPoint: Vector2{77, 18},
     shootBehavior: PistolShoot,
 }
@@ -46,13 +59,16 @@ var shotgunStats = GunStats{
     spread: 0.05,
     damage: 50,
     hasCasing: false,
+
+    shootingType: HalfAutomatic,
+
     maxAmmo: 2,
     shootBehavior: ShotgunShoot,
 }
 
 var rifleStats = GunStats{
     name:     "Rifle",
-    cooldown: 1,
+    cooldown: 10,
     // cooldown: 5000,
     offset:   Vector2{
         x: 94,
@@ -63,7 +79,10 @@ var rifleStats = GunStats{
     casingPoint: Vector2{30, 19},
     spread: 0.025,
     maxAmmo: 30,
-    firingRate: 2,
+
+    shootingType: FullAutomatic,
+
+    firingRate: 100,
     shootBehavior: RifleShoot,
 }
 
@@ -78,7 +97,10 @@ var minigunStats = GunStats{
     spread: 0.05,
     hasCasing: true,
     damage: 15,
-    maxAmmo: 4, 
+    maxAmmo: 200, 
+
+    shootingType: FullAutomatic,
+
     firingRate: 500,
     casingPoint: Vector2{0, 27},
     shootBehavior: MinigunShoot,
