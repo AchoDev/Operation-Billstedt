@@ -177,12 +177,12 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	case AlignNone:
 		op.GeoM.Translate(transform.x, 0)             // Offset the sprite position
 	case AlignCenter:
-		op.GeoM.Translate(camera.width / 2, 0)
+		op.GeoM.Translate(float64(screen.Bounds().Dx()) / 2, 0)
 	case AlignStart:
 		op.GeoM.Translate(0, 0)
 		op.GeoM.Translate(currentSize.x / 2, 0)
 	case AlignEnd:
-		op.GeoM.Translate(camera.width, 0)
+		op.GeoM.Translate(float64(screen.Bounds().Dx()), 0)
 		op.GeoM.Translate(-currentSize.x / 2, 0)
 	}
 
@@ -190,14 +190,13 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	case AlignNone:
 		op.GeoM.Translate(0, transform.y) // Offset the sprite position
 	case AlignCenter:
-		op.GeoM.Translate(0, camera.height/2)
+		op.GeoM.Translate(0, float64(screen.Bounds().Dy())/2)
 	case AlignStart:
 		op.GeoM.Translate(0, 0)
 		op.GeoM.Translate(0, currentSize.y/2) // Center the sprite vertically
 	case AlignEnd:
-		op.GeoM.Translate(0, camera.height)
+		op.GeoM.Translate(0, float64(screen.Bounds().Dy()))
 		op.GeoM.Translate(0, -currentSize.y/2) // Center the sprite vertically
-		fmt.Println(currentSize, options.Scale, image.Bounds().Dx(), image.Bounds().Dy())
 	}
 
 	op.GeoM.Translate(options.Margin.x, options.Margin.y) // Apply margin

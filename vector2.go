@@ -41,3 +41,8 @@ func (vec *Vector2) Set2(x, y float64) {
     vec.x = x
     vec.y = y
 }
+
+func (vec *Vector2) SetVector(other Vector2) {
+    vec.x = other.x
+    vec.y = other.y
+}
