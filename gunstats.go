@@ -32,7 +32,7 @@ type GunStats struct {
 
 var pistolStats = GunStats{
     name:     "Pistol",
-    cooldown: 5,
+    cooldown: 2,
     offset:   Vector2{
         x: 97,
         y: 7,
@@ -50,7 +50,7 @@ var pistolStats = GunStats{
 
 var shotgunStats = GunStats{
     name:     "Shotgun",
-    cooldown: 1,
+    cooldown: 5,
     // cooldown: 1,
     offset:   Vector2{
         x: 78,
