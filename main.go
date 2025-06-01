@@ -15,7 +15,7 @@ var gameObjects []GameObject = []GameObject{}
 var player *Player
 var globalTimeScale = 1.0
 var killscreen bool = false
-
+var mainMenuActivated bool = true
 
 type LoadedLevel struct {
 	Tiles     []Tile `json:"tiles"`
@@ -49,6 +49,11 @@ var currentLevel Level = &Level1{
 type Game struct{}
 
 func (g *Game) Update() error {
+
+	if mainMenuActivated {
+		UpdateMainMenu()
+		return nil
+	}
 
 	playerX := player.transform.x
 	playerY := player.transform.y
@@ -102,7 +107,10 @@ var debugRect *ebiten.Image = ebiten.NewImage(220, 200)
 
 func (g *Game) Draw(screen *ebiten.Image) {
 
-	
+	if mainMenuActivated {
+		DrawMainMenu(screen)
+		return
+	}
 
 	// screen.Fill(color.Black)
 

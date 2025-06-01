@@ -209,6 +209,19 @@ func drawAbsoluteImageWithOptions(screen *ebiten.Image, image *ebiten.Image, tra
 	screen.DrawImage(image, op)
 }
 
+func drawText(screen *ebiten.Image, characters string, transform Transform) {
+	if customFont == nil {
+		loadFont()
+	}
+
+	op := text.DrawOptions{}
+	op.PrimaryAlign = text.AlignCenter
+	op.GeoM.Translate(transform.x, transform.y)
+
+
+	text.Draw(screen, characters, customFont, &op)
+}
+
 type ImageOptions struct {
 	Anchor            Vector2
 	Alpha             float64

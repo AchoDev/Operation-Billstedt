@@ -56,9 +56,13 @@ func LoadSound(filePath string) {
     soundCache[filePath] = data
 }
 
-// PlaySound plays a cached MP3 sound from the given file path
-// PlaySound plays a cached MP3 sound from the given file path
 func PlaySound(filePath string) {
+    PlaySoundWithLoop(filePath, false)
+}
+
+// PlaySound plays a cached MP3 sound from the given file path
+// PlaySound plays a cached MP3 sound from the given file path
+func PlaySoundWithLoop(filePath string, loop bool) {
 
     filePath = "assets/sounds/" + filePath + ".mp3"
 
@@ -77,11 +81,20 @@ func PlaySound(filePath string) {
     }
 
     // Create a player from the cached data
-    player, err := audioContext.NewPlayer(bytes.NewReader(data))
+
+    var player *audio.Player
+    var err error
+
+    if loop {
+        loopingStream := audio.NewInfiniteLoop(bytes.NewReader(data), int64(len(data)))
+        player, err = audioContext.NewPlayer(loopingStream)
+    } else {
+        player, err = audioContext.NewPlayer(bytes.NewReader(data))
+    }
+    
     if err != nil {
         log.Fatalf("Failed to create audio player: %v", err)
     }
-
     cacheMutex.Lock()
     playerCache[filePath] = player
     cacheMutex.Unlock()

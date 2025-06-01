@@ -55,6 +55,8 @@ func (level *Level1) StartLevel() {
 	addGameObject(train)
 	addGameObject(train2)
 
+	PlaySoundWithLoop("music/level1", false)
+
 	go func() {
 		pausableSleep(time.Second * time.Duration(5 + rand.IntN(5)))
 		train.Drive(4000, 0.2)
