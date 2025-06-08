@@ -40,6 +40,7 @@ type Level1 struct {
 }
 
 func (level *Level1) StartLevel() {
+
 	train := CreateTrain(Transform{
 		x:      240,
 		y:      -3000,
@@ -169,4 +170,36 @@ func (level *Level1) GetColliders() []Tile {
 
 func (level *Level1) SetColliders(colliders []Tile) {
 	level.colliders = colliders
+}
+
+
+var currentLevel Level
+
+func loadLevel1() {
+	fmt.Println("LOADING LEVEL 1")
+	loadedLevel := loadJson("level-tilesheets/level1.json", &LoadedLevel{})
+	currentLevel = &Level1{
+		tiles: loadedLevel.Tiles,
+		sprites: map[string]*ebiten.Image{
+			"rail":                           loadImage("assets/tiles/rail.png"),
+			"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
+			"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
+			"station-floor-corner":           loadImage("assets/tiles/station-floor-corner.png"),
+			"station-floor":                  loadImage("assets/tiles/station-floor.png"),
+			"station-floor-protective":       loadImage("assets/tiles/station-floor-protective.png"),
+			"station-floor-protective-right": loadImage("assets/tiles/station-floor-protective-right.png"),
+	
+			"bench":    loadImage("assets/tiles/bench.png"),
+			"elevator": loadImage("assets/tiles/elevator.png"),
+	
+			"stairs": loadImage("assets/tiles/stairs.png"),
+	
+			"shadow": loadImage("assets/tiles/shadow.png"),
+			"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
+		},
+		colliders: loadedLevel.Colliders,
+	}
+	currentLevel.StartLevel()
+	player = CreatePlayer()
+	addGameObject(player)
 }

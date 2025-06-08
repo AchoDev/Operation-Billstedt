@@ -22,29 +22,7 @@ type LoadedLevel struct {
 	Colliders []Tile `json:"colliders"`
 }
 
-var loadedLevel LoadedLevel = loadJson("level-tilesheets/level1.json", &LoadedLevel{})
 
-var currentLevel Level = &Level1{
-	tiles: loadedLevel.Tiles,
-	sprites: map[string]*ebiten.Image{
-		"rail":                           loadImage("assets/tiles/rail.png"),
-		"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
-		"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
-		"station-floor-corner":           loadImage("assets/tiles/station-floor-corner.png"),
-		"station-floor":                  loadImage("assets/tiles/station-floor.png"),
-		"station-floor-protective":       loadImage("assets/tiles/station-floor-protective.png"),
-		"station-floor-protective-right": loadImage("assets/tiles/station-floor-protective-right.png"),
-
-		"bench":    loadImage("assets/tiles/bench.png"),
-		"elevator": loadImage("assets/tiles/elevator.png"),
-
-		"stairs": loadImage("assets/tiles/stairs.png"),
-
-		"shadow": loadImage("assets/tiles/shadow.png"),
-		"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
-	},
-	colliders: loadedLevel.Colliders,
-}
 
 type Game struct{}
 
@@ -52,11 +30,18 @@ func (g *Game) Update() error {
 
 	if mainMenuActivated {
 		UpdateMainMenu()
+		updateKeyState()
+		updateMouseState()
 		return nil
 	}
 
 	playerX := player.transform.x
 	playerY := player.transform.y
+
+	if isKeyJustPressed(ebiten.KeyEscape) {
+		mainMenuActivated = true
+		gameObjects = []GameObject{}
+	}
 
 	if !isPaused {
 		for _, gameObject := range gameObjects {
@@ -228,7 +213,6 @@ func createRectFromTransform(transform Transform) Rect {
 		Center: Vector2{
 			transform.x, transform.y,
 		},
-		Width:  transform.width,
 		Height: transform.height,
 		Angle:  transform.rotation,
 	}
@@ -253,14 +237,9 @@ func main() {
 	addGameObject(NewHealthBar())
 	addGameObject(NewUI())
 
-	player = CreatePlayer()
-	addGameObject(player)
-
 	ebiten.SetWindowSize(1920, 1080)
 	ebiten.SetWindowTitle("Operation Billstedt")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-
-	currentLevel.StartLevel()
 
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)

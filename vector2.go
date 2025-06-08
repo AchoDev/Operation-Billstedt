@@ -46,3 +46,8 @@ func (vec *Vector2) SetVector(other Vector2) {
     vec.x = other.x
     vec.y = other.y
 }
+
+func (vec *Vector2) SmoothMove(target Vector2, speed float64) {
+    vec.x += (target.x - vec.x) * speed
+    vec.y += (target.y - vec.y) * speed
+}
