@@ -62,9 +62,18 @@ var mainButtons []*Button = []*Button{
 
     {
         transform: Transform{x: 500, y: 1600, width: 200, height: 50},
-        text: "Level1",
+        text: "Level 1",
         action: func() {
             loadLevel1()
+            mainMenuActivated = false
+        },
+    },
+
+    {
+        transform: Transform{x: 500, y: 1900, width: 200, height: 50},
+        text: "Level 2",
+        action: func() {
+            loadLevel2()
             mainMenuActivated = false
         },
     },

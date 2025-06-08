@@ -92,7 +92,7 @@ func (enemy *Enemy) Update() {
 
 	colliders := getGameobjectsOfType[*Collider]()
 
-	for _, col := range currentLevel.GetColliders() {
+	for _, col := range currentLevel.GetData().Colliders {
 		collider := &Collider{
 			transform: Transform{
 				x:      col.X * 100,

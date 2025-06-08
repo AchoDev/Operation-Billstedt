@@ -20,20 +20,22 @@ type Tile struct {
 	Sprite string
 }
 
+type LevelData struct {
+	Tiles []Tile
+	Colliders []Tile
+	Sprites map[string]*ebiten.Image
+	CameraFollow Vector2
+	CameraZoom float64
+}
+
 type Level interface {
-	GetTiles() []Tile
-	GetSprites() map[string]*ebiten.Image
-	GetColliders() []Tile
+	GetData() *LevelData
 	UpdateLevel()
-	SetTiles([]Tile)
-	SetColliders([]Tile)
 	StartLevel()
 }
 
 type Level1 struct {
-	tiles            []Tile
-	colliders        []Tile
-	sprites          map[string]*ebiten.Image
+	data LevelData
 	dynamicColliders []*Collider
 
 	// phase int
@@ -74,8 +76,8 @@ func (level *Level1) StartLevel() {
 }
 
 func DrawLevel(screen *ebiten.Image, level Level) {
-	tiles := level.GetTiles()
-	sprites := level.GetSprites()
+	tiles := level.GetData().Tiles
+	sprites := level.GetData().Sprites
 	gridSize := 100.0
 
 	// Create a map to group tiles by their Z order
@@ -134,7 +136,7 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 	}
 
 	if levelEditorActivated && selectedTool == 1{
-		for _, collider := range level.GetColliders() {
+		for _, collider := range level.GetData().Colliders {
 
 			if collider.Z != float64(currentZEditor){
 				continue
@@ -151,36 +153,22 @@ func DrawLevel(screen *ebiten.Image, level Level) {
 
 }
 
-func (level *Level1) GetTiles() []Tile {
-	return level.tiles
+func (level *Level1) GetData() *LevelData {
+	return &level.data
 }
 
-func (level *Level1) GetSprites() map[string]*ebiten.Image {
-	return level.sprites
-}
 
-func (level *Level1) UpdateLevel() {}
-
-func (level *Level1) SetTiles(tiles []Tile) {
-	level.tiles = tiles
+func (level *Level1) UpdateLevel() {
 }
-func (level *Level1) GetColliders() []Tile {
-	return level.colliders
-}
-
-func (level *Level1) SetColliders(colliders []Tile) {
-	level.colliders = colliders
-}
-
 
 var currentLevel Level
 
 func loadLevel1() {
 	fmt.Println("LOADING LEVEL 1")
 	loadedLevel := loadJson("level-tilesheets/level1.json", &LoadedLevel{})
-	currentLevel = &Level1{
-		tiles: loadedLevel.Tiles,
-		sprites: map[string]*ebiten.Image{
+	data := LevelData{
+		Tiles: loadedLevel.Tiles,
+		Sprites: map[string]*ebiten.Image{
 			"rail":                           loadImage("assets/tiles/rail.png"),
 			"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
 			"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
@@ -197,7 +185,64 @@ func loadLevel1() {
 			"shadow": loadImage("assets/tiles/shadow.png"),
 			"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
 		},
-		colliders: loadedLevel.Colliders,
+		Colliders: loadedLevel.Colliders,
+		CameraFollow: Vector2{x: 750},
+		CameraZoom: 1.2,
+	}
+	currentLevel = &Level1{
+		data: data,
+	}
+	currentLevel.StartLevel()
+	player = CreatePlayer()
+	addGameObject(player)
+}
+
+type Level2 struct {
+	data LevelData
+}
+
+
+func (level *Level2) StartLevel() {
+	// Placeholder for Level 2 start logic
+}
+func (level *Level2) UpdateLevel() {
+	// Placeholder for Level 2 update logic
+}
+
+func (level *Level2) GetData() *LevelData {
+	return &level.data
+}
+
+func loadLevel2() {
+	fmt.Println("LOADING LEVEL 2")
+	loadedLevel := loadJson("level-tilesheets/level2.json", &LoadedLevel{})
+	data := LevelData{
+		Tiles: loadedLevel.Tiles,
+		Sprites: map[string]*ebiten.Image{
+			"rail":                           loadImage("assets/tiles/rail.png"),
+			"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
+			"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
+			"station-floor-corner":           loadImage("assets/tiles/station-floor-corner.png"),
+			"station-floor":                  loadImage("assets/tiles/station-floor.png"),
+			"station-floor-protective":       loadImage("assets/tiles/station-floor-protective.png"),
+			"station-floor-protective-right": loadImage("assets/tiles/station-floor-protective-right.png"),
+	
+			"bench":    loadImage("assets/tiles/bench.png"),
+			"elevator": loadImage("assets/tiles/elevator.png"),
+	
+			"stairs": loadImage("assets/tiles/stairs.png"),
+	
+			"shadow": loadImage("assets/tiles/shadow.png"),
+			"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
+	
+			"wall": loadImage("assets/tiles/wall.png"),
+			"level-layout": loadImage("assets/tiles/level-layout-hotlinemiami.png"),
+		},
+		Colliders: loadedLevel.Colliders,
+		CameraZoom: 1.1,
+	}
+	currentLevel = &Level2{
+		data: data,
 	}
 	currentLevel.StartLevel()
 	player = CreatePlayer()

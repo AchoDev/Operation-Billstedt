@@ -42,7 +42,7 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("Hide Gameobjects: %t", hideGameobjects), 10, 1030)
 
 	counter := 0
-	sprites := level.GetSprites()
+	sprites := level.GetData().Sprites
 	keys := make([]string, 0, len(sprites))
 	for k := range sprites {
 		keys = append(keys, k)
@@ -148,7 +148,7 @@ func UpdateLevelEditor(level Level) {
 		}
 
 		selectedSprite += direction
-		if selectedSprite >= len(level.GetSprites()) {
+		if selectedSprite >= len(level.GetData().Sprites) {
 			selectedSprite = 0
 		}
 	}
@@ -195,12 +195,12 @@ func UpdateLevelEditor(level Level) {
 
 		fmt.Println("Searching for tile to delete at:", mousePosition)
 
-		tiles := level.GetTiles()
+		tiles := level.GetData().Tiles
 
 		// Reverse the tiles list
 
 		if selectedTool == 1 {
-			tiles = level.GetColliders()
+			tiles = level.GetData().Colliders
 		}
 
 		for i := len(tiles) - 1; i >= 0; i-- {
@@ -223,12 +223,11 @@ func UpdateLevelEditor(level Level) {
 				mousePosition.y >= tileTr.y-halfHeight && mousePosition.y <= tileTr.y+halfHeight {
 
 				tiles = append(tiles[:i], tiles[i+1:]...)
-
+				d := level.GetData()
 				if selectedTool == 1 {
-					level.SetColliders(tiles)
-					break
+					d.Colliders = tiles
 				} else {
-					level.SetTiles(tiles)
+					d.Tiles = tiles
 				}
 				break
 			}
@@ -248,8 +247,8 @@ func UpdateLevelEditor(level Level) {
 
 	if isKeyJustPressed(ebiten.KeyO) {
 		data := map[string]interface{}{
-			"tiles":     level.GetTiles(),
-			"colliders": level.GetColliders(),
+			"tiles":     level.GetData().Tiles,
+			"colliders": level.GetData().Colliders,
 		}
 		jsonData, err := json.Marshal(data)
 		if err != nil {
@@ -295,7 +294,7 @@ func UpdateLevelEditor(level Level) {
 
 	if isMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 
-		sprites := level.GetSprites()
+		sprites := level.GetData().Sprites
 		keys := make([]string, 0, len(sprites))
 		for k := range sprites {
 			keys = append(keys, k)
@@ -307,11 +306,12 @@ func UpdateLevelEditor(level Level) {
 			if counter == selectedSprite {
 
 				gridPosition := getMouseGridPosition()
+				levelData := level.GetData()
 
 				if selectedTool == 1 {
 
 					fmt.Println("Creating collider at", gridPosition)
-					colliders := level.GetColliders()
+					colliders := level.GetData().Colliders
 					for _, collider := range colliders {
 						if collider.X == gridPosition.x && collider.Y == gridPosition.y {
 							fmt.Println("Collider already exists at", gridPosition)
@@ -325,13 +325,13 @@ func UpdateLevelEditor(level Level) {
 						Width:  currentScale.x,
 						Height: currentScale.y,
 					})
-					level.SetColliders(colliders)
+					levelData.Colliders = colliders
 					fmt.Println("Added collider at", gridPosition)
 
 					break
 				}
 
-				tiles := level.GetTiles()
+				tiles := levelData.Tiles
 
 				// for i, tile := range tiles {
 				// 	if tile.X == gridPosition.x && tile.Y == gridPosition.y {
@@ -351,7 +351,7 @@ func UpdateLevelEditor(level Level) {
 					Sprite: name,
 				})
 
-				level.SetTiles(tiles)
+				levelData.Tiles = tiles
 
 				fmt.Println("Added tile at", gridPosition)
 				break
@@ -394,7 +394,7 @@ func getMouseGridPosition() Vector2 {
 }
 
 func getOrderedSprites(level Level) []string {
-	sprites := level.GetSprites()
+	sprites := level.GetData().Sprites
 	keys := make([]string, 0, len(sprites))
 	for k := range sprites {
 		keys = append(keys, k)

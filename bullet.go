@@ -89,7 +89,7 @@ func (bullet *Bullet) Update() {
 		}
 	}
 
-	for _, collider := range currentLevel.GetColliders() {
+	for _, collider := range currentLevel.GetData().Colliders {
 		if RotatedRectsColliding(
 			Rect{
 				Center: Vector2{bullet.transform.x, bullet.transform.y},

@@ -65,10 +65,14 @@ func (c *Camera) Update() {
     c.velocity.x *= 0.9
     c.velocity.y *= 0.9
 
+    target := currentLevel.GetData().CameraFollow
 
-    target := Vector2{
-        x: 750,
-        y: player.transform.y,
+    if target.x == 0 {
+        target.x = player.transform.x
+    }
+
+    if target.y == 0 {
+        target.y = player.transform.y
     }
 
     direction := Vector2{
@@ -84,7 +88,7 @@ func (c *Camera) Update() {
 		y: target.y - camera.y,
 	}
 
-	zoomDiff := camera.zoom - 1
+	zoomDiff := camera.zoom - currentLevel.GetData().CameraZoom
 
 	camera.zoom -= zoomDiff * 0.1
 	camera.x += diff.x * 0.1

@@ -184,7 +184,7 @@ func checkCollisions(tr *Transform, startPosition Vector2) (bool, bool) {
 		}
 	}
 
-	for _, col := range currentLevel.GetColliders() {
+	for _, col := range currentLevel.GetData().Colliders {
 		rect := Rect{
 			Center: Vector2{
 				col.X * 100,
