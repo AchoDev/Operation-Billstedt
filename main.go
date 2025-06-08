@@ -41,6 +41,7 @@ func (g *Game) Update() error {
 	if isKeyJustPressed(ebiten.KeyEscape) {
 		mainMenuActivated = true
 		gameObjects = []GameObject{}
+		resetSleeps()
 	}
 
 	if !isPaused {
