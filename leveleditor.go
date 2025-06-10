@@ -84,6 +84,15 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	if selectedTool == 1 {
 		sprite = ebiten.NewImage(100, 100)
 		sprite.Fill(color.RGBA{255, 100, 200, 255})
+	} else if selectedSprite == 2 {
+		enemySprites := []*ebiten.Image{
+			getCachedImage("enemies/evren"),
+			getCachedImage("enemies/emran"),
+			getCachedImage("enemies/nick"),
+		}
+
+		selectedSprite = selectedSprite % len(enemySprites)
+		sprite = enemySprites[selectedSprite]
 	}
 	drawImageWithOptions(screen, sprite, Transform{
 		x:        float64(gridPos.x * 100),
@@ -95,7 +104,6 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 }
 
 func UpdateLevelEditor(level Level) {
-
 	if isKeyJustPressed(ebiten.KeyP) {
 		levelEditorActivated = !levelEditorActivated
 		pauseMutex.Lock()
@@ -137,6 +145,9 @@ func UpdateLevelEditor(level Level) {
 	}
 	if isKeyJustPressed(ebiten.Key2) {
 		selectedTool = 1
+	}
+	if isKeyJustPressed(ebiten.Key3) {
+		selectedTool = 2
 	}
 
 	if isKeyJustPressed(ebiten.KeyTab) {
