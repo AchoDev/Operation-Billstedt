@@ -81,10 +81,11 @@ func DrawLevelEditor(screen *ebiten.Image, level Level) {
 	op := defaultImageOptions()
 	op.Alpha = 100
 
-	if selectedTool == 1 {
+	switch selectedTool {
+	case 1:
 		sprite = ebiten.NewImage(100, 100)
 		sprite.Fill(color.RGBA{255, 100, 200, 255})
-	} else if selectedSprite == 2 {
+	case 2:
 		enemySprites := []*ebiten.Image{
 			getCachedImage("enemies/evren"),
 			getCachedImage("enemies/emran"),
@@ -339,6 +340,33 @@ func UpdateLevelEditor(level Level) {
 					levelData.Colliders = colliders
 					fmt.Println("Added collider at", gridPosition)
 
+					break
+				} else if selectedTool == 2 {
+					enemySprites := []EnemyType{
+						EnemyTypeEvren,
+						EnemyTypeEmran,
+						EnemyTypeNick,
+					}
+
+					selectedSprite = selectedSprite % len(enemySprites)
+
+					enemy := &Enemy{
+						transform: Transform{
+							x:      gridPosition.x * 100,
+							y:      gridPosition.y * 100,
+							width:  80,
+							height: 80,
+						},
+						enemyType: enemySprites[selectedSprite],
+					}
+
+					d := level.GetData()
+					d.Enemies = append(d.Enemies, EnemySpawnPoint{
+						X:         gridPosition.x,
+						Y:         gridPosition.y,
+						EnemyType: int(enemy.enemyType),
+					})
+					fmt.Println("Added enemy spawn point at", gridPosition)
 					break
 				}
 

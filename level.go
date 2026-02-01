@@ -20,9 +20,16 @@ type Tile struct {
 	Sprite string
 }
 
+type EnemySpawnPoint struct {
+	X float64
+	Y float64
+	EnemyType int
+}
+
 type LevelData struct {
 	Tiles []Tile
 	Colliders []Tile
+	Enemies []EnemySpawnPoint
 	Sprites map[string]*ebiten.Image
 	CameraFollow Vector2
 	CameraZoom float64
@@ -201,7 +208,6 @@ type Level2 struct {
 	data LevelData
 }
 
-
 func (level *Level2) StartLevel() {
 	// Placeholder for Level 2 start logic
 }
@@ -242,6 +248,56 @@ func loadLevel2() {
 		CameraZoom: 1.1,
 	}
 	currentLevel = &Level2{
+		data: data,
+	}
+	currentLevel.StartLevel()
+	player = CreatePlayer()
+	addGameObject(player)
+}
+
+type Level0 struct {
+	data LevelData
+}
+
+func (level *Level0) StartLevel() {
+	// Placeholder for Level 0 start logic
+}
+func (level *Level0) UpdateLevel() {
+	// Placeholder for Level 0 update logic
+}
+
+func (level *Level0) GetData() *LevelData { 
+	return &level.data
+}
+
+func loadLevel0() {
+	fmt.Println("LOADING LEVEL 0")
+	loadedLevel := loadJson("level-tilesheets/level0.json", &LoadedLevel{})
+	data := LevelData{
+		Tiles: loadedLevel.Tiles,
+		Sprites: map[string]*ebiten.Image{
+			"rail":                           loadImage("assets/tiles/rail.png"),
+			"rail-border-left":               loadImage("assets/tiles/rail-border-left.png"),
+			"rail-border-right":              loadImage("assets/tiles/rail-border-right.png"),
+			"station-floor-corner":           loadImage("assets/tiles/station-floor-corner.png"),
+			"station-floor":                  loadImage("assets/tiles/station-floor.png"),
+			"station-floor-protective":       loadImage("assets/tiles/station-floor-protective.png"),
+			"station-floor-protective-right": loadImage("assets/tiles/station-floor-protective-right.png"),
+	
+			"bench":    loadImage("assets/tiles/bench.png"),
+			"elevator": loadImage("assets/tiles/elevator.png"),
+	
+			"stairs": loadImage("assets/tiles/stairs.png"),
+	
+			"shadow": loadImage("assets/tiles/shadow.png"),
+			"shadow-corner": loadImage("assets/tiles/shadow-corner.png"),
+	
+			"wall": loadImage("assets/tiles/wall.png"),
+		},
+		Colliders: loadedLevel.Colliders,
+		CameraZoom: 1.1,
+	}
+	currentLevel = &Level0{
 		data: data,
 	}
 	currentLevel.StartLevel()
